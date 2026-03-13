@@ -1,65 +1,205 @@
 import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/ui/Button";
+import NewsletterForm from "@/components/newsletter/NewsletterForm";
+import { TechIcons, TechIconName } from "@/components/ui/TechIcons";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex flex-col">
+      {/* HERO SECTION */}
+      <section className="relative flex min-h-[90vh] flex-col items-center justify-center overflow-hidden bg-black px-6 py-24 sm:py-32">
+        {/* Subtle background grid for texture (optional) */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+
+        <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+
+          {/* LEFT SIDE: GIANT LOGO */}
+          <div className="w-full lg:w-1/2 flex justify-center lg:justify-end">
+            <div className="w-full max-w-lg">
+              <Image
+                src="/logos/matecitonobg.png"
+                alt="Matecito.Dev Logo"
+                width={800}
+                height={800}
+                className="h-auto w-full max-w-[500px] object-contain filter drop-shadow-[0_0_30px_rgba(255,255,255,0.05)] transition-transform duration-700 hover:scale-105"
+                priority
+              />
+            </div>
+          </div>
+
+          {/* RIGHT SIDE: TEXT & CTA */}
+          <div className="w-full lg:w-1/2 flex flex-col items-center text-center lg:items-start lg:text-left">
+            <div className="inline-flex items-center border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-mono uppercase tracking-widest text-white backdrop-blur-sm mb-8">
+              <span className="flex h-2 w-2 rounded-full bg-white mr-3 animate-pulse"></span>
+              Consultoría & Arquitectura
+            </div>
+
+            <h1 className="text-5xl font-bold tracking-tight text-white sm:text-7xl md:leading-[1.1]">
+              Ingeniería <br />
+              <span className="text-zinc-500">sin filtros.</span>
+            </h1>
+
+            <p className="mt-8 max-w-md font-mono text-lg font-light leading-relaxed text-zinc-400 sm:text-xl">
+              Diseño minimalista, arquitectura robusta y rendimiento extremo para negocios que exigen excelencia.
+            </p>
+
+            <div className="mt-10 flex w-full flex-col justify-center gap-4 sm:flex-row lg:justify-start">
+              <a
+                href="https://wa.me/541124025239?text=Hola!%20Quisiera%20más%20info%20sobre%20tus%20servicios%20en%20Matecito.Dev"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto"
+              >
+                <Button size="lg" className="w-full font-mono text-xs uppercase tracking-widest sm:w-auto sm:px-10 rounded-none h-14 bg-white text-black hover:bg-zinc-200">
+                  Consultar Ahora
+                </Button>
+              </a>
+            </div>
+          </div>
+
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* PROJECTS SECTION */}
+      <section className="bg-black py-24 border-t border-white/10">
+        <div className="container mx-auto px-6 max-w-7xl">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+            <div className="flex flex-col gap-4">
+              <h2 className="text-4xl font-bold text-white uppercase tracking-tighter sm:text-6xl">Proyectos <br /><span className="text-zinc-500">Propios</span></h2>
+              <p className="max-w-md text-zinc-400 font-mono text-sm uppercase tracking-widest text-balance">Ecosistema de productos internos diseñados y evolucionados íntegramente por Matecito.Dev.</p>
+            </div>
+            <Link href="/estudio" className="font-mono text-xs text-white uppercase tracking-widest underline underline-offset-8 hover:text-zinc-500 transition-colors mb-4">Ver todos los casos →</Link>
+          </div>
+
+          <div className="flex flex-col">
+            {/* Project 1 */}
+            <Link
+              href="https://stockcito.com"
+              target="_blank"
+              className="group border-t border-white/10 py-8 flex flex-col md:flex-row items-center justify-between gap-8 transition-all hover:bg-white/[0.02] px-4"
+            >
+              <div className="flex items-center gap-8">
+                <div className="h-14 w-14 flex-shrink-0 bg-zinc-950 border border-white/5 flex items-center justify-center grayscale group-hover:grayscale-0 transition-all duration-500">
+                  <Image
+                    src="/projects/stockcito.png"
+                    alt="Stockcito"
+                    width={56}
+                    height={56}
+                    className="p-2 object-contain opacity-60 group-hover:opacity-100 transition-opacity"
+                  />
+                </div>
+                <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-6">
+                  <h3 className="text-xl font-bold text-white uppercase tracking-tight">Stockcito.com</h3>
+                  <span className="hidden lg:block h-1 w-1 rounded-full bg-zinc-700"></span>
+                  <p className="text-zinc-500 font-mono text-xs uppercase tracking-widest">SaaS / Gestión de Inventario Inteligente</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-8">
+                <span className="font-mono text-xs text-zinc-600 uppercase tracking-widest px-3 py-1 border border-white/5">2025</span>
+                <span className="text-white group-hover:translate-x-2 transition-transform duration-300">↗</span>
+              </div>
+            </Link>
+
+            {/* Project 2 */}
+            <Link
+              href="https://recienllegue.com"
+              target="_blank"
+              className="group border-y border-white/10 py-8 flex flex-col md:flex-row items-center justify-between gap-8 transition-all hover:bg-white/[0.02] px-4"
+            >
+              <div className="flex items-center gap-8">
+                <div className="h-14 w-14 flex-shrink-0 bg-zinc-950 border border-white/5 flex items-center justify-center grayscale group-hover:grayscale-0 transition-all duration-500">
+                  <Image
+                    src="/projects/recienllegue.png"
+                    alt="Recienllegue"
+                    width={56}
+                    height={56}
+                    className="p-0.5 object-contain opacity-60 group-hover:opacity-100 transition-opacity"
+                  />
+                </div>
+                <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-6">
+                  <h3 className="text-xl font-bold text-white uppercase tracking-tight">Recienllegue.com</h3>
+                  <span className="hidden lg:block h-1 w-1 rounded-full bg-zinc-700"></span>
+                  <p className="text-zinc-500 font-mono text-xs uppercase tracking-widest">Logística / Plataforma Digital Local</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-8">
+                <span className="font-mono text-xs text-zinc-600 uppercase tracking-widest px-3 py-1 border border-white/5">2026</span>
+                <span className="text-white group-hover:translate-x-2 transition-transform duration-300">↗</span>
+              </div>
+            </Link>
+          </div>
         </div>
-      </main>
+      </section>
+
+      {/* VALUE PROP SECTION */}
+      <section className="border-t border-white/10 bg-zinc-950 py-24">
+        <div className="container mx-auto px-6 max-w-7xl">
+          <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
+            <div className="flex flex-col gap-4">
+              <h3 className="font-mono text-xl font-semibold text-white uppercase">01 / Escalabilidad</h3>
+              <p className="text-zinc-400 leading-relaxed font-light">
+                Diseñamos ecosistemas desde el día cero. Bases sólidas que permiten crecimiento exponencial sin acumular deuda técnica inmanejable.
+              </p>
+            </div>
+            <div className="flex flex-col gap-4">
+              <h3 className="font-mono text-xl font-semibold text-white uppercase">02 / Carga Instántanea</h3>
+              <p className="text-zinc-400 leading-relaxed font-light">
+                Milisegundos que deciden conversiones. Optimizamos hasta el último byte para garantizar retención absoluta de usuarios.
+              </p>
+            </div>
+            <div className="flex flex-col gap-4">
+              <h3 className="font-mono text-xl font-semibold text-white uppercase">03 / Dirección</h3>
+              <p className="text-zinc-400 leading-relaxed font-light">
+                Intervenimos directamente en tu arquitectura actual. Auditamos, refactorizamos y educamos a tu equipo en las mejores prácticas.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <NewsletterForm />
+
+      {/* TECH STACK MARQUEE */}
+      <section className="py-8 border-t border-white/5 bg-black overflow-hidden select-none">
+        <div className="flex animate-marquee whitespace-nowrap gap-16 lg:gap-32 items-center">
+          {(() => {
+            const techs: { name: string; slug: TechIconName }[] = [
+              { name: "Next.js", slug: "nextdotjs" },
+              { name: "React", slug: "react" },
+              { name: "TypeScript", slug: "typescript" },
+              { name: "Node.js", slug: "nodedotjs" },
+              { name: "PostgreSQL", slug: "postgresql" },
+              { name: "AWS", slug: "amazonwebservices" },
+              { name: "Docker", slug: "docker" },
+              { name: "Tailwind CSS", slug: "tailwindcss" },
+              { name: "Prisma", slug: "prisma" },
+              { name: "Vercel", slug: "vercel" },
+              { name: "Python", slug: "python" },
+              { name: "Supabase", slug: "supabase" },
+              { name: "Flutter", slug: "flutter" },
+              { name: "Framer", slug: "framer" },
+            ];
+
+            // Duplicamos el array para que el scroll sea infinito y fluido
+            const doubleTechs = [...techs, ...techs];
+
+            return doubleTechs.map((tech, index) => {
+              const Icon = TechIcons[tech.slug];
+              return (
+                <div key={`${tech.slug}-${index}`} className="flex items-center gap-4 group transition-all duration-500">
+                  <div className="w-8 h-8 text-zinc-600 group-hover:text-white transition-colors duration-500">
+                    <Icon className="w-full h-full" />
+                  </div>
+                  <span className="text-zinc-600 font-mono text-sm uppercase tracking-widest group-hover:text-white transition-colors duration-500">
+                    {tech.name}
+                  </span>
+                </div>
+              );
+            });
+          })()}
+        </div>
+      </section>
     </div>
   );
 }
