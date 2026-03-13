@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import Script from "next/script";
 
 const clashDisplay = localFont({
   src: [
@@ -25,11 +26,11 @@ const commitMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Matecito.Dev | Boutique de Ingeniería & Arquitectura Digital",
-  description: "Desarrollamos ecosistemas digitales de alto rendimiento. Consultoría estratégica, arquitectura escalable y soluciones de software con precisión quirúrgica.",
+  title: "Matecito.Dev | Tu equipo de ingeniería, sin vueltas",
+  description: "Diseño, desarrollo y performance extrema. Resolvemos tus desafíos tecnológicos con soluciones reales que escalan.",
   openGraph: {
-    title: "Matecito.Dev | Boutique de Ingeniería",
-    description: "Desarrollamos ecosistemas digitales de alto rendimiento.",
+    title: "Matecito.Dev | Tu equipo de ingeniería",
+    description: "Diseño, desarrollo y performance extrema para tu negocio.",
     url: "https://matecito.dev",
     siteName: "Matecito.Dev",
     locale: "es_AR",
@@ -37,8 +38,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Matecito.Dev | Boutique de Ingeniería",
-    description: "Desarrollamos ecosistemas digitales de alto rendimiento.",
+    title: "Matecito.Dev | Tu equipo de ingeniería",
+    description: "Diseño, desarrollo y performance extrema.",
   },
 };
 
@@ -49,9 +50,30 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className="dark">
+      <head>
+        {/* Google Tag Manager */}
+        <Script id="google-tag-manager" strategy="afterInteractive">
+          {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+          })(window,document,'script','dataLayer','GTM-5GBXMTP3');`}
+        </Script>
+        {/* End Google Tag Manager */}
+      </head>
       <body
         className={`${clashDisplay.variable} ${commitMono.variable} flex min-h-screen flex-col font-sans antialiased bg-black text-white`}
       >
+        {/* Google Tag Manager (noscript) */}
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-5GBXMTP3"
+            height="0"
+            width="0"
+            style={{ display: 'none', visibility: 'hidden' }}
+          />
+        </noscript>
+        {/* End Google Tag Manager (noscript) */}
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />

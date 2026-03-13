@@ -36,12 +36,12 @@ export default function Home() {
             </div>
 
             <h1 className="text-5xl font-bold tracking-tight text-white sm:text-7xl md:leading-[1.1]">
-              Ingeniería <br />
-              <span className="text-zinc-500">sin filtros.</span>
+              Ingeniería de software <br />
+              <span className="text-zinc-500">que escala tu negocio.</span>
             </h1>
 
             <p className="mt-8 max-w-md font-mono text-lg font-light leading-relaxed text-zinc-400 sm:text-xl">
-              Diseño minimalista, arquitectura robusta y rendimiento extremo para negocios que exigen excelencia.
+              Diseño, desarrollo y performance extrema. Resolvemos tus desafíos tecnológicos con soluciones reales y sin vueltas.
             </p>
 
             <div className="mt-10 flex w-full flex-col justify-center gap-4 sm:flex-row lg:justify-start">
@@ -66,8 +66,8 @@ export default function Home() {
         <div className="container mx-auto px-6 max-w-7xl">
           <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
             <div className="flex flex-col gap-4">
-              <h2 className="text-4xl font-bold text-white uppercase tracking-tighter sm:text-6xl">Proyectos <br /><span className="text-zinc-500">Propios</span></h2>
-              <p className="max-w-md text-zinc-400 font-mono text-sm uppercase tracking-widest text-balance">Ecosistema de productos internos diseñados y evolucionados íntegramente por Matecito.Dev.</p>
+              <h2 className="text-4xl font-bold text-white uppercase tracking-tighter sm:text-6xl">Lo que <br /><span className="text-zinc-500">construimos</span></h2>
+              <p className="max-w-md text-zinc-400 font-mono text-sm uppercase tracking-widest text-balance">Productos propios y soluciones a medida diseñadas para impactar.</p>
             </div>
             <Link href="/estudio" className="font-mono text-xs text-white uppercase tracking-widest underline underline-offset-8 hover:text-zinc-500 transition-colors mb-4">Ver todos los casos →</Link>
           </div>
@@ -139,7 +139,7 @@ export default function Home() {
             <div className="flex flex-col gap-4">
               <h3 className="font-mono text-xl font-semibold text-white uppercase">01 / Escalabilidad</h3>
               <p className="text-zinc-400 leading-relaxed font-light">
-                Diseñamos ecosistemas desde el día cero. Bases sólidas que permiten crecimiento exponencial sin acumular deuda técnica inmanejable.
+                Construimos bases sólidas desde el día cero. Sistemas que permiten un crecimiento exponencial sin acumular deuda técnica.
               </p>
             </div>
             <div className="flex flex-col gap-4">
