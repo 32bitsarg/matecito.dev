@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { ChevronDown } from "lucide-react";
 
 export function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -18,7 +19,14 @@ export function Navbar() {
     }, [isMenuOpen]);
 
     const navLinks = [
-        { href: "/servicios", label: "Servicios" },
+        {
+            label: "Servicios",
+            subLinks: [
+                { href: "/landings", label: "Landings" },
+                { href: "/seo", label: "SEO & Performance" },
+                { href: "/marketing", label: "Marketing" },
+            ]
+        },
         { href: "/consultoria", label: "Consultoría" },
         { href: "/estudio", label: "Estudio" },
         { href: "/insights", label: "Insights" },
@@ -44,13 +52,40 @@ export function Navbar() {
                     {/* DESKTOP NAV */}
                     <nav className="hidden md:flex items-center gap-10 font-mono text-sm tracking-wide">
                         {navLinks.map((link) => (
-                            <Link
-                                key={link.href}
-                                href={link.href}
-                                className="text-zinc-400 transition-colors hover:text-white relative after:absolute after:-bottom-1 after:left-0 after:h-[1px] after:w-0 after:bg-white after:transition-all hover:after:w-full uppercase"
-                            >
-                                {link.label}
-                            </Link>
+                            <div key={link.label} className="relative group/item py-4">
+                                {link.subLinks ? (
+                                    <>
+                                        <button className="flex items-center gap-1.5 text-zinc-400 transition-colors hover:text-white uppercase cursor-default">
+                                            {link.label}
+                                            <ChevronDown className="w-4 h-4 transition-transform group-hover/item:rotate-180" />
+                                        </button>
+
+                                        {/* Dropdown Menu */}
+                                        <div className="absolute top-full left-0 w-64 pt-2 opacity-0 invisible group-hover/item:opacity-100 group-hover/item:visible transition-all duration-300 transform translate-y-2 group-hover/item:translate-y-0">
+                                            <div className="bg-zinc-900 border border-white/10 p-4 shadow-2xl backdrop-blur-xl">
+                                                <div className="flex flex-col gap-2">
+                                                    {link.subLinks.map((sub) => (
+                                                        <Link
+                                                            key={sub.href}
+                                                            href={sub.href}
+                                                            className="text-zinc-500 hover:text-white px-3 py-2 transition-all hover:bg-white/5 border-l-2 border-transparent hover:border-white text-xs uppercase tracking-widest"
+                                                        >
+                                                            {sub.label}
+                                                        </Link>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <Link
+                                        href={link.href || "#"}
+                                        className="text-zinc-400 transition-colors hover:text-white relative after:absolute after:-bottom-1 after:left-0 after:h-[1px] after:w-0 after:bg-white after:transition-all hover:after:w-full uppercase"
+                                    >
+                                        {link.label}
+                                    </Link>
+                                )}
+                            </div>
                         ))}
                     </nav>
 
@@ -89,17 +124,41 @@ export function Navbar() {
                 <div className="relative flex flex-col h-full pt-32 pb-12 px-10">
                     <nav className="flex flex-col gap-6">
                         {navLinks.map((link, idx) => (
-                            <Link
-                                key={link.href}
-                                href={link.href}
-                                onClick={() => setIsMenuOpen(false)}
-                                className="group flex items-end gap-3 border-b border-white/5 pb-6"
-                            >
-                                <span className="font-mono text-[10px] text-zinc-600 mb-1 font-bold">0{idx + 1}</span>
-                                <span className="text-3xl font-bold text-white uppercase tracking-tighter">
-                                    {link.label}
-                                </span>
-                            </Link>
+                            <div key={link.label} className="flex flex-col gap-4">
+                                {link.subLinks ? (
+                                    <>
+                                        <div className="flex items-end gap-3 border-b border-white/5 pb-2">
+                                            <span className="font-mono text-[10px] text-zinc-600 mb-1 font-bold">0{idx + 1}</span>
+                                            <span className="text-3xl font-bold text-white uppercase tracking-tighter">
+                                                {link.label}
+                                            </span>
+                                        </div>
+                                        <div className="flex flex-col gap-4 pl-6 border-l border-white/10 ml-2">
+                                            {link.subLinks.map((sub) => (
+                                                <Link
+                                                    key={sub.href}
+                                                    href={sub.href}
+                                                    onClick={() => setIsMenuOpen(false)}
+                                                    className="text-xl font-medium text-zinc-400 hover:text-white uppercase tracking-tighter transition-colors"
+                                                >
+                                                    {sub.label}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </>
+                                ) : (
+                                    <Link
+                                        href={link.href || "#"}
+                                        onClick={() => setIsMenuOpen(false)}
+                                        className="group flex items-end gap-3 border-b border-white/5 pb-6"
+                                    >
+                                        <span className="font-mono text-[10px] text-zinc-600 mb-1 font-bold">0{idx + 1}</span>
+                                        <span className="text-3xl font-bold text-white uppercase tracking-tighter">
+                                            {link.label}
+                                        </span>
+                                    </Link>
+                                )}
+                            </div>
                         ))}
                     </nav>
 
