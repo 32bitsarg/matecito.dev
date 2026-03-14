@@ -1,10 +1,36 @@
+import Link from "next/link";
+import { Metadata } from "next";
 import { Button } from "@/components/ui/Button";
+import { Breadcrumbs } from "@/components/navigation/Breadcrumbs";
+import { JsonLd } from "@/components/seo/JsonLd";
+
+export const metadata: Metadata = {
+    title: "Diseño de Landing Pages de Alta Conversión | Matecito.dev",
+    description: "Landings rápidas, vendedoras y con diseño premium. Convertí tu tráfico en clientes reales con tecnología de élite.",
+};
 
 export default function LandingsPage() {
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Deseño de Landing Pages",
+        "serviceType": "Web Design & Development",
+        "description": "Landings de alta conversión con carga instantánea y diseño premium.",
+        "provider": {
+            "@type": "LocalBusiness",
+            "name": "Matecito.dev",
+            "url": "https://matecito.dev/landings"
+        }
+    };
+
     return (
         <div className="flex flex-col bg-black">
+            <JsonLd data={jsonLd} />
             {/* HERO / ATENCIÓN */}
-            <section className="relative pt-32 pb-20 px-6 overflow-hidden">
+            <section className="relative pt-4 pb-20 px-6 overflow-hidden">
+                <div className="max-w-7xl mx-auto mb-2">
+                    <Breadcrumbs items={[{ label: "Servicios", href: "/servicios" }, { label: "Landings", href: "/landings" }]} />
+                </div>
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:40px_40px]"></div>
                 <div className="relative z-10 max-w-5xl mx-auto text-center">
                     <h1 className="text-5xl md:text-8xl font-bold tracking-tighter text-white mb-8">
@@ -72,6 +98,27 @@ export default function LandingsPage() {
                             <div className="h-2 w-2 bg-white mt-2 shrink-0"></div>
                             <p className="text-zinc-400 font-mono text-sm uppercase tracking-widest">Diseño premium que transmite autoridad.</p>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* CROSS-LINKING / EXPLORAR MÁS */}
+            <section className="py-12 bg-zinc-950 border-t border-white/5">
+                <div className="max-w-7xl mx-auto px-6">
+                    <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-[0.2em] mb-8">Complementá tu estrategia</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <Link href="/seo" className="group p-8 border border-white/5 hover:bg-white/[0.02] transition-all">
+                            <h4 className="text-white font-bold uppercase mb-2 group-hover:translate-x-1 transition-transform inline-flex items-center gap-2">
+                                Ingeniería SEO <span>→</span>
+                            </h4>
+                            <p className="text-zinc-500 text-xs">Dominá los buscadores con una arquitectura optimizada.</p>
+                        </Link>
+                        <Link href="/marketing" className="group p-8 border border-white/5 hover:bg-white/[0.02] transition-all">
+                            <h4 className="text-white font-bold uppercase mb-2 group-hover:translate-x-1 transition-transform inline-flex items-center gap-2">
+                                Ingeniería de Ventas <span>→</span>
+                            </h4>
+                            <p className="text-zinc-500 text-xs">Optimizá tus embudos y automatizá la captación de leads.</p>
+                        </Link>
                     </div>
                 </div>
             </section>

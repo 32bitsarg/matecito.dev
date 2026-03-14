@@ -1,10 +1,36 @@
+import Link from "next/link";
+import { Metadata } from "next";
 import { Button } from "@/components/ui/Button";
+import { Breadcrumbs } from "@/components/navigation/Breadcrumbs";
+import { JsonLd } from "@/components/seo/JsonLd";
+
+export const metadata: Metadata = {
+    title: "Embudos de Venta Automatizados & Analítica GA4 | Matecito.dev",
+    description: "Ingeniería de ventas aplicada. Creamos sistemas de captación lógicos y medibles para escalar tu negocio.",
+};
 
 export default function MarketingPage() {
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Ingeniería de Ventas & Marketing",
+        "serviceType": "Marketing Automation",
+        "description": "Embudos de venta automatizados, analítica avanzada y optimización de leads.",
+        "provider": {
+            "@type": "LocalBusiness",
+            "name": "Matecito.dev",
+            "url": "https://matecito.dev/marketing"
+        }
+    };
+
     return (
         <div className="flex flex-col bg-black">
+            <JsonLd data={jsonLd} />
             {/* HERO / ATENCIÓN */}
-            <section className="relative pt-32 pb-20 px-6 overflow-hidden">
+            <section className="relative pt-4 pb-20 px-6 overflow-hidden">
+                <div className="max-w-7xl mx-auto mb-2">
+                    <Breadcrumbs items={[{ label: "Servicios", href: "/servicios" }, { label: "Marketing", href: "/marketing" }]} />
+                </div>
                 <div className="absolute inset-0 bg-[linear-gradient(45deg,#ffffff03_1px,transparent_1px)] bg-[size:48px_48px]"></div>
                 <div className="relative z-10 max-w-5xl mx-auto text-center">
                     <h1 className="text-5xl md:text-8xl font-bold tracking-tighter text-white mb-8 uppercase">
@@ -65,6 +91,27 @@ export default function MarketingPage() {
                         <div className="h-12 w-12 bg-white/5 border border-white/10 flex items-center justify-center font-mono text-white">03</div>
                         <h3 className="text-xl font-bold text-white uppercase">Conversion Leads</h3>
                         <p className="text-zinc-500 text-sm leading-relaxed">Optimizamos la captación para que los leads lleguen calificados y listos para comprar.</p>
+                    </div>
+                </div>
+            </section>
+
+            {/* CROSS-LINKING / EXPLORAR MÁS */}
+            <section className="py-12 bg-zinc-950 border-t border-white/5">
+                <div className="max-w-7xl mx-auto px-6">
+                    <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-[0.2em] mb-8">Complementá tu estrategia</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <Link href="/seo" className="group p-8 border border-white/5 hover:bg-white/[0.02] transition-all">
+                            <h4 className="text-white font-bold uppercase mb-2 group-hover:translate-x-1 transition-transform inline-flex items-center gap-2">
+                                Ingeniería SEO <span>→</span>
+                            </h4>
+                            <p className="text-zinc-500 text-xs">Dominá los buscadores con una arquitectura optimizada.</p>
+                        </Link>
+                        <Link href="/landings" className="group p-8 border border-white/5 hover:bg-white/[0.02] transition-all">
+                            <h4 className="text-white font-bold uppercase mb-2 group-hover:translate-x-1 transition-transform inline-flex items-center gap-2">
+                                Landings de Élite <span>→</span>
+                            </h4>
+                            <p className="text-zinc-500 text-xs">Convertí el tráfico de tus embudos en ventas reales.</p>
+                        </Link>
                     </div>
                 </div>
             </section>

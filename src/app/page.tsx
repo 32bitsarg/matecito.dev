@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import NewsletterForm from "@/components/newsletter/NewsletterForm";
 import { TechIcons, TechIconName } from "@/components/ui/TechIcons";
+import { Search, Megaphone, Layout, ArrowRight } from "lucide-react";
 
 export default function Home() {
   return (
@@ -58,6 +59,70 @@ export default function Home() {
             </div>
           </div>
 
+        </div>
+      </section>
+
+      {/* SERVICES GRID SECTION */}
+      <section className="bg-black py-24 border-t border-white/10">
+        <div className="container mx-auto px-6 max-w-7xl">
+          <div className="flex flex-col gap-4 mb-16">
+            <h2 className="text-4xl font-bold text-white uppercase tracking-tighter sm:text-6xl">
+              Nuestras <br /><span className="text-zinc-500">Verticales</span>
+            </h2>
+            <p className="max-w-md text-zinc-400 font-mono text-sm uppercase tracking-widest text-balance">
+              Soluciones de ingeniería enfocadas en resultados tangibles.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/10 border border-white/10">
+            {/* SEO & Performance */}
+            <Link href="/seo" className="group bg-black p-10 flex flex-col gap-8 hover:bg-zinc-950 transition-all">
+              <div className="h-12 w-12 border border-white/10 flex items-center justify-center text-zinc-500 group-hover:text-white group-hover:border-white/30 transition-all">
+                <Search className="w-5 h-5" />
+              </div>
+              <div className="flex flex-col gap-4">
+                <h3 className="text-2xl font-bold text-white uppercase tracking-tight">SEO & Performance</h3>
+                <p className="text-zinc-500 font-light text-sm leading-relaxed">
+                  Optimizamos tu arquitectura para dominar Google. Core Web Vitals en verde y carga ultra-rápida.
+                </p>
+              </div>
+              <div className="mt-auto pt-4 flex items-center gap-2 text-white font-mono text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0">
+                Explorar Ingeniería SEO <ArrowRight className="w-3 h-3" />
+              </div>
+            </Link>
+
+            {/* High Conversion Landings */}
+            <Link href="/landings" className="group bg-black p-10 flex flex-col gap-8 hover:bg-zinc-950 transition-all">
+              <div className="h-12 w-12 border border-white/10 flex items-center justify-center text-zinc-500 group-hover:text-white group-hover:border-white/30 transition-all">
+                <Layout className="w-5 h-5" />
+              </div>
+              <div className="flex flex-col gap-4">
+                <h3 className="text-2xl font-bold text-white uppercase tracking-tight">Landings de Élite</h3>
+                <p className="text-zinc-500 font-light text-sm leading-relaxed">
+                  Diseño premium enfocado en conversión. Landings creadas con Next.js para una experiencia de usuario superior.
+                </p>
+              </div>
+              <div className="mt-auto pt-4 flex items-center gap-2 text-white font-mono text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0">
+                Ver Landings de Élite <ArrowRight className="w-3 h-3" />
+              </div>
+            </Link>
+
+            {/* Sales Engineering */}
+            <Link href="/marketing" className="group bg-black p-10 flex flex-col gap-8 hover:bg-zinc-950 transition-all">
+              <div className="h-12 w-12 border border-white/10 flex items-center justify-center text-zinc-500 group-hover:text-white group-hover:border-white/30 transition-all">
+                <Megaphone className="w-5 h-5" />
+              </div>
+              <div className="flex flex-col gap-4">
+                <h3 className="text-2xl font-bold text-white uppercase tracking-tight">Ingeniería de Ventas</h3>
+                <p className="text-zinc-500 font-light text-sm leading-relaxed">
+                  Embudos automatizados y analítica de alta precisión. Sabé exactamenten de dónde vienen tus clientes.
+                </p>
+              </div>
+              <div className="mt-auto pt-4 flex items-center gap-2 text-white font-mono text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0">
+                Automatizar Ventas <ArrowRight className="w-3 h-3" />
+              </div>
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -144,15 +209,21 @@ export default function Home() {
             </div>
             <div className="flex flex-col gap-4">
               <h3 className="font-mono text-xl font-semibold text-white uppercase">02 / Carga Instántanea</h3>
-              <p className="text-zinc-400 leading-relaxed font-light">
+              <p className="text-zinc-400 leading-relaxed font-light mb-4">
                 Milisegundos que deciden conversiones. Optimizamos hasta el último byte para garantizar retención absoluta de usuarios.
               </p>
+              <Link href="/landings" className="text-white font-mono text-[10px] uppercase tracking-widest hover:text-zinc-500 transition-colors flex items-center gap-2">
+                Ver Landings de Elite ↗
+              </Link>
             </div>
             <div className="flex flex-col gap-4">
               <h3 className="font-mono text-xl font-semibold text-white uppercase">03 / Dirección</h3>
-              <p className="text-zinc-400 leading-relaxed font-light">
+              <p className="text-zinc-400 leading-relaxed font-light mb-4">
                 Intervenimos directamente en tu arquitectura actual. Auditamos, refactorizamos y educamos a tu equipo en las mejores prácticas.
               </p>
+              <Link href="/seo" className="text-white font-mono text-[10px] uppercase tracking-widest hover:text-zinc-500 transition-colors flex items-center gap-2">
+                Explorar Ingeniería SEO ↗
+              </Link>
             </div>
           </div>
         </div>
