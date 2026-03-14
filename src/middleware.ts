@@ -41,9 +41,9 @@ export function middleware(request: NextRequest) {
     const cspHeader = `
         default-src 'self';
         script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com;
-        connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://stats.g.doubleclick.net;
+        connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://stats.g.doubleclick.net;
         style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-        img-src 'self' blob: data: https://cdn.simpleicons.org https://vsqvbtpivmshqfppwsws.supabase.co https://*.google-analytics.com https://*.googletagmanager.com https://*.google.com https://*.google.com.ar;
+        img-src 'self' blob: data: https://cdn.simpleicons.org https://vsqvbtpivmshqfppwsws.supabase.co https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://*.googletagmanager.com https://www.google.com https://*.google.com https://www.google.com.ar https://*.google.com.ar;
         font-src 'self' data: https://fonts.gstatic.com;
         object-src 'none';
         base-uri 'self';
