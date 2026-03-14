@@ -40,9 +40,10 @@ export function middleware(request: NextRequest) {
     // Solo permitimos scripts de nuestro dominio, simpleicons (para la marquee) y google fonts si las hubiera.
     const cspHeader = `
         default-src 'self';
-        script-src 'self' 'unsafe-inline' 'unsafe-eval';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com;
+        connect-src 'self' https://www.google-analytics.com *.google-analytics.com *.analytics.google.com *.googletagmanager.com;
         style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-        img-src 'self' blob: data: https://cdn.simpleicons.org https://vsqvbtpivmshqfppwsws.supabase.co;
+        img-src 'self' blob: data: https://cdn.simpleicons.org https://vsqvbtpivmshqfppwsws.supabase.co https://www.google-analytics.com *.google-analytics.com *.googletagmanager.com;
         font-src 'self' data: https://fonts.gstatic.com;
         object-src 'none';
         base-uri 'self';
