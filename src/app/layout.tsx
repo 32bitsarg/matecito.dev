@@ -26,11 +26,11 @@ const commitMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Matecito.Dev | Tu equipo de ingeniería, sin vueltas",
-  description: "Diseño, desarrollo y performance extrema. Resolvemos tus desafíos tecnológicos con soluciones reales que escalan.",
+  title: "Matecito.Dev | Branding, Landing Pages & Ingeniería Software",
+  description: "Estudio de ingeniería de software especializado en Branding premium, Landing Pages de alta conversión y SEO técnico. Escalamos tu negocio con soluciones tecnológicas de alto rendimiento.",
   openGraph: {
-    title: "Matecito.Dev | Tu equipo de ingeniería",
-    description: "Diseño, desarrollo y performance extrema para tu negocio.",
+    title: "Matecito.Dev | Branding, Landing Pages & Ingeniería Software",
+    description: "Estudio de ingeniería de software especializado en Branding premium, Landing Pages de alta conversión y SEO técnico.",
     url: "https://matecito.dev",
     siteName: "Matecito.Dev",
     locale: "es_AR",
@@ -38,8 +38,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Matecito.Dev | Tu equipo de ingeniería",
-    description: "Diseño, desarrollo y performance extrema.",
+    title: "Matecito.Dev | Branding, Landing Pages & Ingeniería Software",
+    description: "Diseño, desarrollo y performance extrema para tu negocio.",
   },
 };
 
