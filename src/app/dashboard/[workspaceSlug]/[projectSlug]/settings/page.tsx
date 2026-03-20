@@ -92,7 +92,7 @@ export default function SettingsPage() {
                     <div>
                         <h1 className="text-3xl font-black text-white tracking-tight">Project Settings</h1>
                         <p className="text-[10px] font-mono text-muted uppercase tracking-[0.2em] mt-1">
-                            Configuración global de tu instancia Matebase
+                            Configuración global de tu instancia Matecito
                         </p>
                     </div>
                 </div>

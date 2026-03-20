@@ -65,8 +65,8 @@ const FIELD_TYPES = [
     { value: 'relation', label: 'Relación',     icon: <LinkIcon className="w-4 h-4"/>,   description: 'Referencia a otra colección' },
     { value: 'file',     label: 'Archivo',      icon: <Paperclip className="w-4 h-4"/>,  description: 'Imágenes, PDFs u otros archivos' },
     { value: 'json',     label: 'JSON',         icon: <Code className="w-4 h-4"/>,       description: 'Cualquier dato JSON válido' },
-    { value: 'editor',   label: 'Rich text',    icon: <FileText className="w-4 h-4"/>,   description: 'Texto con formato HTML' },
-    { value: 'password', label: 'Password',     icon: <Lock className="w-4 h-4"/>,       description: 'Texto encriptado' },
+    { value: 'editor',   label: 'Texto Enriquecido', icon: <FileText className="w-4 h-4"/>,   description: 'Editor de texto con formato HTML' },
+    { value: 'password', label: 'Contraseña',   icon: <Lock className="w-4 h-4"/>,       description: 'Texto encriptado (password)' },
 ]
 
 export default function CollectionEditor({ open, onClose, onSuccess, existingCollection }: CollectionEditorProps) {
@@ -421,7 +421,7 @@ export default function CollectionEditor({ open, onClose, onSuccess, existingCol
                                                         )}>
                                                             {field.name || <span className="text-muted italic">Sin nombre</span>}
                                                         </span>
-                                                        {field.system && <span className="text-[7px] bg-blue-500/10 text-blue-400 px-1 rounded font-bold uppercase tracking-tighter border border-blue-500/20">System</span>}
+                                                        {field.system && <span className="text-[7px] bg-blue-500/10 text-blue-400 px-1 rounded font-bold uppercase tracking-tighter border border-blue-500/20">Sistema</span>}
                                                         {field._state === 'new' && <span className="text-[7px] bg-green-500/10 text-green-500 px-1 rounded font-bold uppercase">Nuevo</span>}
                                                         {errors[field.id] && <AlertTriangle className="w-3 h-3 text-red-500" />}
                                                     </div>
@@ -462,7 +462,7 @@ export default function CollectionEditor({ open, onClose, onSuccess, existingCol
                                         <div className="flex items-center gap-4 mb-8">
                                             <div className="p-4 bg-accent/10 rounded-2xl text-accent">{getFieldIcon(selectedField.type)}</div>
                                             <div>
-                                                <h3 className="text-2xl font-bold text-white capitalize">{selectedField.type} Configuration</h3>
+                                                <h3 className="text-2xl font-bold text-white capitalize">Configuración de {selectedField.type}</h3>
                                                 <p className="text-sm text-muted">Define cómo se comporta el campo <span className="text-accent font-mono">"{selectedField.name || '...'}"</span></p>
                                             </div>
                                         </div>
@@ -635,12 +635,12 @@ export default function CollectionEditor({ open, onClose, onSuccess, existingCol
                                                         <h4 className="font-bold text-accent text-sm uppercase tracking-wider">Acerca de {selectedField.type}</h4>
                                                         <p className="text-xs text-muted leading-relaxed mt-1">
                                                             {selectedField.type === 'json' && 'Este campo valida que el contenido sea una estructura JSON pura.'}
-                                                            {selectedField.type === 'editor' && 'Enables a Rich Text Editor (HTML) in the records dashboard.'}
-                                                            {selectedField.type === 'password' && 'The content is encrypted immediately and only visible to administrators.'}
-                                                            {selectedField.type === 'email' && 'Validates strict email RFC format.'}
-                                                            {selectedField.type === 'bool' && 'Simple true/false toggle.'}
-                                                            {selectedField.type === 'url' && 'Validates proper web addresses (https/http).'}
-                                                            {selectedField.type === 'date' && 'Stores date and time values. You can specify a min/max range.'}
+                                                            {selectedField.type === 'editor' && 'Habilita un editor de texto enriquecido (HTML) en el dashboard de registros.'}
+                                                            {selectedField.type === 'password' && 'El contenido se encripta inmediatamente y solo es visible para administradores.'}
+                                                            {selectedField.type === 'email' && 'Valida el formato estricto de email RFC.'}
+                                                            {selectedField.type === 'bool' && 'Interruptor simple de verdadero/falso.'}
+                                                            {selectedField.type === 'url' && 'Valida direcciones web correctamente formateadas (https/http).'}
+                                                            {selectedField.type === 'date' && 'Almacena valores de fecha y hora. Puedes especificar un rango mín/máx.'}
                                                         </p>
                                                     </div>
                                                 </div>

@@ -87,7 +87,7 @@ export default function LoginPage() {
                             Console
                         </h1>
                         <p className="text-[var(--foreground)] opacity-40 text-[9px] font-mono uppercase tracking-[0.3em]">
-                            Matebase Architecture
+                            Matecito Architecture
                         </p>
                     </div>
 

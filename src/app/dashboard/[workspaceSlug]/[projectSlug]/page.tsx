@@ -51,22 +51,8 @@ export default function ProjectOverview() {
                     </div>
                     <h1 className="text-4xl font-black tracking-tighter text-white flex items-center gap-3">
                         {projectSlug}
-                        <span className="text-accent">.matebase</span>
+                        <span className="text-accent">.matecito</span>
                     </h1>
-                </div>
-
-                <div className="flex items-center gap-4">
-                     <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-accent/5 border border-accent/10">
-                        <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                        <span className="text-[10px] font-black text-accent uppercase tracking-widest">Instance Online</span>
-                    </div>
-                    <a 
-                        href={`https://${projectUrl}`} 
-                        target="_blank" 
-                        className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-muted hover:text-white transition-all shadow-sm"
-                    >
-                        <ExternalLink className="w-5 h-5" />
-                    </a>
                 </div>
             </div>
 
@@ -310,7 +296,7 @@ export default function ProjectOverview() {
                         </div>
                         <div className="space-y-1">
                             <p className="text-sm font-black text-white uppercase tracking-tight">Deploying Apps?</p>
-                            <p className="text-[10px] text-muted font-mono leading-relaxed">Check our docs to integrate Matebase in 3 minutes.</p>
+                            <p className="text-[10px] text-muted font-mono leading-relaxed">Check our docs to integrate Matecito in 3 minutes.</p>
                         </div>
                         <Link href="/docs" className="text-[10px] font-black text-accent hover:underline decoration-accent/30 uppercase tracking-widest">Read SDK Guide</Link>
                     </div>

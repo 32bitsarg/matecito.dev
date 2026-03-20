@@ -61,6 +61,28 @@ export async function POST(req: Request) {
                 service_key: deployData.serviceKey   
             })
 
+            // 4. Configurar seguridad por defecto: Requerir verificación de email
+            // Intentamos hasta 3 veces con un pequeño delay por si la instancia está arrancando
+            const setSecurityDefault = async (retries = 3) => {
+                for (let i = 0; i < retries; i++) {
+                    try {
+                        const instancePb = new PocketBase(`https://${subdomain}.matecito.dev`)
+                        instancePb.authStore.save(deployData.adminToken, null)
+                        await instancePb.collections.update('_pb_users_auth_', {
+                            authRule: 'verified = true'
+                        })
+                        console.log(`[Seguridad] Verificación activada tras ${i + 1} intentos para ${subdomain}`)
+                        return true
+                    } catch (secErr: any) {
+                        console.warn(`Intento ${i + 1} fallido para configurar seguridad en ${subdomain}:`, secErr.message)
+                        if (i < retries - 1) await new Promise(r => setTimeout(r, 3000)) // Esperar 3s entre reintentos
+                    }
+                }
+                return false
+            }
+
+            setSecurityDefault() // Se ejecuta de fondo para no bloquear el retorno al UI
+
         } catch (fetchErr: any) {
             clearTimeout(timeout)
             // Si timeout o error de red, el VPS puede estar procesando

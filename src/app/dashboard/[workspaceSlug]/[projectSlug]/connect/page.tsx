@@ -34,16 +34,16 @@ export default function ConnectPage() {
     const projectUrl = `https://${project.subdomain}.matecito.dev`
 
     const envSnippet = `# .env.local
-NEXT_PUBLIC_MATEBASE_URL=${projectUrl}
-NEXT_PUBLIC_MATEBASE_ANON_KEY=${project.anon_key}
-MATEBASE_SERVICE_KEY=${project.service_key}`
+NEXT_PUBLIC_MATECITO_URL=${projectUrl}
+NEXT_PUBLIC_MATECITO_ANON_KEY=${project.anon_key}
+MATECITO_SERVICE_KEY=${project.service_key}`
 
     return (
         <div className="max-w-4xl mx-auto space-y-12 animate-in fade-in duration-700 pb-20">
             {/* Header */}
             <div>
                 <h1 className="text-3xl font-black uppercase tracking-tighter text-white">Conectar</h1>
-                <p className="text-muted text-sm mt-2">Configurá tu aplicación para interactuar con tu instancia de Matebase.</p>
+                <p className="text-muted text-sm mt-2">Configurá tu aplicación para interactuar con tu instancia de Matecito.</p>
             </div>
 
             {/* API Keys & URL */}
@@ -162,9 +162,9 @@ MATEBASE_SERVICE_KEY=${project.service_key}`
                 <div className="bg-[#050505] border border-white/5 rounded-2xl overflow-hidden p-6 relative group">
                     <pre className="text-xs font-mono text-white/40 leading-relaxed">
                         <span className="text-muted/40"># .env.local</span>{'\n'}
-                        <span className="text-accent">NEXT_PUBLIC_MATEBASE_URL</span>={projectUrl}{'\n'}
-                        <span className="text-accent">NEXT_PUBLIC_MATEBASE_ANON_KEY</span>={project.anon_key}{'\n'}
-                        <span className="text-[#ef4444]/80">MATEBASE_SERVICE_KEY</span>={project.service_key}
+                        <span className="text-accent">NEXT_PUBLIC_MATECITO_URL</span>={projectUrl}{'\n'}
+                        <span className="text-accent">NEXT_PUBLIC_MATECITO_ANON_KEY</span>={project.anon_key}{'\n'}
+                        <span className="text-[#ef4444]/80">MATECITO_SERVICE_KEY</span>={project.service_key}
                     </pre>
                 </div>
             </div>
@@ -218,8 +218,8 @@ MATEBASE_SERVICE_KEY=${project.service_key}`
 {`import { createClient } from 'matecitodb'
 
 export const db = createClient(
-  process.env.NEXT_PUBLIC_MATEBASE_URL!,
-  { anonKey: process.env.NEXT_PUBLIC_MATEBASE_ANON_KEY! }
+  process.env.NEXT_PUBLIC_MATECITO_URL!,
+  { anonKey: process.env.NEXT_PUBLIC_MATECITO_ANON_KEY! }
 )
 
 // Listar datos

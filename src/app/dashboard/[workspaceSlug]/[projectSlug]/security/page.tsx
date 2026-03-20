@@ -20,18 +20,18 @@ import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
 const RULES_KEYS = [
-    { key: 'listRule', label: 'List / Search', desc: 'Who can search many records' },
-    { key: 'viewRule', label: 'View / Get One', desc: 'Who can read a single record' },
-    { key: 'createRule', label: 'Create', desc: 'Who can insert new records' },
-    { key: 'updateRule', label: 'Update', desc: 'Who can modify existing records' },
-    { key: 'deleteRule', label: 'Delete', desc: 'Who can remove records' }
+    { key: 'listRule', label: 'Listar / Buscar', desc: 'Quién puede realizar búsquedas múltiples' },
+    { key: 'viewRule', label: 'Ver / Obtener uno', desc: 'Quién puede leer un solo registro' },
+    { key: 'createRule', label: 'Crear', desc: 'Quién puede insertar nuevos registros' },
+    { key: 'updateRule', label: 'Actualizar', desc: 'Quién puede modificar registros existentes' },
+    { key: 'deleteRule', label: 'Eliminar', desc: 'Quién puede borrar registros' }
 ]
 
 const PRESETS = [
-    { name: 'Public', value: '', icon: Unlock, desc: 'Anyone can access (Dangerous)', color: 'text-red-400' },
-    { name: 'Authenticated', value: '@request.auth.id != ""', icon: ShieldCheck, desc: 'Only logged-in users', color: 'text-accent' },
-    { name: 'Owner Only', value: '@request.auth.id = owner', icon: Shield, desc: 'Only creators can manage', color: 'text-blue-400' },
-    { name: 'Admin Only', value: 'null', icon: Lock, desc: 'Locked from Web API', color: 'text-muted' }
+    { name: 'Público', value: '', icon: Unlock, desc: 'Cualquiera puede acceder (Peligroso)', color: 'text-red-400' },
+    { name: 'Autenticado', value: '@request.auth.id != ""', icon: ShieldCheck, desc: 'Solo usuarios logueados', color: 'text-accent' },
+    { name: 'Solo Propietario', value: '@request.auth.id = owner', icon: Shield, desc: 'Solo los creadores controlan sus datos', color: 'text-blue-400' },
+    { name: 'Solo Admin', value: 'null', icon: Lock, desc: 'Bloqueado desde Web API', color: 'text-muted' }
 ]
 
 export default function SecurityPage() {
@@ -42,13 +42,14 @@ export default function SecurityPage() {
 
     useEffect(() => {
         if (collections.length > 0 && !selectedCol) {
-            setSelectedCol(collections[0])
+            const first = collections[0]
+            setSelectedCol(first)
             setLocalRules({
-                listRule: collections[0].listRule,
-                viewRule: collections[0].viewRule,
-                createRule: collections[0].createRule,
-                updateRule: collections[0].updateRule,
-                deleteRule: collections[0].deleteRule,
+                listRule: first.listRule,
+                viewRule: first.viewRule,
+                createRule: first.createRule,
+                updateRule: first.updateRule,
+                deleteRule: first.deleteRule,
             })
         }
     }, [collections])
@@ -81,17 +82,24 @@ export default function SecurityPage() {
         }
     }
 
+    const getRuleStatus = (value: string | null) => {
+        if (value === null) return { label: 'Solo Admin', color: 'text-muted', icon: Lock, bg: 'bg-white/5' }
+        if (value === "") return { label: 'Público', color: 'text-red-400', icon: Unlock, bg: 'bg-red-400/10' }
+        if (value === '@request.auth.id != ""') return { label: 'Requiere Auth', color: 'text-accent', icon: ShieldCheck, bg: 'bg-accent/10' }
+        return { label: 'Regla Personalizada', color: 'text-blue-400', icon: Shield, bg: 'bg-blue-400/10' }
+    }
+
     return (
-        <div className="h-full flex flex-col space-y-8 animate-in fade-in duration-700">
+        <div className="h-[calc(100vh-140px)] flex flex-col space-y-6 animate-in fade-in duration-700">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-4">
-                    <div className="p-4 bg-accent/10 rounded-3xl text-accent border border-accent/20 shadow-lg shadow-accent/5">
-                        <Lock className="w-8 h-8" />
+                    <div className="p-3 bg-accent/10 rounded-2xl text-accent border border-accent/20 shadow-lg shadow-accent/5">
+                        <Lock className="w-6 h-6" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-black text-white tracking-tight">Security & API Rules</h1>
-                        <p className="text-[10px] font-mono text-muted uppercase tracking-[0.2em] mt-1">
+                        <h1 className="text-2xl font-black text-white tracking-tight">API Security</h1>
+                        <p className="text-[9px] font-mono text-muted uppercase tracking-[0.2em]">
                             Controla el acceso y permisos de cada colección
                         </p>
                     </div>
@@ -99,7 +107,7 @@ export default function SecurityPage() {
                 <button
                     onClick={handleSave}
                     disabled={loading || !selectedCol}
-                    className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-accent text-background text-sm font-black hover:opacity-90 transition-all shadow-xl shadow-accent/10 uppercase tracking-widest"
+                    className="flex items-center gap-2 px-6 py-3 rounded-xl bg-accent text-background text-xs font-black hover:opacity-90 transition-all shadow-xl shadow-accent/10 uppercase tracking-widest disabled:opacity-50"
                 >
                     {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                     Guardar Cambios
@@ -107,121 +115,138 @@ export default function SecurityPage() {
             </div>
 
             {/* Main Layout */}
-            <div className="flex-1 flex gap-8 min-h-0">
+            <div className="flex-1 flex gap-6 min-h-0">
                 
                 {/* Collection Sidebar */}
-                <div className="w-72 flex flex-col space-y-4">
-                    <div className="px-4 text-[10px] font-black uppercase tracking-widest text-muted/40">Collections</div>
-                    <div className="bg-card/20 border border-white/5 rounded-3xl p-2 space-y-1 overflow-y-auto">
+                <div className="w-64 flex flex-col space-y-4 shrink-0">
+                    <div className="px-1 text-[9px] font-black uppercase tracking-widest text-muted/40 flex items-center justify-between">
+                        Colecciones
+                        <span className="px-1.5 py-0.5 rounded-md bg-white/5 text-[8px]">{collections.length}</span>
+                    </div>
+                    <div className="flex-1 bg-card/20 border border-white/5 rounded-2xl p-2 space-y-1 overflow-y-auto custom-scrollbar">
                         {collections.map(col => (
                             <button
                                 key={col.id}
                                 onClick={() => handleSelectCol(col)}
                                 className={cn(
-                                    "w-full flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-bold transition-all group",
+                                    "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-[11px] font-bold transition-all group",
                                     selectedCol?.id === col.id 
                                         ? "bg-accent/10 text-accent border border-accent/20" 
                                         : "text-muted hover:text-white hover:bg-white/5 border border-transparent"
                                 )}
                             >
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-2.5 truncate">
                                     <Shield className={cn("w-3.5 h-3.5 opacity-40 group-hover:opacity-100", selectedCol?.id === col.id && "opacity-100")} />
-                                    {col.name}
+                                    <span className="truncate">{col.name}</span>
                                 </div>
-                                {col.listRule === "" && col.viewRule === "" && (
-                                    <ShieldAlert className="w-3 h-3 text-red-500 animate-pulse" />
+                                {(col.listRule === "" || col.viewRule === "") && (
+                                    <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
                                 )}
                             </button>
                         ))}
                     </div>
 
-                    {/* Quick Info */}
-                    <div className="bg-blue-500/5 border border-blue-500/10 rounded-3xl p-6 mt-auto">
-                        <div className="flex items-center gap-3 mb-4">
-                            <Info className="w-4 h-4 text-blue-400" />
-                            <span className="text-[10px] font-black uppercase text-blue-400 tracking-widest">Security Tip</span>
-                        </div>
-                        <p className="text-[10px] text-blue-200/40 leading-relaxed italic">
-                            Un valor vacío (<code className="text-red-400">""</code>) significa acceso público. Usá <code className="text-accent underline font-mono">@request.auth.id != ""</code> para requerir login.
+                    <div className="bg-blue-500/5 border border-blue-500/10 rounded-2xl p-4">
+                         <p className="text-[10px] text-blue-200/40 leading-relaxed italic">
+                            Un valor vacío (<span className="text-red-400">""</span>) es acceso público.
                         </p>
                     </div>
                 </div>
 
                 {/* Rules Editor */}
-                <div className="flex-1 bg-card/30 border border-border/50 rounded-[2.5rem] flex flex-col overflow-hidden backdrop-blur-sm">
+                <div className="flex-1 bg-card/10 border border-white/5 rounded-[2rem] flex flex-col overflow-hidden backdrop-blur-sm">
                     {selectedCol ? (
-                        <div className="flex-1 flex flex-col animate-in slide-in-from-right-4 duration-500">
+                        <div className="flex-1 flex flex-col min-h-0 animate-in slide-in-from-right-4 duration-500">
                             {/* Editor Header */}
-                            <div className="p-8 border-b border-white/5 bg-black/20 flex items-center justify-between">
+                            <div className="px-8 py-6 border-b border-white/5 bg-black/20 flex items-center justify-between shrink-0">
                                  <div>
-                                    <h2 className="text-xl font-black text-white">Reglas para <span className="text-accent">{selectedCol.name}</span></h2>
-                                    <p className="text-[10px] text-muted font-mono uppercase tracking-[0.2em] mt-1">Configuración actual de permisos de API</p>
+                                    <h2 className="text-lg font-black text-white">Reglas: <span className="text-accent">{selectedCol.name}</span></h2>
+                                    <p className="text-[9px] text-muted font-mono uppercase tracking-widest mt-0.5">Editando permisos de acceso remoto</p>
                                  </div>
-                                 <div className="flex items-center gap-2 px-4 py-2 bg-accent/5 border border-accent/10 rounded-xl text-[9px] font-black text-accent uppercase tracking-widest">
-                                     <CheckCircle2 className="w-3 h-3" /> Instancia Protegida
+                                 <div className="flex items-center gap-2 px-3 py-1.5 bg-accent/5 border border-accent/10 rounded-lg text-[8px] font-black text-accent uppercase tracking-widest">
+                                     <CheckCircle2 className="w-3 h-3" /> API Activa
                                  </div>
                             </div>
 
-                            {/* Rules List */}
-                            <div className="flex-1 overflow-y-auto p-10 space-y-10 custom-scrollbar">
-                                {RULES_KEYS.map((rule) => (
-                                    <div key={rule.key} className="space-y-4 group">
-                                        <div className="flex items-center justify-between px-1">
-                                            <div className="flex items-center gap-3">
-                                                 <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-muted group-hover:text-accent transition-colors">
-                                                     {localRules[rule.key] === "" ? <ShieldAlert className="w-4 h-4 text-red-500" /> : <ShieldCheck className="w-4 h-4" />}
-                                                 </div>
-                                                 <div>
-                                                     <p className="text-xs font-black text-white uppercase tracking-wider">{rule.label}</p>
-                                                     <p className="text-[10px] text-muted/50 font-mono tracking-tighter italic">{rule.desc}</p>
-                                                 </div>
-                                            </div>
+                            {/* Rules Grid */}
+                            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar grayscale-[0.2] hover:grayscale-0 transition-all">
+                                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                                    {RULES_KEYS.map((rule) => {
+                                        const status = getRuleStatus(localRules[rule.key])
+                                        const StatusIcon = status.icon
+                                        
+                                        return (
+                                            <div key={rule.key} className={cn(
+                                                "p-5 rounded-[1.5rem] border bg-black/20 transition-all group flex flex-col gap-4",
+                                                localRules[rule.key] === "" ? "border-red-500/10" : "border-white/5 hover:border-accent/10"
+                                            )}>
+                                                <div className="flex items-start justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all group-hover:scale-105", status.bg)}>
+                                                            <StatusIcon className={cn("w-4 h-4", status.color)} />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] font-black text-white uppercase tracking-wider">{rule.label}</p>
+                                                            <div className={cn("text-[8px] font-black uppercase tracking-tighter mt-0.5", status.color)}>
+                                                                {status.label}
+                                                            </div>
+                                                        </div>
+                                                    </div>
 
-                                            {/* Presets */}
-                                            <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/5">
-                                                {PRESETS.map((p) => (
-                                                    <button
-                                                        key={p.name}
-                                                        onClick={() => applyPreset(rule.key, p.value)}
-                                                        className={cn(
-                                                            "px-2.5 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-[0.1em] transition-all hover:bg-white/5",
-                                                            (localRules[rule.key] === p.value || (p.value === 'null' && localRules[rule.key] === null))
-                                                                ? "bg-white/10 text-white shadow-inner" 
-                                                                : "text-muted/40"
-                                                        )}
-                                                        title={p.desc}
-                                                    >
-                                                        {p.name}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
+                                                    <div className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-lg border border-white/5">
+                                                        {PRESETS.slice(0, 3).map((p) => (
+                                                            <button
+                                                                key={p.name}
+                                                                onClick={() => applyPreset(rule.key, p.value)}
+                                                                className={cn(
+                                                                    "px-2 py-1 rounded-md text-[7px] font-black uppercase tracking-wider transition-all",
+                                                                    (localRules[rule.key] === p.value || (p.value === 'null' && localRules[rule.key] === null))
+                                                                        ? "bg-accent text-background" 
+                                                                        : "text-muted/40 hover:text-muted"
+                                                                )}
+                                                                title={p.desc}
+                                                            >
+                                                                {p.name.split(' ')[0]}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
 
-                                        <div className="relative">
-                                            <textarea 
-                                                value={localRules[rule.key] === null ? "null" : localRules[rule.key]}
-                                                onChange={(e) => setLocalRules((prev: any) => ({ ...prev, [rule.key]: e.target.value === 'null' ? null : e.target.value }))}
-                                                rows={1}
-                                                className={cn(
-                                                    "w-full bg-black/60 border rounded-2xl px-5 py-4 text-[11px] font-mono outline-none transition-all resize-none shadow-inner",
-                                                    localRules[rule.key] === "" 
-                                                        ? "border-red-500/20 text-red-400/80 focus:border-red-500/50" 
-                                                        : "border-white/5 text-accent focus:border-accent/30"
-                                                )}
-                                                placeholder="Enter filter expression (e.g. @request.auth.id != '')"
-                                            />
-                                            <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-20 pointer-events-none group-focus-within:opacity-10 transition-opacity">
-                                                <GripVertical className="w-4 h-4" />
+                                                <textarea 
+                                                    value={localRules[rule.key] === null ? "null" : localRules[rule.key]}
+                                                    onChange={(e) => setLocalRules((prev: any) => ({ ...prev, [rule.key]: e.target.value === 'null' ? null : e.target.value }))}
+                                                    rows={1}
+                                                    className={cn(
+                                                        "w-full bg-black/40 border rounded-xl px-4 py-3 text-[10px] font-mono outline-none transition-all resize-none shadow-inner",
+                                                        localRules[rule.key] === "" 
+                                                            ? "border-red-500/20 text-red-400 focus:border-red-500/40" 
+                                                            : "border-white/5 text-accent/80 focus:border-accent/30"
+                                                    )}
+                                                    placeholder="Expresión de filtro..."
+                                                />
                                             </div>
-                                        </div>
+                                        )
+                                    })}
+                                    
+                                    {/* Info Card to fill grid */}
+                                    <div className="p-5 rounded-[1.5rem] border border-blue-500/10 bg-blue-500/[0.02] flex items-center gap-4">
+                                         <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
+                                            <Info className="w-5 h-5 text-blue-400" />
+                                         </div>
+                                         <div>
+                                             <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Tip de Seguridad</p>
+                                             <p className="text-[9px] text-blue-200/40 leading-tight mt-1 font-medium">
+                                                 Usar <code className="text-accent">@request.auth.id</code> asegura que solo el propietario acceda.
+                                             </p>
+                                         </div>
                                     </div>
-                                ))}
+                                </div>
                             </div>
                         </div>
                     ) : (
                         <div className="h-full flex flex-col items-center justify-center p-20 opacity-20 text-center">
-                            <Lock className="w-16 h-16 mb-4" />
-                            <p className="font-black uppercase tracking-widest text-xs">Select a collection to configure rules</p>
+                            <Lock className="w-12 h-12 mb-4" />
+                            <p className="font-black uppercase tracking-widest text-[10px]">Selecciona una colección</p>
                         </div>
                     )}
                 </div>

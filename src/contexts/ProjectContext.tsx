@@ -18,7 +18,7 @@ interface ProjectContextType {
     deleteRecord: (collectionName: string, id: string) => Promise<void>
     getCollectionSchema: (collectionName: string) => Collection | undefined
     createCollection: (data: any) => Promise<any>
-    updateCollection: (collectionId: string, data: { name?: string, fields?: any[] }) => Promise<any>
+    updateCollection: (collectionId: string, data: any) => Promise<any>
     deleteCollection: (collectionId: string) => Promise<void>
     getRecord: (collectionName: string, id: string, options?: any) => Promise<any>
     getFirstRecord: (collectionName: string, filter: string, options?: any) => Promise<any>
@@ -29,6 +29,7 @@ interface ProjectContextType {
     getAuthMethods: () => Promise<any>
     getSettings: () => Promise<any>
     updateSettings: (settings: any) => Promise<any>
+    testSmtp: (email: string) => Promise<any>
     project?: any // Metadatos del proyecto (subdomain, keys, etc.)
 }
 
@@ -148,6 +149,14 @@ export function ProjectProvider({
             setLoading(false)
         }
     }, [childPb, mutateSettings])
+    const testSmtp = useCallback(async (email: string) => {
+        setLoading(true)
+        try {
+            return await ProjectService.testSmtp(childPb, email)
+        } finally {
+            setLoading(false)
+        }
+    }, [childPb])
 
     const createCollection = useCallback(async (data: any) => {
         setLoading(true)
@@ -165,7 +174,7 @@ export function ProjectProvider({
 
     const updateCollection = useCallback(async (
         collectionId: string,
-        data: { name?: string, fields?: any[] }
+        data: any
     ) => {
         setLoading(true)
         try {
@@ -256,6 +265,7 @@ export function ProjectProvider({
             getAuthMethods,
             getSettings,
             updateSettings,
+            testSmtp,
             project
         }}>
             {children}

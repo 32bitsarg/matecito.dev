@@ -42,12 +42,12 @@ export const ProjectService = {
         return result as unknown as Collection;
     },
 
-    async updateCollection(pb: PocketBase, collectionId: string, data: { name?: string, fields?: CollectionField[] }): Promise<Collection> {
+    async updateCollection(pb: PocketBase, collectionId: string, data: any): Promise<Collection> {
         const current = await pb.collections.getOne(collectionId);
         if (!current) throw new Error('Colección no encontrada');
 
-        const updateData: any = {};
-        if (data.name) updateData.name = data.name;
+        const updateData: any = { ...data };
+        
         if (data.fields) {
             const systemFields = (current.fields as any[]).filter(f =>
                 f.system || ['created', 'updated'].includes(f.name)
@@ -134,6 +134,13 @@ export const ProjectService = {
 
     async getSettings(pb: PocketBase): Promise<any> {
         return await pb.settings.getAll();
+    },
+
+    async testSmtp(pb: PocketBase, email: string): Promise<void> {
+        await pb.send("/api/settings/test/email", {
+            method: "POST",
+            body: { email }
+        });
     }
 };
 

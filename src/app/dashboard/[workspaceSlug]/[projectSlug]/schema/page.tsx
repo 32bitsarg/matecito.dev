@@ -49,7 +49,7 @@ export default function SchemaEditorPage() {
                         <Activity className="w-3 h-3" />
                         Arquitectura del Proyecto
                     </div>
-                    <h1 className="text-3xl font-extrabold text-white tracking-tight">Database Schema</h1>
+                    <h1 className="text-3xl font-extrabold text-white tracking-tight">Esquema de Datos</h1>
                     <p className="text-sm text-muted">Diseña y gestiona el motor de datos de tu aplicación.</p>
                 </div>
                 
@@ -130,7 +130,7 @@ export default function SchemaEditorPage() {
                                     <p className="text-sm font-bold text-white">{collection.fields.length}</p>
                                 </div>
                                 <div className="text-center opacity-40">
-                                    <p className="text-[10px] text-muted uppercase font-bold tracking-widest mb-0.5">Records</p>
+                                    <p className="text-[10px] text-muted uppercase font-bold tracking-widest mb-0.5">Registros</p>
                                     <p className="text-sm font-bold text-white">—</p>
                                 </div>
                             </div>

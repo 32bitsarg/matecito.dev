@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
+import { ConditionalFooter } from "@/components/layout/ConditionalFooter";
 import Script from "next/script";
 import { Toaster } from "sonner";
 
@@ -75,7 +75,7 @@ export default function RootLayout({
       >
         <Navbar />
         <main className="flex-1">{children}</main>
-        <Footer />
+        <ConditionalFooter />
         <Toaster position="top-right" richColors theme="light" />
       </body>
     </html>
