@@ -38,20 +38,20 @@ export function middleware(request: NextRequest) {
 
     // 1. Content Security Policy (CSP)
     // Solo permitimos scripts de nuestro dominio, simpleicons (para la marquee) y google fonts si las hubiera.
-    const cspHeader = `
-        default-src 'self';
-        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com;
-        connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://stats.g.doubleclick.net;
-        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-        img-src 'self' blob: data: https://cdn.simpleicons.org https://vsqvbtpivmshqfppwsws.supabase.co https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://*.googletagmanager.com https://www.google.com https://*.google.com https://www.google.com.ar https://*.google.com.ar;
-        font-src 'self' data: https://fonts.gstatic.com;
-        object-src 'none';
-        base-uri 'self';
-        form-action 'self';
-        frame-ancestors 'none';
-        block-all-mixed-content;
-        upgrade-insecure-requests;
-    `.replace(/\s{2,}/g, ' ').trim();
+    const cspHeader = [
+        "default-src 'self';",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://*.matecito.dev;",
+        "connect-src 'self' https://*.matecito.dev wss://*.matecito.dev https://console.matecito.dev https://vsqvbtpivmshqfppwsws.supabase.co https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://stats.g.doubleclick.net http://localhost:*;",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;",
+        "img-src 'self' blob: data: https://*.matecito.dev https://console.matecito.dev https://cdn.simpleicons.org https://vsqvbtpivmshqfppwsws.supabase.co https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://*.googletagmanager.com https://www.google.com https://*.google.com https://www.google.com.ar https://*.google.com.ar;",
+        "font-src 'self' data: https://fonts.gstatic.com;",
+        "object-src 'none';",
+        "base-uri 'self';",
+        "form-action 'self';",
+        "frame-ancestors 'none';",
+        "block-all-mixed-content;",
+        "upgrade-insecure-requests;"
+    ].join(' ');
 
     response.headers.set('Content-Security-Policy', cspHeader);
 

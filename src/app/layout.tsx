@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import Script from "next/script";
+import { Toaster } from "sonner";
 
 const clashDisplay = localFont({
   src: [
@@ -26,11 +27,12 @@ const commitMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Matecito.Dev | Branding, Landing Pages & Ingeniería Software",
-  description: "Estudio de ingeniería de software especializado en Branding premium, Landing Pages de alta conversión y SEO técnico. Escalamos tu negocio con soluciones tecnológicas de alto rendimiento.",
+  title: "Matecito.Dev | Landing Pages en Argentina, Pergamino & Buenos Aires",
+  description: "Creamos Landing Pages de alta conversión en toda Argentina. Ingeniería de software con sede en Pergamino y Buenos Aires. Expertos en SEO local y bases de datos de baja latencia.",
+  keywords: ["Diseño web Pergamino", "Desarrollo web Pergamino", "SEO Pergamino", "Landing Pages Buenos Aires", "Bases de datos Sudamérica", "Ingeniería de Software Argentina"],
   openGraph: {
-    title: "Matecito.Dev | Branding, Landing Pages & Ingeniería Software",
-    description: "Estudio de ingeniería de software especializado en Branding premium, Landing Pages de alta conversión y SEO técnico.",
+    title: "Matecito.Dev | Landing Pages en Argentina, Pergamino & Buenos Aires",
+    description: "Creamos Landing Pages de alta conversión en toda Argentina. Ingeniería de software con sede en Pergamino y Buenos Aires.",
     url: "https://matecito.dev",
     siteName: "Matecito.Dev",
     locale: "es_AR",
@@ -38,8 +40,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Matecito.Dev | Branding, Landing Pages & Ingeniería Software",
-    description: "Diseño, desarrollo y performance extrema para tu negocio.",
+    title: "Matecito.Dev | Landing Pages en Argentina, Pergamino & Buenos Aires",
+    description: "Creamos Landing Pages de alta conversión en toda Argentina con infraestructura local en Sudamérica.",
   },
 };
 
@@ -49,7 +51,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className="dark">
+    <html lang="es">
       <head>
         {/* Google Analytics (gtag.js) */}
         <Script
@@ -69,11 +71,12 @@ export default function RootLayout({
         {/* End Google Analytics */}
       </head>
       <body
-        className={`${clashDisplay.variable} ${commitMono.variable} flex min-h-screen flex-col font-sans antialiased bg-black text-white`}
+        className={`${clashDisplay.variable} ${commitMono.variable} flex min-h-screen flex-col font-sans antialiased`}
       >
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />
+        <Toaster position="top-right" richColors theme="light" />
       </body>
     </html>
   );

@@ -1,15 +1,32 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { ChevronDown } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import pb from "@/lib/pocketbase";
+import { LogOut } from "lucide-react";
 
 export function Navbar() {
+    const pathname = usePathname();
+    const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [user, setUser] = useState<any>(null);
+    const isDashboard = pathname.startsWith('/dashboard');
 
-    // Bloqueo de scroll agresivo
+    // Manejo de hidratación y sincro de usuario
+    useEffect(() => {
+        const syncUser = () => {
+            setUser(pb.authStore.record);
+        };
+
+        syncUser();
+        const unsubscribe = pb.authStore.onChange(syncUser);
+        
+        return () => unsubscribe();
+    }, [pathname]);
+
+    // Bloqueo de scroll agresivo para el menú móvil
     useEffect(() => {
         if (isMenuOpen) {
             document.body.style.overflow = "hidden";
@@ -18,165 +35,153 @@ export function Navbar() {
         }
     }, [isMenuOpen]);
 
+    const handleLogout = () => {
+        pb.authStore.clear();
+        setUser(null);
+        // Hard redirect for session cleaning
+        window.location.href = '/login';
+    };
+
     const navLinks = [
-        {
-            label: "Servicios",
-            subLinks: [
-                { href: "/landings", label: "Landings" },
-                { href: "/seo", label: "SEO & Performance" },
-                { href: "/marketing", label: "Marketing" },
-            ]
-        },
-        { href: "/consultoria", label: "Consultoría" },
+        { href: "/#servicios", label: "Servicios" },
         { href: "/estudio", label: "Estudio" },
         { href: "/insights", label: "Insights" },
     ];
 
     return (
         <>
-            {/* HEADER - Prioridad Máxima (z-[1001]) */}
-            <header className={`sticky top-0 w-full border-b border-white/10 transition-all duration-300 z-[1001] ${isMenuOpen ? 'bg-transparent border-transparent' : 'bg-black/90 backdrop-blur-md'}`}>
-                <div className="container mx-auto flex h-16 sm:h-24 max-w-7xl items-center justify-between px-6 md:px-12 relative">
+            {/* HEADER - Minimalist Context-Aware */}
+            <header className={`sticky top-0 w-full transition-all duration-300 z-[1001] border-b border-border/50 ${isMenuOpen ? 'bg-transparent border-transparent' : 'bg-background/80 backdrop-blur-xl'}`}>
+                <div className="container mx-auto flex h-9 sm:h-11 max-w-7xl items-center justify-between px-6 md:px-12 relative">
+                    
+                    {/* LEFT SECTION: BRANDING & PRIMARY NAV */}
+                    <div className="flex items-center gap-8 group shrink-0 relative z-[1002]">
+                        <Link href="/" className="flex items-center gap-1 group">
+                            <span className="font-bold tracking-tighter text-lg sm:text-xl text-white">matecito<span className="text-accent underline decoration-accent/30">.dev</span></span>
+                        </Link>
 
-                    {/* LOGO */}
-                    <Link href="/" className="flex items-center gap-2 group shrink-0 relative z-[1002]">
-                        <Image
-                            src="/logos/onlytext.png"
-                            alt="Matecito.Dev Logo"
-                            width={300}
-                            height={80}
-                            className="h-3 sm:h-4 w-auto object-contain brightness-0 invert"
-                        />
-                    </Link>
-
-                    {/* DESKTOP NAV */}
-                    <nav className="hidden md:flex items-center gap-10 font-mono text-sm tracking-wide">
-                        {navLinks.map((link) => (
-                            <div key={link.label} className="relative group/item py-4">
-                                {link.subLinks ? (
-                                    <>
-                                        <button className="flex items-center gap-1.5 text-zinc-400 transition-colors hover:text-white uppercase cursor-default">
+                        {/* NAV LINKS (Left aligned next to logo) */}
+                        <nav className="hidden md:flex items-center gap-8 font-mono text-[10px] uppercase tracking-[0.2em] font-bold border-l border-[var(--foreground)]/10 pl-8 ml-2">
+                            {isDashboard ? (
+                                <>
+                                    <Link href="/" className="text-[var(--foreground)]/60 transition-colors hover:text-[var(--accent)]">Inicio</Link>
+                                    <Link href="/#servicios" className="text-[var(--foreground)]/60 transition-colors hover:text-[var(--accent)]">Servicios</Link>
+                                    <Link href="/insights" className="text-[var(--foreground)]/60 transition-colors hover:text-[var(--accent)]">Insights</Link>
+                                </>
+                            ) : (
+                                navLinks.map((link) => (
+                                    <div key={link.label} className="relative group/item py-2">
+                                        <Link href={link.href || "#"} className="text-[var(--foreground)]/60 transition-colors hover:text-[var(--accent)] relative">
                                             {link.label}
-                                            <ChevronDown className="w-4 h-4 transition-transform group-hover/item:rotate-180" />
-                                        </button>
+                                        </Link>
+                                    </div>
+                                ))
+                            )}
+                        </nav>
+                    </div>
 
-                                        {/* Dropdown Menu */}
-                                        <div className="absolute top-full left-0 w-64 pt-2 opacity-0 invisible group-hover/item:opacity-100 group-hover/item:visible transition-all duration-300 transform translate-y-2 group-hover/item:translate-y-0">
-                                            <div className="bg-zinc-900 border border-white/10 p-4 shadow-2xl backdrop-blur-xl">
-                                                <div className="flex flex-col gap-2">
-                                                    {link.subLinks.map((sub) => (
-                                                        <Link
-                                                            key={sub.href}
-                                                            href={sub.href}
-                                                            className="text-zinc-500 hover:text-white px-3 py-2 transition-all hover:bg-white/5 border-l-2 border-transparent hover:border-white text-xs uppercase tracking-widest"
-                                                        >
-                                                            {sub.label}
-                                                        </Link>
-                                                    ))}
-                                                </div>
-                                            </div>
+                    <div className="flex-1" />
+
+                    {/* RIGHT SECTION: ACTIONS */}
+                    <div className="flex items-center gap-6 relative z-[1002]">
+                        {user ? (
+                            <div className="flex items-center gap-4">
+                                {isDashboard ? (
+                                    <>
+                                        <div className="hidden lg:flex flex-col items-end min-w-0 pr-4 border-r border-[var(--foreground)]/5">
+                                            <span className="text-[10px] font-bold text-[var(--accent)] truncate">{user.name || 'Usuario'}</span>
+                                            <span className="text-[8px] font-mono opacity-40 truncate lowercase tracking-tighter">{user.email}</span>
                                         </div>
+                                        <button
+                                            onClick={handleLogout}
+                                            className="flex items-center gap-2 text-[var(--foreground)]/60 hover:text-red-500 transition-colors font-mono text-[9px] uppercase tracking-widest pl-2"
+                                        >
+                                            Cerrar Sesión
+                                            <LogOut className="w-3.5 h-3.5" />
+                                        </button>
                                     </>
                                 ) : (
                                     <Link
-                                        href={link.href || "#"}
-                                        className="text-zinc-400 transition-colors hover:text-white relative after:absolute after:-bottom-1 after:left-0 after:h-[1px] after:w-0 after:bg-white after:transition-all hover:after:w-full uppercase"
+                                        href="/dashboard"
+                                        className="text-[var(--foreground)]/60 hover:text-[var(--accent)] transition-colors font-mono uppercase text-[9px] tracking-[0.15em] border border-[var(--accent)]/10 px-4 py-1.5 rounded-full hover:bg-[var(--accent)]/5"
                                     >
-                                        {link.label}
+                                        Ir a Consola
                                     </Link>
                                 )}
                             </div>
-                        ))}
-                    </nav>
-
-                    {/* MOBILE BUTTONS */}
-                    <div className="flex items-center gap-4 relative z-[1002]">
+                        ) : (
+                            <Link
+                                href="/login"
+                                className="hidden sm:block text-[var(--foreground)]/60 hover:text-[var(--accent)] transition-colors font-mono uppercase text-[9px] tracking-[0.15em] border border-[var(--accent)]/10 px-4 py-1.5 rounded-full hover:bg-[var(--accent)]/5"
+                            >
+                                Login
+                            </Link>
+                        )}
+                        
                         <a
                             href="https://wa.me/541124025239"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="hidden sm:block"
                         >
-                            <Button variant="default" className="rounded-none font-mono uppercase tracking-widest text-xs px-8 h-12 bg-white text-black">
+                            <Button variant="outline" className="rounded-full font-mono uppercase tracking-[0.2em] text-[8px] px-4 h-8 border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--background)]">
                                 Contacto
                             </Button>
                         </a>
 
-                        {/* HAMBURGER - Siempre por encima */}
+                        {/* HAMBURGER (Mobile) */}
                         <button
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
-                            className="flex flex-col gap-1.5 md:hidden p-4 -mr-4 group focus:outline-none"
+                            className="flex flex-col gap-1 md:hidden p-2 group focus:outline-none"
                             aria-label="Toggle Menu"
                         >
-                            <span className={`h-0.5 w-8 bg-white transition-all duration-300 ${isMenuOpen ? "rotate-45 translate-y-2" : ""}`}></span>
-                            <span className={`h-0.5 w-8 bg-white transition-all duration-300 ${isMenuOpen ? "opacity-0" : ""}`}></span>
-                            <span className={`h-0.5 w-8 bg-white transition-all duration-300 ${isMenuOpen ? "-rotate-45 -translate-y-2" : ""}`}></span>
+                            <span className={`h-[1px] w-6 bg-[var(--accent)] transition-all duration-300 ${isMenuOpen ? "rotate-45 translate-y-1" : ""}`}></span>
+                            <span className={`h-[1px] w-6 bg-[var(--accent)] transition-all duration-300 ${isMenuOpen ? "opacity-0" : ""}`}></span>
+                            <span className={`h-[1px] w-6 bg-[var(--accent)] transition-all duration-300 ${isMenuOpen ? "-rotate-45 -translate-y-1" : ""}`}></span>
                         </button>
                     </div>
                 </div>
             </header>
 
-            {/* MENÚ MÓVIL - Capa Media (z-[1000]) */}
+            {/* MOBILE MENU */}
             <div
-                className={`fixed inset-0 menu-solid-black transition-transform duration-500 ease-[cubic-bezier(0.85,0,0.15,1)] md:hidden ${isMenuOpen ? "translate-x-0" : "translate-x-full"}`}
+                className={`fixed inset-0 bg-[var(--background)] transition-transform duration-500 ease-[cubic-bezier(0.85,0,0.15,1)] md:hidden ${isMenuOpen ? "translate-x-0" : "translate-x-full"}`}
                 style={{ zIndex: 1000 }}
             >
-                <div className="relative flex flex-col h-full pt-32 pb-12 px-10">
-                    <nav className="flex flex-col gap-6">
+                <div className="relative flex flex-col h-full pt-20 pb-12 px-10">
+                    <nav className="flex flex-col gap-8">
                         {navLinks.map((link, idx) => (
                             <div key={link.label} className="flex flex-col gap-4">
-                                {link.subLinks ? (
-                                    <>
-                                        <div className="flex items-end gap-3 border-b border-white/5 pb-2">
-                                            <span className="font-mono text-[10px] text-zinc-600 mb-1 font-bold">0{idx + 1}</span>
-                                            <span className="text-3xl font-bold text-white uppercase tracking-tighter">
-                                                {link.label}
-                                            </span>
-                                        </div>
-                                        <div className="flex flex-col gap-4 pl-6 border-l border-white/10 ml-2">
-                                            {link.subLinks.map((sub) => (
-                                                <Link
-                                                    key={sub.href}
-                                                    href={sub.href}
-                                                    onClick={() => setIsMenuOpen(false)}
-                                                    className="text-xl font-medium text-zinc-400 hover:text-white uppercase tracking-tighter transition-colors"
-                                                >
-                                                    {sub.label}
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    </>
-                                ) : (
-                                    <Link
-                                        href={link.href || "#"}
-                                        onClick={() => setIsMenuOpen(false)}
-                                        className="group flex items-end gap-3 border-b border-white/5 pb-6"
-                                    >
-                                        <span className="font-mono text-[10px] text-zinc-600 mb-1 font-bold">0{idx + 1}</span>
-                                        <span className="text-3xl font-bold text-white uppercase tracking-tighter">
-                                            {link.label}
-                                        </span>
-                                    </Link>
-                                )}
+                                <Link
+                                    href={link.href || "#"}
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className="group flex items-end gap-2 border-b border-[var(--accent)]/10 pb-4"
+                                >
+                                    <span className="font-mono text-[8px] text-[var(--foreground)] mb-1 font-bold">0{idx + 1}</span>
+                                    <span className="text-2xl font-bold text-[var(--accent)] uppercase tracking-tight">
+                                        {link.label}
+                                    </span>
+                                </Link>
                             </div>
                         ))}
                     </nav>
 
-                    <div className="mt-auto flex flex-col gap-8">
-                        <div className="flex flex-col gap-2">
-                            <span className="font-mono text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Disponibilidad</span>
-                            <div className="flex items-center gap-3">
-                                <span className="h-2 w-2 rounded-full bg-white animate-pulse"></span>
-                                <span className="text-xs text-white uppercase tracking-tight">Abierto a proyectos</span>
-                            </div>
-                        </div>
-
+                    <div className="mt-auto flex flex-col gap-6">
+                        <Link
+                            href="/dashboard"
+                            onClick={() => setIsMenuOpen(false)}
+                            className="bg-[var(--foreground)]/5 border border-[var(--accent)]/10 p-5 group flex justify-between items-center"
+                        >
+                            <span className="text-sm font-bold text-[var(--accent)] uppercase tracking-widest">Dashboard</span>
+                            <span className="text-[var(--accent)] transition-transform group-hover:translate-x-1">→</span>
+                        </Link>
+                        
                         <a
                             href="https://wa.me/541124025239"
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={() => setIsMenuOpen(false)}
-                            className="bg-white text-black py-5 text-center font-mono text-sm uppercase tracking-widest font-black"
+                            className="bg-[var(--accent)] text-[var(--background)] py-4 text-center font-mono text-[10px] uppercase tracking-[0.2em] font-black rounded-full"
                         >
                             WhatsApp Directo ↗
                         </a>

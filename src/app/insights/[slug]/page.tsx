@@ -74,62 +74,70 @@ export default async function PostPage({ params }: Props) {
     );
 
     return (
-        <div className="min-h-screen bg-black text-white relative selection:bg-zinc-800">
+        <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] relative selection:bg-[var(--accent)] selection:text-[var(--background)]">
             {/* Subtle Gradient Background */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,#ffffff03_0%,transparent_50%)] pointer-events-none"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,var(--accent)_0.05%,transparent_50%)] opacity-[0.03] pointer-events-none"></div>
 
             <article className="relative z-10 container mx-auto px-6 py-24 sm:py-32 max-w-3xl">
                 {/* Navegación Superior */}
                 <nav className="mb-16">
-                    {backButton}
+                    <Link
+                        href="/insights"
+                        className="inline-flex items-center gap-3 text-[var(--accent)] opacity-40 hover:opacity-100 transition-all font-mono text-[10px] uppercase tracking-[0.3em] group font-bold"
+                    >
+                        <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-2" />
+                        Volver a Insights
+                    </Link>
                 </nav>
 
-                <header className="flex flex-col gap-6 mb-20 border-l border-white/10 pl-8">
-                    <div className="flex items-center gap-4 text-zinc-600 font-mono text-[10px] uppercase tracking-widest">
+                <header className="flex flex-col gap-8 mb-24 border-l border-[var(--accent)]/10 pl-12 relative overflow-hidden">
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--accent)] opacity-20"></div>
+                    <div className="flex items-center gap-6 text-[var(--accent)] font-mono text-[10px] uppercase tracking-[0.4em] font-bold opacity-40">
                         <span>{post.category}</span>
-                        <span className="w-4 h-px bg-zinc-800"></span>
+                        <span className="w-6 h-px bg-[var(--accent)] opacity-20"></span>
                         <span>{new Date(post.published_at).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                     </div>
 
-                    <h1 className="text-4xl sm:text-6xl font-semibold tracking-tighter leading-tight text-white text-balance">
+                    <h1 className="text-5xl sm:text-7xl font-bold tracking-tighter leading-none text-[var(--accent)] text-balance uppercase">
                         {post.title}
                     </h1>
 
-                    <p className="text-xl text-zinc-500 font-light leading-relaxed">
+                    <p className="text-xl text-[var(--foreground)] opacity-60 font-medium leading-relaxed max-w-2xl">
                         {post.excerpt}
                     </p>
                 </header>
 
-                <div className="prose prose-invert prose-zinc max-w-none">
+                <div className="prose prose-zinc max-w-none">
                     <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
                         components={{
-                            h2: ({ node, ...props }) => <h2 className="text-3xl font-semibold mt-16 mb-6 text-white tracking-tight" {...props} />,
-                            h3: ({ node, ...props }) => <h3 className="text-2xl font-semibold mt-10 mb-4 text-white tracking-tight" {...props} />,
-                            p: ({ node, ...props }) => <p className="text-zinc-400 text-lg leading-relaxed mb-6 font-light" {...props} />,
-                            li: ({ node, ...props }) => <li className="text-zinc-400 text-lg mb-2 ml-4 list-disc font-light" {...props} />,
-                            code: ({ node, ...props }) => <code className="bg-zinc-900 text-zinc-300 px-1.5 py-0.5 rounded-sm font-mono text-sm border border-white/5" {...props} />,
-                            pre: ({ node, ...props }) => <pre className="bg-zinc-950 p-6 rounded-sm border border-white/5 overflow-x-auto my-8 font-mono text-sm" {...props} />,
-                            a: ({ node, ...props }) => <a className="text-white underline underline-offset-4 decoration-white/20 hover:decoration-white transition-all duration-300" target="_blank" rel="noopener noreferrer" {...props} />,
+                            h2: ({ node, ...props }) => <h2 className="text-4xl font-bold mt-24 mb-10 text-[var(--accent)] tracking-tighter uppercase leading-none" {...props} />,
+                            h3: ({ node, ...props }) => <h3 className="text-2xl font-bold mt-16 mb-6 text-[var(--accent)] tracking-tight uppercase" {...props} />,
+                            p: ({ node, ...props }) => <p className="text-[var(--foreground)] opacity-60 text-lg leading-relaxed mb-8 font-medium" {...props} />,
+                            li: ({ node, ...props }) => <li className="text-[var(--foreground)] opacity-60 text-lg mb-4 ml-6 list-disc font-medium marker:text-[var(--accent)]" {...props} />,
+                            code: ({ node, ...props }) => <code className="bg-[var(--accent)]/[0.05] text-[var(--accent)] px-2 py-0.5 rounded-md font-mono text-sm border border-[var(--accent)]/5 font-bold" {...props} />,
+                            pre: ({ node, ...props }) => <pre className="bg-[var(--accent)]/[0.02] p-10 rounded-[2rem] border border-[var(--accent)]/5 overflow-x-auto my-12 font-mono text-sm shadow-sm" {...props} />,
+                            a: ({ node, ...props }) => <a className="text-[var(--accent)] font-bold underline underline-offset-8 decoration-[var(--accent)]/20 hover:decoration-[var(--accent)] transition-all duration-300" target="_blank" rel="noopener noreferrer" {...props} />,
+                            blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-[var(--accent)] pl-10 py-4 my-12 italic text-2xl font-serif text-[var(--accent)] opacity-80" {...props} />,
                         }}
                     >
                         {post.content}
                     </ReactMarkdown>
                 </div>
 
-                <footer className="mt-32">
+                <footer className="mt-40">
                     {/* Related Posts Section */}
                     {relatedPosts && relatedPosts.length > 0 && (
-                        <div className="border-t border-white/10 pt-16 mb-24">
-                            <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-zinc-600 block mb-12">Siguiente Lectura</span>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-12">
+                        <div className="border-t border-[var(--accent)]/10 pt-24 mb-32">
+                            <span className="font-mono text-[10px] uppercase tracking-[0.5em] text-[var(--accent)] opacity-40 block mb-16 font-bold">Siguiente Lectura</span>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-16">
                                 {relatedPosts.map((rPost) => (
-                                    <Link key={rPost.id} href={`/insights/${rPost.slug}`} className="group flex flex-col gap-4">
-                                        <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-widest">{rPost.category}</span>
-                                        <h4 className="text-xl font-medium tracking-tight group-hover:text-zinc-400 transition-colors leading-tight">
+                                    <Link key={rPost.id} href={`/insights/${rPost.slug}`} className="group flex flex-col gap-8 p-10 rounded-[2rem] border border-[var(--accent)]/5 bg-[var(--accent)]/[0.02] hover:bg-[var(--accent)]/[0.05] transition-all">
+                                        <span className="text-[9px] font-mono text-[var(--accent)] opacity-40 uppercase tracking-[0.3em] font-bold">{rPost.category}</span>
+                                        <h4 className="text-2xl font-bold tracking-tighter text-[var(--accent)] group-hover:translate-x-2 transition-transform leading-tight uppercase">
                                             {rPost.title}
                                         </h4>
-                                        <p className="text-zinc-500 text-sm font-light line-clamp-2 leading-relaxed">
+                                        <p className="text-[var(--foreground)] opacity-40 text-sm font-medium line-clamp-2 leading-relaxed">
                                             {rPost.excerpt}
                                         </p>
                                     </Link>
@@ -139,17 +147,23 @@ export default async function PostPage({ params }: Props) {
                     )}
 
                     {/* Navegación Inferior */}
-                    <nav className="pt-12 border-t border-white/10 mb-16">
-                        {backButton}
+                    <nav className="pt-16 border-t border-[var(--accent)]/10 mb-24">
+                        <Link
+                            href="/insights"
+                            className="inline-flex items-center gap-3 text-[var(--accent)] opacity-40 hover:opacity-100 transition-all font-mono text-[10px] uppercase tracking-[0.3em] group font-bold"
+                        >
+                            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-2" />
+                            Volver a Insights
+                        </Link>
                     </nav>
 
-                    <div className="flex flex-col gap-4 opacity-50">
-                        <span className="font-mono text-[9px] text-zinc-600 uppercase tracking-[0.4em]">Publicado por</span>
-                        <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-none bg-zinc-900 border border-white/10 flex items-center justify-center font-bold text-lg text-white">M</div>
-                            <div className="flex flex-col">
-                                <span className="font-medium text-sm">Equipo Matecito</span>
-                                <span className="text-[10px] text-zinc-600 font-mono uppercase tracking-tight">Departamento de Ingeniería</span>
+                    <div className="flex flex-col gap-6 p-10 rounded-[2rem] bg-[var(--accent)]/[0.02] border border-[var(--accent)]/5">
+                        <span className="font-mono text-[9px] text-[var(--accent)] opacity-40 uppercase tracking-[0.4em] font-bold">Publicado por</span>
+                        <div className="flex items-center gap-6">
+                            <div className="w-16 h-16 rounded-full bg-[var(--accent)] text-[var(--background)] flex items-center justify-center font-bold text-2xl shadow-xl shadow-[var(--accent)]/20">M</div>
+                            <div className="flex flex-col gap-1">
+                                <span className="font-bold text-lg text-[var(--accent)] uppercase tracking-tighter">Equipo Matecito</span>
+                                <span className="text-[10px] text-[var(--foreground)] opacity-40 font-mono uppercase tracking-widest font-bold">Laboratorio de Ingeniería</span>
                             </div>
                         </div>
                     </div>
