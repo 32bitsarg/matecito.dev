@@ -123,6 +123,12 @@ export default function Sidebar() {
                                     icon={LayoutDashboard}
                                     label="Overview"
                                 />
+                                <SidebarLink 
+                                    href={`/dashboard/${workspaceSlug}/${projectSlug}/connect`} 
+                                    active={pathname === `/dashboard/${workspaceSlug}/${projectSlug}/connect`}
+                                    icon={Zap}
+                                    label="Connect"
+                                />
                             </div>
 
                             {/* CATEGORY: DATA MANAGEMENT */}

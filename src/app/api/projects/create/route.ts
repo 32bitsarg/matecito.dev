@@ -13,7 +13,7 @@ export async function POST(req: Request) {
         pb.authStore.save(token, null)
 
         // 1. Crear en PocketBase con status "creating"
-        const project = await pb.collection('projects').create({
+        let project = await pb.collection('projects').create({
             name,
             workspace: workspaceId,
             subdomain,
@@ -49,6 +49,17 @@ export async function POST(req: Request) {
                 await pb.collection('projects').delete(project.id)
                 return NextResponse.json({ error: deployData.error }, { status: 500 })
             }
+
+            // 3. Si el deploy fue exitoso, actualizar el proyecto con sus datos finales
+            project = await pb.collection('projects').update(project.id, {
+                port: deployData.port,
+                status: 'active',
+                admin_email: deployData.adminEmail,
+                admin_pass: deployData.adminPass,
+                admin_token: deployData.adminToken,
+                anon_key: deployData.anonKey,        
+                service_key: deployData.serviceKey   
+            })
 
         } catch (fetchErr: any) {
             clearTimeout(timeout)

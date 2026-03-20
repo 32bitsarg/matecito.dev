@@ -29,6 +29,7 @@ interface ProjectContextType {
     getAuthMethods: () => Promise<any>
     getSettings: () => Promise<any>
     updateSettings: (settings: any) => Promise<any>
+    project?: any // Metadatos del proyecto (subdomain, keys, etc.)
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined)
@@ -38,29 +39,19 @@ export function ProjectProvider({
     subdomain,
     adminToken,
     adminEmail,
-    adminPass
+    adminPass,
+    project
 }: {
     children: ReactNode,
     subdomain: string,
     adminToken: string,
     adminEmail?: string,
-    adminPass?: string
+    adminPass?: string,
+    project?: any
 }) {
     const childPb = useMemo(() => {
         const url = `https://${subdomain}.matecito.dev`
         
-        // 🕵️‍♂️ Scouting Log
-        console.log('=== ProjectProvider init ===')
-        console.log('subdomain:', subdomain)
-        try {
-            const payload = adminToken?.split('.')[1] 
-                ? JSON.parse(atob(adminToken.split('.')[1])) 
-                : null
-            console.log('adminToken ID (Decoded):', payload?.id || 'sin id')
-        } catch (e) {
-            console.log('Error decoding token:', e)
-        }
-
         const pb = new PocketBase(url, new BaseAuthStore())
         pb.authStore.save(adminToken, null)
         pb.autoCancellation(false) 
@@ -110,7 +101,7 @@ export function ProjectProvider({
             setRecords(result.items)
             return result
         } catch (err: any) {
-            console.error(`Error fetching records for ${collectionName}:`, err)
+            // console.error(`Error fetching records for ${collectionName}:`, err)
             setError(err.message)
             return null
         } finally {
@@ -264,7 +255,8 @@ export function ProjectProvider({
             subscribe,
             getAuthMethods,
             getSettings,
-            updateSettings
+            updateSettings,
+            project
         }}>
             {children}
         </ProjectContext.Provider>

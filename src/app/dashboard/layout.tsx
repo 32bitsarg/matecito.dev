@@ -19,8 +19,6 @@ export default function DashboardLayout({
             const isValid = pb.authStore.isValid
             const hasRecord = !!pb.authStore.record
             
-            console.log("[Layout Debug] Checking Auth. Valid:", isValid, "Has Record:", hasRecord);
-
             if (!isValid || !hasRecord) {
                 console.warn("[Layout Debug] Unauthorized or Inconsistent Session. Redirecting...");
                 

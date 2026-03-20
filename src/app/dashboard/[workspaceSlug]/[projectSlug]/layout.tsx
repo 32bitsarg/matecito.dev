@@ -59,6 +59,7 @@ export default function ProjectLayout({
             adminToken={project.admin_token}
             adminEmail={project.admin_email}
             adminPass={project.admin_pass}
+            project={project}
         >
             <div className="animate-fade-in h-full">
                 {children}

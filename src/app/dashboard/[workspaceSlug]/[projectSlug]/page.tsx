@@ -28,7 +28,8 @@ import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
 export default function ProjectOverview() {
-    const { collections, loading, error, fetchCollections } = useProject()
+    const { collections, loading, error, fetchCollections, project } = useProject()
+    const [view, setView] = useState<'infra' | 'connect'>('infra')
     const { workspaceSlug, projectSlug } = useParams()
     const baseUrl = `/dashboard/${workspaceSlug}/${projectSlug}`
     const projectUrl = `${projectSlug}.matecito.dev`
@@ -69,33 +70,89 @@ export default function ProjectOverview() {
                 </div>
             </div>
 
-            {/* Infrastructure Ribbon */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <InfrastructureCard 
-                    label="Endpoint URL" 
-                    value={`https://${projectUrl}`} 
-                    icon={Globe} 
-                    onAction={() => copyToClipboard(`https://${projectUrl}`)}
-                    color="text-blue-400"
-                />
-                <InfrastructureCard 
-                    label="Cloud Engine" 
-                    value="v0.36.7-stable" 
-                    icon={Cpu} 
-                    color="text-purple-400"
-                />
-                <InfrastructureCard 
-                    label="Active Subscriptions" 
-                    value="Realtime" 
-                    icon={Activity} 
-                    color="text-accent"
-                />
-                <InfrastructureCard 
-                    label="Auto Backups" 
-                    value="Enabled" 
-                    icon={ShieldCheck} 
-                    color="text-green-400"
-                />
+            {/* Tabs Switcher */}
+            <div className="flex items-center gap-1 p-1 bg-white/[0.02] border border-white/5 rounded-2xl w-fit">
+                <button 
+                    onClick={() => setView('infra')}
+                    className={cn(
+                        "px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                        view === 'infra' ? "bg-accent text-background shadow-lg shadow-accent/20" : "text-muted hover:text-white"
+                    )}
+                >
+                    Infraestructura
+                </button>
+                <button 
+                    onClick={() => setView('connect')}
+                    className={cn(
+                        "px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                        view === 'connect' ? "bg-accent text-background shadow-lg shadow-accent/20" : "text-muted hover:text-white"
+                    )}
+                >
+                    Conexión Rápida
+                </button>
+            </div>
+
+            {/* Infrastructure Ribbon / Connection Quick View */}
+            <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+                {view === 'infra' ? (
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <InfrastructureCard 
+                            label="Endpoint URL" 
+                            value={`https://${projectUrl}`} 
+                            icon={Globe} 
+                            onAction={() => copyToClipboard(`https://${projectUrl}`)}
+                            color="text-blue-400"
+                        />
+                        <InfrastructureCard 
+                            label="Cloud Engine" 
+                            value="v0.36.7-stable" 
+                            icon={Cpu} 
+                            color="text-purple-400"
+                        />
+                        <InfrastructureCard 
+                            label="Active Subscriptions" 
+                            value="Realtime" 
+                            icon={Activity} 
+                            color="text-accent"
+                        />
+                        <InfrastructureCard 
+                            label="Auto Backups" 
+                            value="Enabled" 
+                            icon={ShieldCheck} 
+                            color="text-green-400"
+                        />
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                         <div className="bg-card/20 border border-white/5 p-5 rounded-3xl flex flex-col justify-between group">
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-[9px] uppercase font-black tracking-widest text-[#3ECF8E]">Project URL</span>
+                                <button onClick={() => copyToClipboard(`https://${projectUrl}`)} className="p-1.5 hover:bg-white/5 rounded-lg text-muted hover:text-white transition-all"><Copy size={12} /></button>
+                            </div>
+                            <code className="text-[11px] font-mono text-white/60 truncate italic">https://{projectUrl}</code>
+                        </div>
+                        <div className="bg-card/20 border border-white/5 p-5 rounded-3xl flex flex-col justify-between group">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[9px] uppercase font-black tracking-widest text-accent">Anon Key</span>
+                                    <span className="text-[7px] border border-accent/20 text-accent px-1 rounded uppercase">Client</span>
+                                </div>
+                                <button onClick={() => copyToClipboard(project?.anon_key || '')} className="p-1.5 hover:bg-white/5 rounded-lg text-muted hover:text-white transition-all"><Copy size={12} /></button>
+                            </div>
+                            <code className="text-[11px] font-mono text-white/60 truncate tabular-nums">••••••••••••••••</code>
+                        </div>
+                        <div className="bg-card/20 border border-white/5 p-5 rounded-3xl flex flex-col justify-between group">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[9px] uppercase font-black tracking-widest text-red-400">Service Key</span>
+                                    <span className="text-[7px] border border-red-400/20 text-red-400 px-1 rounded uppercase">Secret</span>
+                                </div>
+                                <button onClick={() => copyToClipboard(project?.service_key || '')} className="p-1.5 hover:bg-white/5 rounded-lg text-muted hover:text-white transition-all"><Copy size={12} /></button>
+                            </div>
+                            <code className="text-[11px] font-mono text-white/60 truncate tabular-nums">••••••••••••••••</code>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Main Content Areas */}
