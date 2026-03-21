@@ -1,12 +1,10 @@
 import PocketBase from 'pocketbase';
 import { Collection, CollectionField, RecordModel } from '@/lib/types';
 
-// Campos del sistema de PocketBase que NUNCA hay que mandar en un update
-// ya que lanzan errores de validación si están presentes en el array 'fields'.
-// Usamos minúsculas para comparaciones insensibles al caso.
-export const POCKETBASE_SYSTEM_FIELDS = [
-    'id', 'username', 'tokenkey', 'password', 'email', 
-    'emailvisibility', 'verified', 'created', 'updated'
+// Campos que NUNCA deben ir en el array 'fields' de una colección (vienen en el objeto collection)
+// Si se incluyen en 'fields', PocketBase lanza error de "Duplicated or invalid field name".
+export const POCKETBASE_FORBIDDEN_FIELDS = [
+    'tokenkey', 'password'
 ];
 
 /**
@@ -61,15 +59,16 @@ export const ProjectService = {
         const updateData: any = { ...data };
         
         if (data.fields) {
-            // Filtrado INTELIGENTE: 
-            // 1. id, created y updated son sistema en TODAS las colecciones.
-            // 2. username, email, password, etc. solo son sistema en colecciones auth.
+            // Filtrado SELECTIVO:
+            // SÓLO removemos los campos que PocketBase prohíbe explícitamente en el array 'fields'.
+            // NO removemos id, created, updated ni los de sistema de auth (email, username, etc)
+            // porque PocketBase interpreta su ausencia como un intento de borrado.
             updateData.fields = (data.fields as any[]).filter(f => {
                 const fieldName = f.name.toLowerCase();
-                const alwaysSystem = ['id', 'created', 'updated'].includes(fieldName);
-                const authSystem = isAuth && POCKETBASE_SYSTEM_FIELDS.includes(fieldName);
+                // Si es Auth, prohibimos explícitamente tokenkey y password
+                if (isAuth && POCKETBASE_FORBIDDEN_FIELDS.includes(fieldName)) return false;
                 
-                return !alwaysSystem && !authSystem;
+                return true;
             });
         }
 

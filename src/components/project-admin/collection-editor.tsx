@@ -254,12 +254,34 @@ const POCKETBASE_SYSTEM_FIELDS = [
                 name: slugify(f.name),
                 type: f.type,
                 required: f.required,
-                ...(f.type === 'select' && { values: f.options?.values || [], maxSelect: f.options?.maxSelect || 1 }),
-                ...(f.type === 'relation' && { collectionId: f.collectionId, cascadeDelete: f.cascadeDelete || false, maxSelect: f.maxSelect || null }),
-                ...(f.type === 'file' && { maxSelect: f.maxSelect || 1, maxSize: (Number(f.maxSize) || 5) * 1024 * 1024, mimeTypes: f.mimeTypes || [] }),
-                ...(f.type === 'text' && { min: f.min, max: f.max, pattern: f.pattern }),
-                ...(f.type === 'number' && { min: Number(f.min) || undefined, max: Number(f.max) || undefined, noDecimal: f.noDecimal }),
-                ...(f.type === 'date' && { min: f.min, max: f.max }),
+                ...(f.type === 'select' && { 
+                    values: f.options?.values || [], 
+                    maxSelect: Number(f.options?.maxSelect || 1) 
+                }),
+                ...(f.type === 'relation' && { 
+                    collectionId: f.collectionId, 
+                    cascadeDelete: f.cascadeDelete || false, 
+                    maxSelect: f.maxSelect ? Number(f.maxSelect) : null 
+                }),
+                ...(f.type === 'file' && { 
+                    maxSelect: Number(f.maxSelect || 1), 
+                    maxSize: (Number(f.maxSize) || 5) * 1024 * 1024, 
+                    mimeTypes: f.mimeTypes || [] 
+                }),
+                ...(f.type === 'text' && { 
+                    min: f.min ? Number(f.min) : undefined, 
+                    max: f.max ? Number(f.max) : undefined, 
+                    pattern: f.pattern 
+                }),
+                ...(f.type === 'number' && { 
+                    min: f.min !== undefined && f.min !== '' ? Number(f.min) : undefined, 
+                    max: f.max !== undefined && f.max !== '' ? Number(f.max) : undefined, 
+                    noDecimal: f.noDecimal 
+                }),
+                ...(f.type === 'date' && { 
+                    min: f.min, // En fechas sí enviamos el string ISO/Datetime
+                    max: f.max 
+                }),
             }))
 
             if (isEditing) {
