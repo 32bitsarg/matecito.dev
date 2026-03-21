@@ -92,10 +92,10 @@ export default function CollectionEditor({ open, onClose, onSuccess, existingCol
 
     const isEditing = !!existingCollection
 
-// Campos del sistema de PocketBase que no deben ser editables
+// Campos del sistema de PocketBase que no deben ser editables (en minúsculas)
 const POCKETBASE_SYSTEM_FIELDS = [
-    'id', 'tokenKey', 'password', 'email', 
-    'emailVisibility', 'verified', 'created', 'updated'
+    'id', 'username', 'tokenkey', 'password', 'email', 
+    'emailvisibility', 'verified', 'created', 'updated'
 ];
 
     useEffect(() => {
@@ -103,25 +103,28 @@ const POCKETBASE_SYSTEM_FIELDS = [
             if (existingCollection) {
                 setCollectionName(existingCollection.name)
                 const editableFields = existingCollection.fields
-                    .map(f => ({
-                        id: f.id || Math.random().toString(),
-                        name: f.name,
-                        type: f.type as FieldType,
-                        required: f.required || false,
-                        // Marcamos como sistema si la API lo dice o si está en nuestra lista negra
-                        system: f.system || POCKETBASE_SYSTEM_FIELDS.includes(f.name),
-                        _state: 'existing' as FieldState,
-                        options: f.type === 'select' ? { values: f.values || [], maxSelect: f.maxSelect } : undefined,
-                        collectionId: f.collectionId,
-                        cascadeDelete: f.cascadeDelete,
-                        maxSelect: f.maxSelect,
-                        maxSize: f.maxSize ? f.maxSize / (1024 * 1024) : undefined,
-                        mimeTypes: f.mimeTypes,
-                        min: f.min,
-                        max: f.max,
-                        pattern: f.pattern,
-                        noDecimal: f.noDecimal
-                    }))
+                    .map(f => {
+                        const nameLower = f.name.toLowerCase();
+                        return {
+                            id: f.id || Math.random().toString(),
+                            name: f.name,
+                            type: f.type as FieldType,
+                            required: f.required || false,
+                            // Marcamos como sistema si la API lo dice o si está en nuestra lista negra
+                            system: f.system || POCKETBASE_SYSTEM_FIELDS.includes(nameLower),
+                            _state: 'existing' as FieldState,
+                            options: f.type === 'select' ? { values: f.values || [], maxSelect: f.maxSelect } : undefined,
+                            collectionId: f.collectionId,
+                            cascadeDelete: f.cascadeDelete,
+                            maxSelect: f.maxSelect,
+                            maxSize: f.maxSize ? f.maxSize / (1024 * 1024) : undefined,
+                            mimeTypes: f.mimeTypes,
+                            min: f.min,
+                            max: f.max,
+                            pattern: f.pattern,
+                            noDecimal: f.noDecimal
+                        }
+                    })
 
                 setFields(editableFields)
                 if (editableFields.length > 0) setSelectedFieldId(editableFields[0].id)

@@ -3,9 +3,10 @@ import { Collection, CollectionField, RecordModel } from '@/lib/types';
 
 // Campos del sistema de PocketBase que NUNCA hay que mandar en un update
 // ya que lanzan errores de validación si están presentes en el array 'fields'.
+// Usamos minúsculas para comparaciones insensibles al caso.
 export const POCKETBASE_SYSTEM_FIELDS = [
-    'id', 'tokenKey', 'password', 'email', 
-    'emailVisibility', 'verified', 'created', 'updated'
+    'id', 'username', 'tokenkey', 'password', 'email', 
+    'emailvisibility', 'verified', 'created', 'updated'
 ];
 
 /**
@@ -62,10 +63,11 @@ export const ProjectService = {
         if (data.fields) {
             // Filtrado INTELIGENTE: 
             // 1. id, created y updated son sistema en TODAS las colecciones.
-            // 2. email, password, etc. solo son sistema en colecciones de tipo 'auth'.
+            // 2. username, email, password, etc. solo son sistema en colecciones auth.
             updateData.fields = (data.fields as any[]).filter(f => {
-                const alwaysSystem = ['id', 'created', 'updated'].includes(f.name);
-                const authSystem = isAuth && ['tokenKey', 'password', 'email', 'emailVisibility', 'verified'].includes(f.name);
+                const fieldName = f.name.toLowerCase();
+                const alwaysSystem = ['id', 'created', 'updated'].includes(fieldName);
+                const authSystem = isAuth && POCKETBASE_SYSTEM_FIELDS.includes(fieldName);
                 
                 return !alwaysSystem && !authSystem;
             });
