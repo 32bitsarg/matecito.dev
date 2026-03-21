@@ -7,13 +7,18 @@ import { cn } from '@/lib/utils'
 import { useState, useMemo } from 'react'
 import CollectionEditor from '@/components/project-admin/collection-editor'
 import DeleteCollectionModal from '@/components/project-admin/delete-collection-modal'
+import Link from 'next/link'
+import { useParams } from 'next/navigation'
 
 export default function SchemaEditorPage() {
     const { collections, loading, fetchCollections } = useProject()
+    const { workspaceSlug, projectSlug } = useParams()
     const [isEditorOpen, setIsEditorOpen] = useState(false)
     const [collectionToEdit, setCollectionToEdit] = useState<any>(null)
     const [collectionToDelete, setCollectionToDelete] = useState<any>(null)
     const [searchQuery, setSearchQuery] = useState('')
+
+    const baseUrl = `/dashboard/${workspaceSlug}/${projectSlug}`
 
     const filteredCollections = useMemo(() => {
         return collections.filter(c => 
@@ -85,10 +90,13 @@ export default function SchemaEditorPage() {
                             {/* Visual Indicator */}
                             <div className="absolute left-0 top-0 bottom-0 w-1 bg-accent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                            {/* Main Info */}
-                            <div className="flex-1 flex items-center gap-5 p-2 px-4 min-w-0">
+                            {/* Main Info - Clickable area to view records */}
+                            <Link 
+                                href={`${baseUrl}/${collection.name}`}
+                                className="flex-1 flex items-center gap-5 p-2 px-4 min-w-0 group/link"
+                            >
                                 <div className={cn(
-                                    "p-3 rounded-xl shadow-inner",
+                                    "p-3 rounded-xl shadow-inner transition-transform group-hover/link:scale-110",
                                     collection.type === 'auth' ? "bg-blue-500/10 text-blue-400" : "bg-accent/10 text-accent"
                                 )}>
                                     {collection.type === 'auth' ? <Shield className="w-6 h-6" /> : <Database className="w-6 h-6" />}
@@ -108,7 +116,7 @@ export default function SchemaEditorPage() {
                                         {collection.type} · <span className="text-muted/60 lowercase italic">{collection.id}</span>
                                     </p>
                                 </div>
-                            </div>
+                            </Link>
 
                             {/* Fields Preview (Compact Tags) */}
                             <div className="hidden lg:flex items-center gap-2 max-w-sm overflow-hidden text-nowrap select-none opacity-40 group-hover:opacity-100 transition-opacity">
@@ -153,7 +161,9 @@ export default function SchemaEditorPage() {
                                         <Trash2 className="w-5 h-5" />
                                     </button>
                                 )}
-                                <ChevronRight className="w-5 h-5 text-muted/20 mr-2 group-hover:text-accent/50 group-hover:translate-x-1 transition-all" />
+                                <Link href={`${baseUrl}/${collection.name}`} className="p-2">
+                                    <ChevronRight className="w-5 h-5 text-muted/20 group-hover:text-accent/50 group-hover:translate-x-1 transition-all" />
+                                </Link>
                             </div>
                         </div>
                     ))
