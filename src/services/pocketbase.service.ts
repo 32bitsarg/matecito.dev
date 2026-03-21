@@ -1,6 +1,13 @@
 import PocketBase from 'pocketbase';
 import { Collection, CollectionField, RecordModel } from '@/lib/types';
 
+// Campos del sistema de PocketBase que NUNCA hay que mandar en un update
+// ya que lanzan errores de validación si están presentes en el array 'fields'.
+export const POCKETBASE_SYSTEM_FIELDS = [
+    'id', 'tokenKey', 'password', 'email', 
+    'emailVisibility', 'verified', 'created', 'updated'
+];
+
 /**
  * Servicio para interactuar con una instancia específica de PocketBase.
  * Diseñado para ser stateless y recibir la instancia de PB como argumento.
@@ -17,6 +24,8 @@ export const ProjectService = {
     },
 
     async createCollection(pb: PocketBase, data: { name: string, type?: string, fields: CollectionField[] }): Promise<Collection> {
+        // En creación de base collections nos gusta asegurar created/updated
+        // aunque PocketBase ya los cree. Lo dejamos por ahora.
         const augmentedData = {
             ...data,
             type: data.type || 'base',
@@ -27,14 +36,14 @@ export const ProjectService = {
                     type: 'autodate',
                     onCreate: true,
                     onUpdate: false,
-                    system: false
+                    system: true
                 },
                 {
                     name: 'updated',
                     type: 'autodate',
                     onCreate: true,
                     onUpdate: true,
-                    system: false
+                    system: true
                 }
             ]
         };
@@ -43,16 +52,23 @@ export const ProjectService = {
     },
 
     async updateCollection(pb: PocketBase, collectionId: string, data: any): Promise<Collection> {
-        const current = await pb.collections.getOne(collectionId);
+        // Validación previa de existencia
+        const current = await pb.collections.getOne(collectionId).catch(() => null);
         if (!current) throw new Error('Colección no encontrada');
 
+        const isAuth = current.type === 'auth';
         const updateData: any = { ...data };
         
         if (data.fields) {
-            const systemFields = (current.fields as any[]).filter(f =>
-                f.system || ['created', 'updated'].includes(f.name)
-            );
-            updateData.fields = [...data.fields, ...systemFields];
+            // Filtrado INTELIGENTE: 
+            // 1. id, created y updated son sistema en TODAS las colecciones.
+            // 2. email, password, etc. solo son sistema en colecciones de tipo 'auth'.
+            updateData.fields = (data.fields as any[]).filter(f => {
+                const alwaysSystem = ['id', 'created', 'updated'].includes(f.name);
+                const authSystem = isAuth && ['tokenKey', 'password', 'email', 'emailVisibility', 'verified'].includes(f.name);
+                
+                return !alwaysSystem && !authSystem;
+            });
         }
 
         const result = await pb.collections.update(collectionId, updateData);

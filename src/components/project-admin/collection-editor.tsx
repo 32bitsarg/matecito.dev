@@ -92,6 +92,12 @@ export default function CollectionEditor({ open, onClose, onSuccess, existingCol
 
     const isEditing = !!existingCollection
 
+// Campos del sistema de PocketBase que no deben ser editables
+const POCKETBASE_SYSTEM_FIELDS = [
+    'id', 'tokenKey', 'password', 'email', 
+    'emailVisibility', 'verified', 'created', 'updated'
+];
+
     useEffect(() => {
         if (open) {
             if (existingCollection) {
@@ -102,7 +108,8 @@ export default function CollectionEditor({ open, onClose, onSuccess, existingCol
                         name: f.name,
                         type: f.type as FieldType,
                         required: f.required || false,
-                        system: f.system || ['id', 'created', 'updated'].includes(f.name),
+                        // Marcamos como sistema si la API lo dice o si está en nuestra lista negra
+                        system: f.system || POCKETBASE_SYSTEM_FIELDS.includes(f.name),
                         _state: 'existing' as FieldState,
                         options: f.type === 'select' ? { values: f.values || [], maxSelect: f.maxSelect } : undefined,
                         collectionId: f.collectionId,
