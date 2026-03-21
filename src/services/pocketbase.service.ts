@@ -4,7 +4,7 @@ import { Collection, CollectionField, RecordModel } from '@/lib/types';
 // Campos que NUNCA deben ir en el array 'fields' de una colección (vienen en el objeto collection)
 // Si se incluyen en 'fields', PocketBase lanza error de "Duplicated or invalid field name".
 export const POCKETBASE_FORBIDDEN_FIELDS = [
-    'tokenkey', 'password'
+    'tokenkey', 'password', 'emailvisibility', 'email', 'verified'
 ];
 
 /**
@@ -51,29 +51,35 @@ export const ProjectService = {
     },
 
     async updateCollection(pb: PocketBase, collectionId: string, data: any): Promise<Collection> {
-        // Validación previa de existencia
-        const current = await pb.collections.getOne(collectionId).catch(() => null);
-        if (!current) throw new Error('Colección no encontrada');
+        const current = await pb.collections.getOne(collectionId).catch(() => null)
+        if (!current) throw new Error('Colección no encontrada')
 
-        const isAuth = current.type === 'auth';
-        const updateData: any = { ...data };
-        
+        const isAuth = current.type === 'auth'
+        const updateData: any = { ...data }
+
         if (data.fields) {
-            // Filtrado SELECTIVO:
-            // SÓLO removemos los campos que PocketBase prohíbe explícitamente en el array 'fields'.
-            // NO removemos id, created, updated ni los de sistema de auth (email, username, etc)
-            // porque PocketBase interpreta su ausencia como un intento de borrado.
+            // Campos que PocketBase maneja fuera del array fields
+            // en colecciones auth — mandarlos dentro da error de duplicado
+            const AUTH_MANAGED_FIELDS = [
+                'tokenkey', 'password', 'email',
+                'emailvisibility', 'verified'
+            ]
+
             updateData.fields = (data.fields as any[]).filter(f => {
-                const fieldName = f.name.toLowerCase();
-                // Si es Auth, prohibimos explícitamente tokenkey y password
-                if (isAuth && POCKETBASE_FORBIDDEN_FIELDS.includes(fieldName)) return false;
-                
-                return true;
-            });
+                const fieldName = f.name.toLowerCase()
+
+                // Siempre filtrar campos del sistema
+                if (f.system) return false
+
+                // En colecciones auth, filtrar campos manejados por PocketBase
+                if (isAuth && AUTH_MANAGED_FIELDS.includes(fieldName)) return false
+
+                return true
+            })
         }
 
-        const result = await pb.collections.update(collectionId, updateData);
-        return result as unknown as Collection;
+        const result = await pb.collections.update(collectionId, updateData)
+        return result as unknown as Collection
     },
 
     async deleteCollection(pb: PocketBase, collectionId: string): Promise<void> {
