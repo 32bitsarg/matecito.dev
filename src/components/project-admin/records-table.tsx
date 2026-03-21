@@ -250,10 +250,14 @@ export default function RecordsTable({
                         </>
                     )}
                     components={{
-                        Table: (props) => <table {...props} className="w-full text-left border-collapse table-fixed group/table" />,
-                        TableRow: (props) => {
-                            const index = props['data-index']
-                            const record = records[index]
+                        Table: ({ children, ...props }) => (
+                            <table {...props} className="w-full text-left border-collapse table-fixed group/table">
+                                {children}
+                            </table>
+                        ),
+                        TableRow: ({ children, ...props }) => {
+                            const index = (props as any)['data-index'];
+                            const record = records[index];
                             return (
                                 <tr 
                                     {...props} 
@@ -262,8 +266,10 @@ export default function RecordsTable({
                                         record && selectedIds.includes(record.id) && "bg-accent/[0.03]"
                                     )}
                                     onClick={() => record && onEdit(record)}
-                                />
-                            )
+                                >
+                                    {children}
+                                </tr>
+                            );
                         }
                     }}
                 />

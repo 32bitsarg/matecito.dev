@@ -89,6 +89,7 @@ export default function CellRenderer({ value, type, record }: CellRendererProps)
             )
 
         default:
-            return <span className="text-xs text-white/80 truncate inline-block max-w-full">{value.toString()}</span>;
+            const content = typeof value === 'object' ? JSON.stringify(value) : String(value);
+            return <span className="text-xs text-white/80 truncate inline-block max-w-full" title={content}>{content}</span>;
     }
 }
