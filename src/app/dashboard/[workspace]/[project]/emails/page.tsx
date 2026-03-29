@@ -251,8 +251,8 @@ function TemplateEditor({ template, onSave, onClose }: {
     onClose: () => void
 }) {
     const [subject,   setSubject]   = useState(template.subject   ?? '')
-    const [htmlBody,  setHtmlBody]  = useState(template.html_body ?? '')
-    const [textBody,  setTextBody]  = useState(template.text_body ?? '')
+    const [htmlBody,  setHtmlBody]  = useState<string>(template.html_body ?? '')
+    const [textBody,  setTextBody]  = useState<string>(template.text_body ?? '')
     const [editorTab, setEditorTab] = useState<'html' | 'text' | 'preview'>('html')
     const [saving,    setSaving]    = useState(false)
     const { updateEmailTemplate } = useProject()
@@ -271,8 +271,8 @@ function TemplateEditor({ template, onSave, onClose }: {
     }
 
     const insertVar = (v: string) => {
-        if (editorTab === 'html') setHtmlBody(b => b + v)
-        if (editorTab === 'text') setTextBody(b => b + v)
+        if (editorTab === 'html') setHtmlBody((b: string) => b + v)
+        if (editorTab === 'text') setTextBody((b: string) => b + v)
     }
 
     return (
