@@ -35,7 +35,7 @@ export default function ProjectLayout({
     return (
         <ProjectProvider 
             projectId={project.id}
-            subdomain={project.subdomain} 
+            subdomain={project.subdomain ?? ''} 
             project={project}
         >
             <div className="animate-fade-in h-full">
