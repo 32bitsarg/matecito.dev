@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { X, AlertTriangle, Loader2, Trash2 } from 'lucide-react'
 import { useProject } from '@/contexts/ProjectContext'
 import { toast } from 'sonner'
@@ -12,26 +13,35 @@ interface DeleteCollectionModalProps {
     onSuccess: () => void
 }
 
-export default function DeleteCollectionModal({ 
-    isOpen, 
-    onClose, 
-    collection, 
-    onSuccess 
+export default function DeleteCollectionModal({
+    isOpen,
+    onClose,
+    collection,
+    onSuccess,
 }: DeleteCollectionModalProps) {
     const { deleteCollection } = useProject()
     const [confirmName, setConfirmName] = useState('')
     const [loading, setLoading] = useState(false)
+
+    useEffect(() => {
+        if (!isOpen) setConfirmName('')
+    }, [isOpen])
+
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+        window.addEventListener('keydown', handler)
+        return () => window.removeEventListener('keydown', handler)
+    }, [onClose])
 
     if (!isOpen || !collection) return null
 
     const handleDelete = async (e: React.FormEvent) => {
         e.preventDefault()
         if (confirmName !== collection.name) return
-
         setLoading(true)
         try {
-            await deleteCollection(collection.id)
-            toast.success(`Colección "${collection.name}" eliminada correctamente`)
+            await deleteCollection(collection.name)
+            toast.success(`Colección "${collection.name}" eliminada`)
             onSuccess()
             onClose()
         } catch (err: any) {
@@ -41,55 +51,54 @@ export default function DeleteCollectionModal({
         }
     }
 
-    return (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-            <div className="w-full max-w-md bg-[#0f0f0f] border border-red-500/20 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in duration-300">
+    return createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+            style={{ backgroundColor: 'rgba(15,23,42,0.5)', backdropFilter: 'blur(4px)' }}>
+            <div className="absolute inset-0" onClick={onClose} />
+
+            <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
                 {/* Header */}
-                <div className="p-6 border-b border-[#222222] bg-red-500/5 flex items-center gap-4">
-                    <div className="p-3 bg-red-500/10 rounded-2xl text-red-500">
-                        <AlertTriangle className="w-6 h-6" />
+                <div className="flex items-center gap-4 p-5 border-b border-red-100 bg-red-50">
+                    <div className="p-2.5 bg-red-100 rounded-xl text-red-600">
+                        <AlertTriangle className="w-5 h-5" />
                     </div>
-                    <div>
-                        <h2 className="text-xl font-bold text-white">¿Estás seguro?</h2>
-                        <p className="text-xs text-[#a1a1aa] mt-1 text-pretty">Esta acción es irreversible y borrará todos los datos asociados.</p>
+                    <div className="flex-1">
+                        <h2 className="font-extrabold text-slate-900">Eliminar colección</h2>
+                        <p className="text-xs text-slate-500 mt-0.5">Esta acción es irreversible y borrará todos los datos.</p>
                     </div>
+                    <button onClick={onClose} className="p-1.5 hover:bg-red-100 rounded-lg text-slate-400 transition-colors">
+                        <X className="w-4 h-4" />
+                    </button>
                 </div>
 
                 {/* Content */}
-                <form onSubmit={handleDelete} className="p-6 space-y-6">
-                    <div className="space-y-3">
-                        <p className="text-sm text-[#a1a1aa]">
-                            Para confirmar, por favor escribe <span className="text-white font-mono font-bold">{collection.name}</span> a continuación:
-                        </p>
-                        <input
-                            type="text"
-                            placeholder="Escribe el nombre de la colección"
-                            className="w-full bg-[#0c0c0c] border border-[#222222] rounded-xl px-4 py-3 text-sm text-white focus:border-red-500 outline-none transition-all font-mono"
-                            value={confirmName}
-                            onChange={(e) => setConfirmName(e.target.value)}
-                            autoFocus
-                        />
-                    </div>
-
-                    <div className="flex gap-3">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="flex-1 px-4 py-2.5 rounded-xl border border-[#2a2a2a] text-sm font-bold text-[#a1a1aa] hover:text-white hover:bg-[#1a1a1a] transition-all"
-                        >
+                <form onSubmit={handleDelete} className="p-5 space-y-4">
+                    <p className="text-sm text-slate-600">
+                        Escribí <span className="font-mono font-bold text-slate-900">{collection.name}</span> para confirmar:
+                    </p>
+                    <input
+                        type="text"
+                        placeholder={collection.name}
+                        autoFocus
+                        value={confirmName}
+                        onChange={e => setConfirmName(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 font-mono focus:border-red-400 outline-none transition-all"
+                    />
+                    <div className="flex gap-2 pt-1">
+                        <button type="button" onClick={onClose}
+                            className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all">
                             Cancelar
                         </button>
-                        <button
-                            type="submit"
+                        <button type="submit"
                             disabled={confirmName !== collection.name || loading}
-                            className="flex-[2] flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-red-500 text-white text-sm font-bold hover:bg-red-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_20px_rgba(239,68,68,0.2)]"
-                        >
+                            className="flex-[2] flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
                             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                            Eliminar Colección
+                            Eliminar
                         </button>
                     </div>
                 </form>
             </div>
-        </div>
+        </div>,
+        document.body
     )
 }

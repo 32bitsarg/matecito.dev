@@ -2,13 +2,13 @@
 
 import { toast } from 'sonner'
 import { useState } from 'react'
-import pb from '@/lib/pocketbase'
-import { ExternalLink, Copy, Calendar, MoreVertical, LayoutGrid, Trash2, Loader2, AlertTriangle } from 'lucide-react'
+import { Copy, Calendar, ArrowRight, Trash2, Loader2, AlertTriangle, Database } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
+import { ProjectService, type Project } from '@/services/api.service'
 
 interface ProjectCardProps {
-    project: any
+    project: Project
     workspaceSlug: string
     onDelete?: () => void
 }
@@ -17,10 +17,17 @@ export default function ProjectCard({ project, workspaceSlug, onDelete }: Projec
     const [isDeleting, setIsDeleting] = useState(false)
     const [showConfirm, setShowConfirm] = useState(false)
 
-    const dateStr = new Date(project.created).toLocaleDateString('es-AR', {
+    const projectSlug = project.subdomain
+
+    if (!project.subdomain) {
+        console.error('Proyecto sin subdomain', project)
+        return null
+    }
+
+    const dateStr = new Date(project.created_at).toLocaleDateString('es-AR', {
         day: 'numeric',
         month: 'short',
-        year: 'numeric'
+        year: 'numeric',
     })
 
     const fullUrl = `${project.subdomain}.matecito.dev`
@@ -29,7 +36,7 @@ export default function ProjectCard({ project, workspaceSlug, onDelete }: Projec
         e.preventDefault()
         e.stopPropagation()
         navigator.clipboard.writeText(fullUrl)
-        toast.success('¡URL copiada al portapapeles!')
+        toast.success('URL copiada')
     }
 
     const handleDelete = async (e: React.MouseEvent) => {
@@ -38,31 +45,17 @@ export default function ProjectCard({ project, workspaceSlug, onDelete }: Projec
 
         if (!showConfirm) {
             setShowConfirm(true)
+            setTimeout(() => setShowConfirm(false), 3000)
             return
         }
 
         setIsDeleting(true)
         try {
-            const res = await fetch('/api/projects/delete', {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    subdomain: project.subdomain,
-                    projectId: project.id,
-                    token: pb.authStore.token
-                })
-            })
-
-            const data = await res.json()
-            if (data.success) {
-                toast.success('Proyecto eliminado correctamente 🗑️')
-                onDelete?.()
-            } else {
-                throw new Error(data.error || 'Fallo al eliminar')
-            }
+            await ProjectService.delete(project.id)
+            toast.success('Proyecto eliminado')
+            onDelete?.()
         } catch (error: any) {
-            console.error('Error deleting project:', error)
-            toast.error(error.message || 'Error al eliminar el proyecto')
+            toast.error(error.message || 'Error al eliminar')
             setShowConfirm(false)
         } finally {
             setIsDeleting(false)
@@ -71,81 +64,72 @@ export default function ProjectCard({ project, workspaceSlug, onDelete }: Projec
 
     return (
         <div className={cn(
-            "group relative flex flex-col rounded-2xl border bg-[var(--card)] p-8 transition-all duration-500 hover:-translate-y-2 shadow-2xl hover:shadow-[var(--accent)]/5",
-            project.status === 'failed' ? "border-red-500/30" : "border-[var(--accent)]/10 hover:border-[var(--accent)]/40",
-            isDeleting && "opacity-50 grayscale pointer-events-none"
+            "group relative flex flex-col bg-white border border-slate-200 rounded-2xl p-5 transition-all hover:shadow-md hover:border-violet-200",
+            isDeleting && "opacity-50 pointer-events-none"
         )}>
-            <div className="mb-6 flex items-start justify-between">
-                <div className="space-y-1.5">
-                    <h3 className="text-2xl font-bold text-white">
-                        {project.name}
-                    </h3>
+            {/* Icon + name */}
+            <div className="flex items-start gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center shrink-0">
+                    <Database className="w-5 h-5 text-violet-600" />
+                </div>
+                <div className="min-w-0 flex-1">
+                    <h3 className="font-bold text-slate-900 truncate">{project.name}</h3>
                     <button
                         onClick={copyUrl}
-                        className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-white/40 transition-all hover:text-white hover:opacity-100"
+                        className="flex items-center gap-1 text-xs text-slate-400 hover:text-violet-600 transition-colors mt-0.5 group/url"
                     >
-                        {fullUrl}
-                        <Copy className="w-3 h-3" />
+                        <span className="truncate">{fullUrl}</span>
+                        <Copy className="w-3 h-3 shrink-0 opacity-0 group-hover/url:opacity-100 transition-opacity" />
                     </button>
                 </div>
 
-                <div className={cn(
-                    "inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em]",
-                    project.status === 'active' ? "bg-[var(--accent)]/10 text-[var(--accent)]" :
-                        project.status === 'creating' ? "bg-yellow-500/10 text-yellow-600 animate-pulse border border-yellow-500/10" :
-                            project.status === 'failed' ? "bg-red-500/10 text-red-600 border border-red-500/10" :
-                                "bg-[var(--foreground)]/10 text-[var(--foreground)]/60"
-                )}>
-                    <span className={cn(
-                        "h-1.5 w-1.5 rounded-full",
-                        project.status === 'active' ? "bg-[var(--accent)]" :
-                            project.status === 'creating' ? "bg-yellow-500" :
-                                project.status === 'failed' ? "bg-red-500" : "bg-[var(--foreground)]/60"
-                    )} />
-                    {project.status === 'active' ? 'En línea' :
-                        project.status === 'creating' ? 'Desplegando' :
-                            project.status === 'failed' ? 'Error' : 'Pausado'}
-                </div>
+                {/* Live badge */}
+                <span className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-full shrink-0">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    Live
+                </span>
             </div>
 
-            <div className="mt-auto flex items-center justify-between border-t border-[var(--accent)]/5 pt-6">
-                <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2 text-[var(--foreground)] opacity-40 text-[10px] font-mono uppercase tracking-widest leading-none">
+            {/* Footer */}
+            <div className="flex items-center justify-between pt-4 border-t border-slate-100 mt-auto">
+                <div className="flex flex-col gap-0.5">
+                    <div className="flex items-center gap-1.5 text-xs text-slate-400">
                         <Calendar className="w-3.5 h-3.5" />
-                        <span>{dateStr}</span>
+                        {dateStr}
                     </div>
                     {showConfirm && (
-                        <span className="text-[8px] font-bold text-red-400 uppercase tracking-widest animate-pulse">¿Confirmar?</span>
+                        <span className="text-[10px] text-red-500 font-semibold animate-pulse">
+                            Click para confirmar
+                        </span>
                     )}
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                     <button
                         onClick={handleDelete}
-                        onMouseLeave={() => !isDeleting && setShowConfirm(false)}
-                        className={cn(
-                            "p-2.5 rounded-full transition-all duration-300",
-                            showConfirm 
-                                ? "bg-red-500 text-white animate-bounce shadow-lg shadow-red-500/40" 
-                                : "bg-white/5 text-white/20 hover:bg-white/10 hover:text-red-400"
-                        )}
                         title="Eliminar proyecto"
+                        className={cn(
+                            "p-2 rounded-lg border text-sm transition-all",
+                            showConfirm
+                                ? "bg-red-500 border-red-500 text-white"
+                                : "border-slate-200 text-slate-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50"
+                        )}
                     >
                         {isDeleting ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
                         ) : showConfirm ? (
-                            <AlertTriangle className="w-4 h-4" />
+                            <AlertTriangle className="w-3.5 h-3.5" />
                         ) : (
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5" />
                         )}
                     </button>
 
                     <Link
-                        href={`/dashboard/${workspaceSlug}/${project.subdomain}`}
-                        className="flex items-center gap-2 rounded-full bg-[var(--accent)] px-6 py-2.5 text-[10px] font-bold text-[var(--background)] transition-all hover:opacity-90 uppercase tracking-[0.2em] shadow-lg shadow-[var(--accent)]/20"
+                        href={`/dashboard/${workspaceSlug}/${projectSlug}`}
+                        className="flex items-center gap-1.5 px-3 py-2 bg-violet-600 text-white text-xs font-semibold rounded-lg hover:bg-violet-700 transition-colors"
                     >
-                        <LayoutGrid className="w-3.5 h-3.5" />
                         Gestionar
+                        <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                 </div>
             </div>

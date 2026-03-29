@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import PocketBase from 'pocketbase'
 
 export async function DELETE(req: Request) {
     try {
@@ -11,6 +10,8 @@ export async function DELETE(req: Request) {
         }
 
         // 2. Intentar llamar al VPS para limpiar la infraestructura
+        // Nota: En una arquitectura final con backend propio, el backend debería orquestar esto.
+        // Por ahora mantenemos la lógica de Next.js como orquestador si el backend no lo hace.
         try {
             const vpsRes = await fetch(`${process.env.INTERNAL_API_URL}/delete`, {
                 method: 'DELETE',
@@ -23,9 +24,6 @@ export async function DELETE(req: Request) {
 
             const vpsData = await vpsRes.json()
             
-            // Si el VPS falla críticamente, informamos pero permitimos el flujo (o no, dependiendo de la política)
-            // En este caso, si no se borró en el VPS, es mejor no borrar el registro de PB 
-            // para que el usuario pueda reintentar o sepamos que hay basura.
             if (!vpsRes.ok || !vpsData.success) {
                 return NextResponse.json({ 
                     error: vpsData.error || 'Fallo al eliminar en el VPS' 
@@ -38,11 +36,19 @@ export async function DELETE(req: Request) {
             }, { status: 500 })
         }
 
-        // 3. Si el VPS limpió OK, procedemos a borrar el registro en PocketBase Central
-        const pb = new PocketBase(process.env.NEXT_PUBLIC_POCKETBASE_URL)
-        pb.authStore.save(token, null)
-        
-        await pb.collection('projects').delete(projectId)
+        // 3. Si el VPS limpió OK, procedemos a borrar el registro en el nuevo Backend
+        const backendRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/projects/${projectId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        })
+
+        if (!backendRes.ok) {
+            const error = await backendRes.json()
+            throw new Error(error.message || 'Error al eliminar en el backend')
+        }
 
         return NextResponse.json({ success: true })
 
@@ -51,3 +57,4 @@ export async function DELETE(req: Request) {
         return NextResponse.json({ error: err.message }, { status: 500 })
     }
 }
+

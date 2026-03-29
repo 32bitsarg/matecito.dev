@@ -285,10 +285,10 @@ const POCKETBASE_SYSTEM_FIELDS = [
             }))
 
             if (isEditing) {
-                await updateCollection(existingCollection!.id, { name: collectionSlug, fields: fieldsPayload })
-                toast.success('Colección actualizada correctamente')
+                await updateCollection(existingCollection!.name, collectionSlug)
+                toast.success('Colección renombrada correctamente')
             } else {
-                await createCollection({ name: collectionSlug, type: 'base', fields: fieldsPayload })
+                await createCollection(collectionSlug)
                 toast.success('Colección creada correctamente')
             }
             onSuccess(); onClose()

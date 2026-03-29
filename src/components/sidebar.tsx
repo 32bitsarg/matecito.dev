@@ -2,330 +2,225 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useParams, usePathname, useRouter } from 'next/navigation'
-import pb from '@/lib/pocketbase'
-import PocketBase, { BaseAuthStore } from 'pocketbase'
-import { 
-    Database, 
-    Settings, 
-    Plus, 
-    Folder, 
-    LayoutDashboard, 
-    Code2, 
-    Server,
-    ShieldCheck,
-    Cpu,
-    ArrowLeft,
-    Activity,
-    Key,
-    History,
-    Zap,
-    ChevronDown,
-    ChevronUp,
-    ChevronRight,
-    Lock,
-    Shield,
-    Users,
-    ActivitySquare
+import { useParams, usePathname } from 'next/navigation'
+import {
+    Database, Settings, Plus, Folder, LayoutDashboard,
+    Code2, ArrowLeft, Users, Shield, Terminal, LogOut, ChevronDown, FlaskConical,
+    Table2, UserCircle, Mail, Webhook
 } from 'lucide-react'
 import WorkspaceSelector from '@/components/workspace-selector'
 import { cn } from '@/lib/utils'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
-import { ProjectService } from '@/services/pocketbase.service'
-import { Collection } from '@/lib/types'
 
 export default function Sidebar() {
     const pathname = usePathname()
     const params = useParams()
-    const { workspaces, currentWorkspace, selectWorkspace, projects, refreshWorkspaces } = useWorkspace()
+    const { workspaces, currentWorkspace, setCurrentWorkspace, projects, refreshWorkspaces, user, logout } = useWorkspace()
 
-    const workspaceSlugFromParams = params?.workspaceSlug as string
-    const projectSlug = params?.projectSlug as string
-    const workspaceSlug = workspaceSlugFromParams || currentWorkspace?.slug
-
-    const [projectMetadata, setProjectMetadata] = useState<any>(null)
+    const workspaceSlug = (params?.workspace as string) || currentWorkspace?.slug
+    const projectSlug = params?.project as string
     const [mounted, setMounted] = useState(false)
+    const projectMetadata = projects.find(p => p.subdomain === projectSlug) ?? null
 
-    useEffect(() => {
-        setMounted(true)
-    }, [])
-
-    useEffect(() => {
-        const fetchProjectContext = async () => {
-            if (!projectSlug) {
-                setProjectMetadata(null)
-                return
-            }
-
-            try {
-                const res = await pb.collection('projects').getFirstListItem(`subdomain = "${projectSlug}"`, {
-                    expand: 'workspace',
-                })
-                setProjectMetadata(res)
-            } catch (err) {
-                console.error('Sidebar Context Error:', err)
-            }
-        }
-
-        fetchProjectContext()
-    }, [projectSlug])
-
+    useEffect(() => { setMounted(true) }, [])
     if (!mounted) return null
 
     const isProjectContext = !!projectSlug
+    const base = `/dashboard/${workspaceSlug}/${projectSlug}`
+
+    const handleLogout = () => {
+        logout?.()
+        window.location.href = '/login'
+    }
 
     return (
-        <aside className="w-64 flex-shrink-0 flex flex-col bg-[#0a0a0a] border-r border-border/50 text-foreground h-screen sticky top-0 z-50 overflow-hidden">
-            
-            {/* Header Content Area */}
+        <aside className="w-60 flex-shrink-0 flex flex-col bg-white border-r border-slate-200 h-screen sticky top-0 z-50">
+
+            {/* Logo/Brand */}
+            <div className="h-14 flex items-center px-5 border-b border-slate-100">
+                <Link href="/dashboard" className="flex items-center gap-2 group">
+                    <div className="w-7 h-7 rounded-lg bg-violet-600 flex items-center justify-center shadow-sm">
+                        <Database className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <span className="font-bold text-slate-900 tracking-tight text-sm">matecitodb</span>
+                </Link>
+            </div>
+
+            {/* Content */}
             <div className="flex-1 flex flex-col overflow-hidden">
                 {isProjectContext ? (
-                    <div className="flex-1 flex flex-col animate-in fade-in slide-in-from-left-2 duration-500">
-                        {/* 1. Context Navigation Bar */}
-                        <div className="px-4 py-2 border-b border-white/5 bg-white/[0.02]">
-                            <Link 
-                                href="/dashboard"
-                                className="flex items-center gap-2 px-2 py-1.5 text-[10px] font-black text-muted uppercase tracking-[0.2em] hover:text-accent transition-all group"
-                            >
-                                <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
-                                <div className="flex items-center gap-2 opacity-40">
-                                    <span>Espacio de Trabajo</span>
-                                    <ChevronRight className="w-2.5 h-2.5" />
-                                    <span>Proyecto</span>
-                                </div>
+                    <div className="flex-1 flex flex-col animate-in fade-in duration-300">
+                        {/* Back + Project name */}
+                        <div className="px-4 py-3 border-b border-slate-100">
+                            <Link href="/dashboard"
+                                className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-violet-600 transition-colors mb-3 group">
+                                <ArrowLeft className="w-3 h-3 group-hover:-translate-x-0.5 transition-transform" />
+                                Todos los proyectos
                             </Link>
+                            <div className="flex items-center justify-between">
+                                <div className="min-w-0">
+                                    <p className="text-xs text-slate-400 truncate">{workspaceSlug}</p>
+                                    <h2 className="text-sm font-bold text-slate-900 truncate">
+                                        {projectMetadata?.name || projectSlug}
+                                    </h2>
+                                </div>
+                                <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-md shrink-0 ml-2">
+                                    Live
+                                </span>
+                            </div>
                         </div>
-                <div className="px-6 py-2.5 border-b border-white/5 bg-gradient-to-b from-white/[0.02] to-transparent">
-                    <div className="flex items-center justify-between">
-                        <h1 className="text-sm font-black truncate text-white uppercase tracking-wider">
-                            {projectMetadata?.name || projectSlug}
-                        </h1>
-                        <div className={cn(
-                            "px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-tighter",
-                            projectMetadata?.status === 'active' 
-                                ? "bg-accent/10 text-accent border border-accent/20" 
-                                : "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20"
-                        )}>
-                            {projectMetadata?.status === 'active' ? 'Activo' : 'Pausado'}
-                        </div>
-                    </div>
-                </div>
 
-                        {/* 3. Reorganized Navigation Actions */}
-                        <nav className="flex-1 px-3 py-2 space-y-4 overflow-y-auto custom-scrollbar pb-24">
-                            
-                            {/* TOP LEVEL: OVERVIEW */}
-                            <div className="space-y-1">
-                                <SidebarLink 
-                                    href={`/dashboard/${workspaceSlug}/${projectSlug}`} 
-                                    active={pathname === `/dashboard/${workspaceSlug}/${projectSlug}`}
-                                    icon={LayoutDashboard}
-                                    label="Resumen"
-                                />
-                                <SidebarLink 
-                                    href={`/dashboard/${workspaceSlug}/${projectSlug}/connect`} 
-                                    active={pathname === `/dashboard/${workspaceSlug}/${projectSlug}/connect`}
-                                    icon={Zap}
-                                    label="Conexión"
-                                />
+                        {/* Nav */}
+                        <nav className="flex-1 px-3 py-3 space-y-5 overflow-y-auto pb-20">
+                            <div className="space-y-0.5">
+                                <SidebarLink href={base} active={pathname === base}
+                                    icon={LayoutDashboard} label="Resumen" />
                             </div>
 
-                            {/* CATEGORY: DATA MANAGEMENT */}
-                            <div className="space-y-1">
-                                <div className="px-3 mb-1">
-                                    <span className="text-[10px] uppercase font-black text-muted tracking-[0.2em] opacity-40">Gestión de Datos</span>
-                                </div>
-                                <div className="space-y-0.5">
-                                    <SidebarLink 
-                                        href={`/dashboard/${workspaceSlug}/${projectSlug}/schema`} 
-                                        active={pathname === `/dashboard/${workspaceSlug}/${projectSlug}/schema`}
-                                        icon={Database}
-                                        label="Esquema de Datos"
-                                    />
-                                     <SidebarLink 
-                                        href={`/dashboard/${workspaceSlug}/${projectSlug}/security`} 
-                                        active={pathname === `/dashboard/${workspaceSlug}/${projectSlug}/security`}
-                                        icon={Lock}
-                                        label="Reglas de API"
-                                    />
-                                </div>
-                            </div>
+                            <NavSection label="Datos">
+                                <SidebarLink href={`${base}/data`} active={pathname.startsWith(`${base}/data`)}
+                                    icon={Table2} label="Registros" />
+                                <SidebarLink href={`${base}/schema`} active={pathname.startsWith(`${base}/schema`)}
+                                    icon={Database} label="Esquema" />
+                                <SidebarLink href={`${base}/api`} active={pathname.startsWith(`${base}/api`)}
+                                    icon={Code2} label="API Explorer" />
+                                <SidebarLink href={`${base}/sql`} active={pathname.startsWith(`${base}/sql`)}
+                                    icon={FlaskConical} label="SQL Editor" />
+                            </NavSection>
 
-                            {/* CATEGORY: AUTH & IDENTITY */}
-                            <div className="space-y-1">
-                                <div className="px-3 mb-1">
-                                    <span className="text-[10px] uppercase font-black text-muted tracking-[0.2em] opacity-40">Autenticación</span>
-                                </div>
-                                <div className="space-y-0.5">
-                                    <SidebarLink 
-                                        href={`/dashboard/${workspaceSlug}/${projectSlug}/auth`} 
-                                        active={pathname === `/dashboard/${workspaceSlug}/${projectSlug}/auth`}
-                                        icon={Users}
-                                        label="Gestión de Usuarios"
-                                    />
-                                    <SidebarLink 
-                                        href={`/dashboard/${workspaceSlug}/${projectSlug}/auth/providers`} 
-                                        active={pathname === `/dashboard/${workspaceSlug}/${projectSlug}/auth/providers`}
-                                        icon={Key}
-                                        label="Proveedores OAuth2"
-                                    />
-                                </div>
-                            </div>
+                            <NavSection label="Usuarios">
+                                <SidebarLink href={`${base}/auth`} active={pathname.startsWith(`${base}/auth`)}
+                                    icon={Users} label="Usuarios" />
+                            </NavSection>
 
-                            {/* CATEGORY: ASSETS */}
-                            <div className="space-y-1">
-                                <div className="px-3 mb-1">
-                                    <span className="text-[10px] uppercase font-black text-muted tracking-[0.2em] opacity-40">Archivos</span>
-                                </div>
-                                <div className="space-y-0.5">
-                                    <SidebarLink 
-                                        href={`/dashboard/${workspaceSlug}/${projectSlug}/storage`} 
-                                        active={pathname === `/dashboard/${workspaceSlug}/${projectSlug}/storage`}
-                                        icon={Folder}
-                                        label="Galería de Almacenamiento"
-                                    />
-                                </div>
-                            </div>
+                            <NavSection label="Archivos">
+                                <SidebarLink href={`${base}/storage`} active={pathname.startsWith(`${base}/storage`)}
+                                    icon={Folder} label="Storage" />
+                                <SidebarLink href={`${base}/emails`} active={pathname.startsWith(`${base}/emails`)}
+                                    icon={Mail} label="Emails" />
+                            </NavSection>
 
-                            {/* CATEGORY: ENGINEERING TOOLS */}
-                            <div className="space-y-1">
-                                <div className="px-3 mb-1">
-                                    <span className="text-[10px] uppercase font-black text-muted tracking-[0.2em] opacity-40">Herramientas</span>
-                                </div>
-                                <div className="space-y-0.5">
-                                    <SidebarLink 
-                                        href={`/dashboard/${workspaceSlug}/${projectSlug}/api`} 
-                                        active={pathname === `/dashboard/${workspaceSlug}/${projectSlug}/api`}
-                                        icon={Code2}
-                                        label="Explorador de API"
-                                    />
-                                    <SidebarLink 
-                                        href={`/dashboard/${workspaceSlug}/${projectSlug}/logs`} 
-                                        active={pathname === `/dashboard/${workspaceSlug}/${projectSlug}/logs`}
-                                        icon={ActivitySquare}
-                                        label="Logs en Vivo"
-                                    />
-                                </div>
-                            </div>
-
-                            {/* CATEGORY: OPERATIONS */}
-                            <div className="space-y-1">
-                                <div className="px-3 mb-1">
-                                    <span className="text-[10px] uppercase font-black text-muted tracking-[0.2em] opacity-40">Operaciones</span>
-                                </div>
-                                <div className="space-y-0.5">
-                                    <SidebarLink 
-                                        href={`/dashboard/${workspaceSlug}/${projectSlug}/backups`} 
-                                        active={pathname === `/dashboard/${workspaceSlug}/${projectSlug}/backups`}
-                                        icon={History}
-                                        label="Copias de Seguridad"
-                                    />
-                                    <SidebarLink 
-                                        href={`/dashboard/${workspaceSlug}/${projectSlug}/settings`} 
-                                        active={pathname === `/dashboard/${workspaceSlug}/${projectSlug}/settings`}
-                                        icon={Settings}
-                                        label="Configuración"
-                                    />
-                                </div>
-                            </div>
-
+                            <NavSection label="Proyecto">
+                                <SidebarLink href={`${base}/logs`} active={pathname.startsWith(`${base}/logs`)}
+                                    icon={Terminal} label="Logs" />
+                                <SidebarLink href={`${base}/webhooks`} active={pathname.startsWith(`${base}/webhooks`)}
+                                    icon={Webhook} label="Webhooks" />
+                                <SidebarLink href={`${base}/security`} active={pathname.startsWith(`${base}/security`)}
+                                    icon={Shield} label="Permisos" />
+                                <SidebarLink href={`${base}/connect`} active={pathname.startsWith(`${base}/connect`)}
+                                    icon={Code2} label="Conexión & Keys" />
+                                <SidebarLink href={`${base}/settings`} active={pathname.startsWith(`${base}/settings`)}
+                                    icon={Settings} label="Configuración" />
+                            </NavSection>
                         </nav>
                     </div>
                 ) : (
-                    /* GLOBAL WORKSPACE CONTEXT */
-                    <div className="flex-1 flex flex-col animate-in fade-in duration-500 p-4 space-y-6">
-                        {/* Selector */}
-                        <div className="mb-4">
-                            <WorkspaceSelector
-                                workspaces={workspaces}
-                                current={currentWorkspace}
-                                onSelect={selectWorkspace}
-                                onRefresh={refreshWorkspaces}
-                            />
+                    <div className="flex-1 flex flex-col p-4 space-y-4 overflow-hidden">
+                        <WorkspaceSelector
+                            workspaces={workspaces}
+                            current={currentWorkspace}
+                            onSelect={setCurrentWorkspace}
+                            onRefresh={refreshWorkspaces}
+                        />
+                        {/* Workspace links */}
+                        <div className="px-1 mb-3 space-y-0.5">
+                            <Link href={`/dashboard/${workspaceSlug}/members`}
+                                className={cn(
+                                    "flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all",
+                                    pathname === `/dashboard/${workspaceSlug}/members`
+                                        ? "bg-violet-50 text-violet-700 font-semibold"
+                                        : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+                                )}>
+                                <Users className={cn("w-4 h-4 shrink-0", pathname === `/dashboard/${workspaceSlug}/members` ? "text-violet-600" : "text-slate-400")} />
+                                <span className="truncate">Equipo</span>
+                            </Link>
                         </div>
 
-                        {/* Projects list */}
-                        <div className="flex-1 overflow-y-auto custom-scrollbar">
-                           <div className="px-3 mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted flex items-center justify-between">
-                               <span>Proyectos</span>
-                               <button 
-                                   onClick={() => window.dispatchEvent(new CustomEvent('open-new-project-modal'))}
-                                   className="p-1 hover:bg-accent/10 hover:text-accent rounded transition-all active:scale-90"
-                               >
-                                   <Plus className="w-4 h-4" />
-                               </button>
-                           </div>
-                           <nav className="space-y-0.5">
-                               {projects.length > 0 ? (
-                                   projects.map((p) => (
-                                       <Link
-                                            key={p.id}
+                        <div className="flex-1 overflow-y-auto">
+                            <div className="flex items-center justify-between px-1 mb-2">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Proyectos</span>
+                                <button
+                                    onClick={() => window.dispatchEvent(new CustomEvent('open-new-project-modal'))}
+                                    className="p-1 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded-md transition-all">
+                                    <Plus className="w-3.5 h-3.5" />
+                                </button>
+                            </div>
+                            <nav className="space-y-0.5">
+                                {projects.length > 0 ? (
+                                    projects.map(p => (
+                                        <Link key={p.id}
                                             href={`/dashboard/${workspaceSlug}/${p.subdomain}`}
-                                            className="flex items-center justify-between px-3 py-2.5 rounded-xl transition-all group hover:bg-white/[0.03] border border-transparent hover:border-white/5"
-                                       >
-                                           <div className="flex items-center gap-3 truncate">
-                                               <div className="p-1.5 bg-white/5 rounded-lg group-hover:bg-accent/10 group-hover:text-accent transition-all">
-                                                   <Folder className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100" />
-                                               </div>
-                                               <span className="text-xs font-bold truncate group-hover:text-white transition-colors">{p.name}</span>
-                                           </div>
-                                           <div className={cn(
-                                               "w-1.5 h-1.5 rounded-full shrink-0",
-                                               p.status === 'active' ? "bg-accent/40 group-hover:bg-accent" : "bg-yellow-500/40"
-                                           )} />
-                                       </Link>
-                                   ))
-                               ) : (
-                                    <div className="px-3 py-10 border border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center text-center bg-white/[0.01]">
-                                         <p className="text-[10px] text-muted italic mb-4 font-mono">Clean Slate</p>
-                                         <button 
+                                            className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:text-violet-700 hover:bg-violet-50 transition-all group">
+                                            <div className="flex items-center gap-2.5 truncate">
+                                                <div className="w-5 h-5 rounded-md bg-violet-100 flex items-center justify-center shrink-0 group-hover:bg-violet-200 transition-colors">
+                                                    <Database className="w-3 h-3 text-violet-600" />
+                                                </div>
+                                                <span className="truncate">{p.name}</span>
+                                            </div>
+                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                                        </Link>
+                                    ))
+                                ) : (
+                                    <div className="px-3 py-8 flex flex-col items-center text-center gap-3">
+                                        <p className="text-xs text-slate-400 italic">Sin proyectos aún</p>
+                                        <button
                                             onClick={() => window.dispatchEvent(new CustomEvent('open-new-project-modal'))}
-                                            className="text-[10px] bg-accent/10 text-accent font-black px-4 py-2 rounded-xl border border-accent/20 uppercase tracking-[0.2em] hover:bg-accent hover:text-background transition-all"
-                                        >
-                                            Create Project
+                                            className="text-xs font-semibold text-violet-600 hover:text-violet-700 transition-colors">
+                                            + Crear proyecto
                                         </button>
                                     </div>
                                 )}
-                           </nav>
+                            </nav>
                         </div>
                     </div>
                 )}
             </div>
 
+            {/* Footer: user */}
+            {user && (
+                <div className="border-t border-slate-100 px-4 py-3 flex items-center justify-between gap-2">
+                    <Link href="/dashboard/profile" className="flex items-center gap-2 min-w-0 flex-1 group">
+                        <div className="w-6 h-6 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 text-[10px] font-bold shrink-0 group-hover:bg-violet-200 transition-colors">
+                            {(user.name || user.email || '?')[0].toUpperCase()}
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-xs font-semibold text-slate-800 truncate group-hover:text-violet-700 transition-colors">{user.name || user.email}</p>
+                            <p className="text-[10px] text-slate-400 truncate">{user.email}</p>
+                        </div>
+                    </Link>
+                    <button onClick={handleLogout}
+                        className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all shrink-0"
+                        title="Cerrar sesión">
+                        <LogOut className="w-3.5 h-3.5" />
+                    </button>
+                </div>
+            )}
         </aside>
     )
 }
 
-function SidebarLink({ href, active, icon: Icon, label, disabled = false }: any) {
-    if (disabled) {
-        return (
-            <div className="flex items-center gap-3 px-3 py-2 text-xs text-muted/20 cursor-not-allowed select-none">
-                <Icon className="w-4 h-4 shrink-0 opacity-20" />
-                <span className="font-medium tracking-tight">{label}</span>
-                <span className="ml-auto text-[7px] border border-white/5 px-1 rounded-sm opacity-30 font-black">PRONTO</span>
-            </div>
-        )
-    }
-
+function NavSection({ label, children }: { label: string; children: React.ReactNode }) {
     return (
-        <Link
-            href={href}
-            className={cn(
-                "flex items-center gap-3 px-3 py-1.5 rounded-xl text-xs transition-all group relative overflow-hidden",
-                active 
-                    ? "text-accent bg-accent/5 font-black border border-accent/20 shadow-[0_4px_20px_rgba(55,255,208,0.02)]" 
-                    : "text-muted hover:text-white hover:bg-white/[0.02] border border-transparent font-bold"
-            )}
-        >
-            <Icon className={cn(
-                "w-4 h-4 shrink-0 transition-all",
-                active ? "opacity-100 scale-110" : "opacity-40 group-hover:opacity-80"
-            )} />
-            <span className="truncate tracking-tight whitespace-nowrap">{label}</span>
-            
-            {active && (
-                <div className="absolute right-3 w-1 h-1 bg-accent rounded-full animate-pulse shadow-[0_0_8px_var(--accent)]" />
-            )}
+        <div className="space-y-0.5">
+            <p className="px-3 mb-1 text-[9px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
+            {children}
+        </div>
+    )
+}
+
+function SidebarLink({ href, active, icon: Icon, label }: {
+    href: string; active: boolean; icon: any; label: string
+}) {
+    return (
+        <Link href={href} className={cn(
+            "flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all",
+            active
+                ? "bg-violet-50 text-violet-700 font-semibold"
+                : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+        )}>
+            <Icon className={cn("w-4 h-4 shrink-0", active ? "text-violet-600" : "text-slate-400")} />
+            <span className="truncate">{label}</span>
+            {active && <div className="ml-auto w-1 h-4 rounded-full bg-violet-500" />}
         </Link>
     )
 }

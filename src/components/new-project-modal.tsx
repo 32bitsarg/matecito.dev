@@ -1,21 +1,43 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import pb from '@/lib/pocketbase'
+import { ProjectService } from '@/services/api.service'
 import { toast } from 'sonner'
-import { slugify } from '@/lib/utils'
 import { X, Loader2, Globe } from 'lucide-react'
 
+// ─── Utils ───────────────────────────────────────────────────────────────────
+
+function previewSubdomain(name: string): string {
+    return name
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .substring(0, 50)
+}
+
+// ─── Types ───────────────────────────────────────────────────────────────────
+
 interface NewProjectModalProps {
-    currentWorkspaceId: string
+    currentWorkspaceId?: string
     onCreated: () => void
 }
 
-export default function NewProjectModal({ currentWorkspaceId, onCreated }: NewProjectModalProps) {
+// ─── Component ───────────────────────────────────────────────────────────────
+
+export default function NewProjectModal({
+    currentWorkspaceId,
+    onCreated
+}: NewProjectModalProps) {
+
     const [isOpen, setIsOpen] = useState(false)
     const [name, setName] = useState('')
-    const [subdomain, setSubdomain] = useState('')
     const [loading, setLoading] = useState(false)
+
+    // ── Open listener ──────────────────────────────────────────────────────────
 
     useEffect(() => {
         const handleOpen = () => setIsOpen(true)
@@ -23,41 +45,64 @@ export default function NewProjectModal({ currentWorkspaceId, onCreated }: NewPr
         return () => window.removeEventListener('open-new-project-modal', handleOpen)
     }, [])
 
-    // Auto-slugify for subdomain
-    useEffect(() => {
-        setSubdomain(slugify(name))
-    }, [name])
+    // ── Handlers ───────────────────────────────────────────────────────────────
+
+    const handleClose = () => {
+        if (loading) return // evita cerrar en medio de creación
+        setIsOpen(false)
+        setName('')
+    }
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!name || !subdomain || !currentWorkspaceId) return
+
+        const trimmed = name.trim()
+
+        // ── Validaciones ────────────────────────────────────────────────────────
+        if (!trimmed) {
+            toast.error('El nombre es requerido')
+            return
+        }
+
+        if (trimmed.length < 3) {
+            toast.error('Mínimo 3 caracteres')
+            return
+        }
+
+        if (trimmed.length > 50) {
+            toast.error('Máximo 50 caracteres')
+            return
+        }
+
+        if (!currentWorkspaceId) {
+            toast.error('Workspace inválido')
+            return
+        }
+
+        if (loading) return // evita doble submit
 
         setLoading(true)
+
         try {
-            const response = await fetch('/api/projects/create', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name,
-                    workspaceId: currentWorkspaceId,
-                    subdomain,
-                    token: pb.authStore.token
-                })
-            })
+            const { project, api_keys } = await ProjectService.create(
+                currentWorkspaceId,
+                trimmed
+            )
 
-            const data = await response.json()
+            toast.success('Proyecto creado 🚀')
 
-            if (data.success) {
-                toast.success('¡Proyecto iniciado! Se está configurando... ⚙️')
-                setIsOpen(false)
-                setName('')
-                onCreated()
-            } else {
-                throw new Error(data.error || 'Error al crear proyecto')
-            }
+            // 👉 opcional: mostrar keys (esto es oro)
+            console.log('API KEYS:', api_keys)
+
+            handleClose()
+            onCreated()
+
+            // 👉 opcional (pro level): redirigir directo
+            // router.push(`/dashboard/${workspaceSlug}/${project.subdomain}`)
+
         } catch (error: any) {
-            console.error('Error creating project:', error)
-            toast.error('Error al crear el proyecto. El subdominio podría estar ocupado.')
+            console.error(error)
+            toast.error(error.message ?? 'Error al crear el proyecto')
         } finally {
             setLoading(false)
         }
@@ -65,62 +110,74 @@ export default function NewProjectModal({ currentWorkspaceId, onCreated }: NewPr
 
     if (!isOpen) return null
 
+    const subdomain = previewSubdomain(name)
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--accent)]/10 backdrop-blur-md animate-in fade-in duration-300">
-            <div className="w-full max-w-md bg-[var(--background)] border border-[var(--accent)]/10 rounded-3xl shadow-[0_32px_64px_-12px_rgba(1,57,26,0.15)] overflow-hidden animate-in zoom-in duration-500">
-                <div className="flex items-center justify-between p-8 border-b border-[var(--accent)]/5">
-                    <h2 className="text-2xl font-bold text-[var(--accent)]">Nuevo Proyecto</h2>
-                    <button onClick={() => setIsOpen(false)} className="text-[var(--foreground)] opacity-40 hover:opacity-100 transition-all p-2 rounded-full hover:bg-[var(--accent)]/5">
+
+            <div className="w-full max-w-md bg-[var(--background)] border border-[var(--accent)]/10 rounded-3xl shadow-xl overflow-hidden animate-in zoom-in duration-300">
+
+                {/* Header */}
+                <div className="flex items-center justify-between p-6 border-b border-[var(--accent)]/5">
+                    <h2 className="text-xl font-bold text-[var(--accent)]">
+                        Nuevo Proyecto
+                    </h2>
+
+                    <button
+                        onClick={handleClose}
+                        disabled={loading}
+                        className="opacity-40 hover:opacity-100 p-2 rounded-full"
+                    >
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
-                <form onSubmit={handleCreate} className="p-8 space-y-8">
-                    <div className="space-y-6">
-                        <div>
-                            <label className="block text-[10px] font-bold text-[var(--foreground)] opacity-40 uppercase tracking-[0.2em] mb-3 ml-1">
-                                Nombre del Proyecto
-                            </label>
-                            <input
-                                type="text"
-                                required
-                                className="w-full rounded-full border border-[var(--accent)]/10 bg-[var(--accent)]/5 px-6 py-4 text-sm text-[var(--accent)] placeholder-[var(--foreground)]/30 outline-none transition-all focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]"
-                                placeholder="Mi App Increíble"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                            />
-                        </div>
+                {/* Form */}
+                <form onSubmit={handleCreate} className="p-6 space-y-6">
 
-                        <div>
-                            <label className="block text-[10px] font-bold text-[var(--foreground)] opacity-40 uppercase tracking-[0.2em] mb-3 ml-1">
-                                Subdominio
-                            </label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 flex items-center pl-5 pointer-events-none text-[var(--accent)] opacity-40">
-                                    <Globe className="w-4 h-4" />
-                                </div>
-                                <input
-                                    type="text"
-                                    required
-                                    className="w-full rounded-full border border-[var(--accent)]/10 bg-[var(--accent)]/5 pl-12 pr-6 py-4 text-sm text-[var(--accent)] placeholder-[var(--foreground)]/30 outline-none transition-all focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]"
-                                    placeholder="mi-app"
-                                    value={subdomain}
-                                    onChange={(e) => setSubdomain(slugify(e.target.value))}
-                                />
-                            </div>
-                            <p className="mt-3 text-[10px] font-mono text-[var(--foreground)] opacity-40 ml-1">
-                                URL: <span className="text-[var(--accent)] font-bold">{subdomain || '...'}.matecito.dev</span>
-                            </p>
-                        </div>
+                    <div>
+                        <label className="block text-xs font-bold opacity-40 uppercase mb-2">
+                            Nombre del Proyecto
+                        </label>
+
+                        <input
+                            type="text"
+                            required
+                            autoFocus
+                            maxLength={50}
+                            className="w-full rounded-full border px-5 py-3 text-sm bg-[var(--accent)]/5 outline-none focus:ring-1"
+                            placeholder="Mi App Increíble"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
                     </div>
 
+                    {/* Preview */}
+                    {name.trim() && (
+                        <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-[var(--accent)]/5 border">
+                            <Globe className="w-4 h-4 opacity-40" />
+                            <p className="text-xs font-mono opacity-60">
+                                {subdomain}.matecito.dev
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Submit */}
                     <button
                         type="submit"
-                        disabled={loading || !name}
-                        className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-6 py-4 text-sm font-bold text-[var(--background)] transition-all hover:opacity-90 disabled:opacity-50 uppercase tracking-widest shadow-lg shadow-[var(--accent)]/20"
+                        disabled={loading || !name.trim()}
+                        className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-6 py-3 text-sm font-bold text-[var(--background)] disabled:opacity-50"
                     >
-                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Crear Proyecto'}
+                        {loading ? (
+                            <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Creando...
+                            </>
+                        ) : (
+                            'Crear Proyecto'
+                        )}
                     </button>
+
                 </form>
             </div>
         </div>

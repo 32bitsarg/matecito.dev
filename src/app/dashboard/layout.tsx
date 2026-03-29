@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import pb from '@/lib/pocketbase'
+import { isAuthenticated, clearToken } from '@/lib/api'
 import Sidebar from '@/components/sidebar'
-import { WorkspaceProvider } from '@/contexts/WorkspaceContext'
 
 export default function DashboardLayout({
     children,
@@ -16,19 +15,13 @@ export default function DashboardLayout({
 
     useEffect(() => {
         const checkAuth = () => {
-            const isValid = pb.authStore.isValid
-            const hasRecord = !!pb.authStore.record
+            const isAuth = isAuthenticated()
             
-            if (!isValid || !hasRecord) {
-                console.warn("[Layout Debug] Unauthorized or Inconsistent Session. Redirecting...");
+            if (!isAuth) {
+                console.warn("[Layout Debug] Unauthorized session. Redirecting...");
                 
-                // Si es un estado inconsistente (token sin record), limpiamos localmente
-                if (isValid && !hasRecord) {
-                    pb.authStore.clear();
-                }
-
-                // Intentamos redirección suave primero
-                router.push('/login');
+                clearToken()
+                router.push('/login')
                 
                 // Si estamos en un estado atascado despues de un segundo, forzamos hard redirect
                 const backupTimer = setTimeout(() => {
@@ -46,34 +39,30 @@ export default function DashboardLayout({
 
         checkAuth();
         
-        const unsubscribe = pb.authStore.onChange(checkAuth);
-        return () => unsubscribe();
+        // El api helper no tiene un "onChange" como PB, así que simplemente verificamos en el montaje
+        // o podríamos agregar un listener a localStorage si fuera necesario.
     }, [router])
 
     if (!authorized) {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--accent)] border-t-transparent" />
-                    <span className="text-[10px] font-mono uppercase tracking-widest opacity-40">Verificando Sesión...</span>
+            <div className="flex min-h-screen items-center justify-center bg-slate-50">
+                <div className="flex flex-col items-center gap-3">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-500 border-t-transparent" />
+                    <span className="text-xs font-medium text-slate-400">Verificando sesión...</span>
                 </div>
             </div>
         )
     }
 
-    return (
-        <WorkspaceProvider>
-            <div className="flex h-screen bg-[var(--background)] text-[var(--foreground)]">
-                {/* Sidebar Fijo */}
-                <Sidebar />
 
-                {/* Contenido Principal */}
-                <main className="flex-1 overflow-y-auto">
-                    <div className="mx-auto max-w-7xl p-8">
-                        {children}
-                    </div>
-                </main>
-            </div>
-        </WorkspaceProvider>
+    return (
+        <div className="flex h-screen bg-slate-50 text-slate-900">
+            <Sidebar />
+            <main className="flex-1 overflow-y-auto">
+                <div className="mx-auto max-w-7xl p-8">
+                    {children}
+                </div>
+            </main>
+        </div>
     )
 }

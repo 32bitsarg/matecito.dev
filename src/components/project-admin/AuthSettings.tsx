@@ -49,7 +49,7 @@ interface SmtpConfig {
 }
 
 export function AuthSettings() {
-    const { workspaceSlug, projectSlug } = useParams()
+    const { workspace: workspaceSlug, project: projectSlug } = useParams()
     const { getSettings, updateSettings, updateCollection, testSmtp, project } = useProject()
     
     const [config, setConfig] = useState<AuthConfig | null>(null)
@@ -92,7 +92,7 @@ export function AuthSettings() {
             }
 
             // 2. Obtener settings de colección via nuestra API
-            const res = await fetch(`/api/projects/auth-settings?subdomain=${project?.subdomain}&adminToken=${project?.admin_token}`)
+            const res = await fetch(`/api/v1/projects/auth-settings?subdomain=${project?.subdomain}&adminToken=${project?.admin_token}`)
             const data = await res.json()
             
             const googleProv = data.oauth2?.providers?.find((p: any) => p.name === 'google')
@@ -156,7 +156,7 @@ export function AuthSettings() {
                 }
             }
 
-            const authRes = await fetch('/api/projects/auth-settings', {
+            const authRes = await fetch('/api/v1/projects/auth-settings', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

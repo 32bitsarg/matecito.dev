@@ -1,139 +1,228 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
-import pb from '@/lib/pocketbase'
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  type ReactNode,
+} from 'react'
 
-interface WorkspaceContextType {
-    workspaces: any[]
-    currentWorkspace: any
-    projects: any[]
-    loading: boolean
-    isInitialized: boolean
-    refreshWorkspaces: () => Promise<void>
-    refreshProjects: (workspaceId: string) => Promise<void>
-    selectWorkspace: (ws: any) => void
+import {
+  AuthService,
+  WorkspaceService,
+  ProjectService,
+  type PlatformUser,
+  type Workspace,
+  type Project,
+} from '@/services/api.service'
+
+import { getToken } from '@/lib/api'
+
+// ─── Tipos ────────────────────────────────────────────────────────────────────
+
+interface WorkspaceContextValue {
+  user: PlatformUser | null
+  workspaces: Workspace[]
+  currentWorkspace: Workspace | null
+  projects: Project[]
+  loading: boolean
+  isInitialized: boolean
+  error: string | null
+
+  setCurrentWorkspace: (workspace: Workspace) => void
+  refreshWorkspaces: () => Promise<void>
+  refreshProjects: (workspaceId: string) => Promise<void>
+  logout: () => void
 }
 
-const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined)
+// ─── Contexto ─────────────────────────────────────────────────────────────────
 
-export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
-    const [workspaces, setWorkspaces] = useState<any[]>([])
-    const [currentWorkspace, setCurrentWorkspace] = useState<any>(null)
-    const [projects, setProjects] = useState<any[]>([])
-    const [loading, setLoading] = useState(true)
-    const [isInitialized, setIsInitialized] = useState(false)
-    
-    const currentWSRef = useRef<any>(null)
+const WorkspaceContext = createContext<WorkspaceContextValue | null>(null)
 
-    const fetchProjects = useCallback(async (workspaceId: string) => {
-        try {
-            const records = await pb.collection('projects').getList(1, 100, {
-                filter: `workspace = "${workspaceId}"`,
-                sort: '-created',
-                requestKey: null
-            })
-            setProjects(records.items)
-        } catch (error) {
-            console.error('[WorkspaceContext] Error fetching projects:', error)
-        }
-    }, [])
+// ─── Provider ─────────────────────────────────────────────────────────────────
 
-    const fetchWorkspaces = useCallback(async () => {
-        const user = pb.authStore.record
-        if (!user?.id) {
-            setLoading(false)
-            setIsInitialized(true)
-            return
-        }
-        
-        setLoading(true)
-        try {
-            const records = await pb.collection('workspaces').getList(1, 50, {
-                filter: `owner = "${user.id}"`,
-                sort: '-created',
-                requestKey: null
-            })
-            
-            setWorkspaces(records.items)
+export function WorkspaceProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<PlatformUser | null>(null)
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([])
+  const [currentWorkspace, setCurrentWorkspace] = useState<Workspace | null>(null)
+  const [projects, setProjects] = useState<Project[]>([])
+  const [initialized, setInitialized] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-            if (records.items.length > 0 && !currentWSRef.current) {
-                const firstWS = records.items[0]
-                currentWSRef.current = firstWS
-                setCurrentWorkspace(firstWS)
-                await fetchProjects(firstWS.id)
-            }
-        } catch (error) {
-            console.error('[WorkspaceContext] Error fetching workspaces:', error)
-        } finally {
-            setLoading(false)
-            setIsInitialized(true)
-        }
-    }, [fetchProjects])
+  const currentWorkspaceRef = useRef<string | null>(null)
 
-    // Polling effect: Si hay proyectos creando, refrescar cada 5 segundos
-    useEffect(() => {
-        const hasCreatingProjects = projects.some(p => p.status === 'creating')
-        
-        let interval: NodeJS.Timeout
-        
-        if (hasCreatingProjects && currentWorkspace) {
-            interval = setInterval(() => {
-                fetchProjects(currentWorkspace.id)
-            }, 5000)
-        }
+  const loading = !initialized
 
-        return () => {
-            if (interval) clearInterval(interval)
-        }
-    }, [projects, currentWorkspace, fetchProjects])
+  // ── Reset seguro ────────────────────────────────────────────────────────────
 
-    useEffect(() => {
-        fetchWorkspaces()
-        
-        const unsubscribe = pb.authStore.onChange((token, record) => {
-            if (record) {
-                fetchWorkspaces()
-            } else {
-                setWorkspaces([])
-                setCurrentWorkspace(null)
-                currentWSRef.current = null
-                setLoading(false)
-            }
-        })
-        
-        return () => {
-            unsubscribe();
-        }
-    }, [fetchWorkspaces])
+  const resetState = useCallback(() => {
+    setUser(null)
+    setWorkspaces([])
+    setCurrentWorkspace(null)
+    setProjects([])
+    setError(null)
+  }, [])
 
-    const selectWorkspace = useCallback(async (ws: any) => {
-        currentWSRef.current = ws
-        setCurrentWorkspace(ws)
-        setLoading(true)
-        await fetchProjects(ws.id)
-        setLoading(false)
-    }, [fetchProjects])
+  // ── Refresh Projects (race-safe) ────────────────────────────────────────────
 
-    return (
-        <WorkspaceContext.Provider value={{
-            workspaces,
-            currentWorkspace,
-            projects,
-            loading,
-            isInitialized,
-            refreshWorkspaces: fetchWorkspaces,
-            refreshProjects: fetchProjects,
-            selectWorkspace
-        }}>
-            {children}
-        </WorkspaceContext.Provider>
-    )
-}
+  const refreshProjects = useCallback(async (workspaceId: string) => {
+    currentWorkspaceRef.current = workspaceId
 
-export function useWorkspace() {
-    const context = useContext(WorkspaceContext)
-    if (context === undefined) {
-        throw new Error('useWorkspace must be used within a WorkspaceProvider')
+    try {
+      const list = await ProjectService.list(workspaceId)
+
+      if (currentWorkspaceRef.current === workspaceId) {
+        setProjects(list)
+      }
+    } catch (err: any) {
+      console.error('Error al cargar proyectos:', err.message)
+
+      if (currentWorkspaceRef.current === workspaceId) {
+        setProjects([])
+      }
     }
-    return context
+  }, [])
+
+  // ── Refresh Workspaces ──────────────────────────────────────────────────────
+
+  const refreshWorkspaces = useCallback(async () => {
+    try {
+      const list = await WorkspaceService.list()
+      setWorkspaces(list)
+
+      if (list.length === 0) {
+        setCurrentWorkspace(null)
+        setProjects([])
+        return
+      }
+
+      const segments = window.location.pathname.split('/')
+      const slugFromUrl = segments[1] === 'dashboard' ? segments[2] : null
+
+      const workspaceBySlug = list.find(w => w.slug === slugFromUrl)
+      const selected = workspaceBySlug || list[0]
+
+      setCurrentWorkspace(selected)
+      await refreshProjects(selected.id)
+
+    } catch (err: any) {
+      console.error('Error al cargar workspaces:', err.message)
+      setError(err.message)
+    }
+  }, [refreshProjects])
+
+  // ── Init ────────────────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    let mounted = true
+
+    async function init() {
+      setError(null)
+
+      const token = getToken()
+      if (!token) {
+        if (mounted) setInitialized(true)
+        return
+      }
+
+      try {
+        const data = await AuthService.me()
+
+        if (!mounted) return
+
+        setUser(data.user)
+        setWorkspaces(data.workspaces)
+
+        if (data.workspaces.length > 0) {
+          const segments = window.location.pathname.split('/')
+          const slugFromUrl = segments[1] === 'dashboard' ? segments[2] : null
+
+          const workspaceBySlug = data.workspaces.find(w => w.slug === slugFromUrl)
+          const selected = workspaceBySlug || data.workspaces[0]
+
+          setCurrentWorkspace(selected)
+
+          const workspaceProjects = data.projects.filter(
+            (p: Project) => p.workspace_id === selected.id
+          )
+
+          setProjects(workspaceProjects)
+        }
+
+      } catch (err: any) {
+        console.error('Sesión inválida:', err.message)
+        resetState()
+      } finally {
+        if (mounted) setInitialized(true)
+      }
+    }
+
+    init()
+
+    return () => {
+      mounted = false
+    }
+  }, [resetState])
+
+  // ── Logout global listener ──────────────────────────────────────────────────
+
+  useEffect(() => {
+    const handleLogout = () => {
+      resetState()
+    }
+
+    window.addEventListener('auth:logout', handleLogout)
+
+    return () => {
+      window.removeEventListener('auth:logout', handleLogout)
+    }
+  }, [resetState])
+
+  // ── Cambiar workspace ───────────────────────────────────────────────────────
+
+  const handleSetCurrentWorkspace = useCallback((workspace: Workspace) => {
+    setCurrentWorkspace(workspace)
+    setProjects([])
+    refreshProjects(workspace.id)
+  }, [refreshProjects])
+
+  // ── Logout manual ───────────────────────────────────────────────────────────
+
+  const logout = useCallback(() => {
+    resetState()
+    AuthService.logout()
+  }, [resetState])
+
+  // ───────────────────────────────────────────────────────────────────────────
+
+  return (
+    <WorkspaceContext.Provider
+      value={{
+        user,
+        workspaces,
+        currentWorkspace,
+        projects,
+        loading,
+        isInitialized: initialized, // ✅ FIX CLAVE
+        error,
+        setCurrentWorkspace: handleSetCurrentWorkspace,
+        refreshWorkspaces,
+        refreshProjects,
+        logout,
+      }}
+    >
+      {children}
+    </WorkspaceContext.Provider>
+  )
+}
+
+// ─── Hook ─────────────────────────────────────────────────────────────────────
+
+export function useWorkspace(): WorkspaceContextValue {
+  const ctx = useContext(WorkspaceContext)
+  if (!ctx) throw new Error('useWorkspace debe usarse dentro de <WorkspaceProvider>')
+  return ctx
 }

@@ -2,189 +2,149 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
-import { usePathname, useRouter } from "next/navigation";
-import pb from "@/lib/pocketbase";
-import { LogOut } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { useWorkspace } from "@/contexts/WorkspaceContext";
+import { LogOut, Menu, X } from "lucide-react";
 
 export function Navbar() {
     const pathname = usePathname();
-    const router = useRouter();
+    const { user, logout } = useWorkspace();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [user, setUser] = useState<any>(null);
+    const [scrolled, setScrolled] = useState(false);
     const isDashboard = pathname.startsWith('/dashboard');
 
-    // Manejo de hidratación y sincro de usuario
     useEffect(() => {
-        const syncUser = () => {
-            setUser(pb.authStore.record);
-        };
+        const onScroll = () => setScrolled(window.scrollY > 8);
+        window.addEventListener("scroll", onScroll);
+        return () => window.removeEventListener("scroll", onScroll);
+    }, []);
 
-        syncUser();
-        const unsubscribe = pb.authStore.onChange(syncUser);
-        
-        return () => unsubscribe();
-    }, [pathname]);
-
-    // Bloqueo de scroll agresivo para el menú móvil
     useEffect(() => {
-        if (isMenuOpen) {
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "";
-        }
+        document.body.style.overflow = isMenuOpen ? "hidden" : "";
     }, [isMenuOpen]);
 
     const handleLogout = () => {
-        pb.authStore.clear();
-        setUser(null);
-        // Hard redirect for session cleaning
+        logout();
+        setIsMenuOpen(false);
         window.location.href = '/login';
     };
 
+    if (isDashboard) return null;
+
     const navLinks = [
+        { href: "/matecitodb", label: "matecitodb" },
         { href: "/#servicios", label: "Servicios" },
-        { href: "/estudio", label: "Estudio" },
-        { href: "/insights", label: "Insights" },
+        { href: "/#proyectos", label: "Proyectos" },
+        { href: "/#contacto", label: "Contacto" },
     ];
 
     return (
         <>
-            {/* HEADER - Minimalist Context-Aware */}
-            <header className={`sticky top-0 w-full transition-all duration-300 z-[1001] border-b border-border/50 ${isMenuOpen ? 'bg-transparent border-transparent' : 'bg-background/80 backdrop-blur-xl'}`}>
-                <div className="container mx-auto flex h-9 sm:h-11 max-w-7xl items-center justify-between px-6 md:px-12 relative">
-                    
-                    {/* LEFT SECTION: BRANDING & PRIMARY NAV */}
-                    <div className="flex items-center gap-8 group shrink-0 relative z-[1002]">
-                        <Link href="/" className="flex items-center gap-1 group">
-                            <span className="font-bold tracking-tighter text-lg sm:text-xl text-white">matecito<span className="text-accent underline decoration-accent/30">.dev</span></span>
-                        </Link>
+            <header className={`sticky top-0 z-[1001] w-full transition-all duration-300 ${
+                scrolled
+                    ? "bg-white/95 backdrop-blur-xl border-b border-slate-200 shadow-sm"
+                    : "bg-white border-b border-slate-100"
+            }`}>
+                <div className="max-w-7xl mx-auto flex h-14 items-center justify-between px-6">
+                    {/* Logo */}
+                    <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-violet-600 flex items-center justify-center shadow-sm">
+                            <span className="text-white font-black text-xs">m</span>
+                        </div>
+                        <span className="font-bold text-base text-slate-900 tracking-tight">
+                            matecito<span className="text-violet-500">.dev</span>
+                        </span>
+                    </Link>
 
-                        {/* NAV LINKS (Left aligned next to logo) */}
-                        <nav className="hidden md:flex items-center gap-8 font-mono text-[10px] uppercase tracking-[0.2em] font-bold border-l border-[var(--foreground)]/10 pl-8 ml-2">
-                            {isDashboard ? (
-                                <>
-                                    <Link href="/" className="text-[var(--foreground)]/60 transition-colors hover:text-[var(--accent)]">Inicio</Link>
-                                    <Link href="/#servicios" className="text-[var(--foreground)]/60 transition-colors hover:text-[var(--accent)]">Servicios</Link>
-                                    <Link href="/insights" className="text-[var(--foreground)]/60 transition-colors hover:text-[var(--accent)]">Insights</Link>
-                                </>
-                            ) : (
-                                navLinks.map((link) => (
-                                    <div key={link.label} className="relative group/item py-2">
-                                        <Link href={link.href || "#"} className="text-[var(--foreground)]/60 transition-colors hover:text-[var(--accent)] relative">
-                                            {link.label}
-                                        </Link>
-                                    </div>
-                                ))
-                            )}
-                        </nav>
-                    </div>
-
-                    <div className="flex-1" />
-
-                    {/* RIGHT SECTION: ACTIONS */}
-                    <div className="flex items-center gap-6 relative z-[1002]">
-                        {user ? (
-                            <div className="flex items-center gap-4">
-                                {isDashboard ? (
-                                    <>
-                                        <div className="hidden lg:flex flex-col items-end min-w-0 pr-4 border-r border-[var(--foreground)]/5">
-                                            <span className="text-[10px] font-bold text-[var(--accent)] truncate">{user.name || 'Usuario'}</span>
-                                            <span className="text-[8px] font-mono opacity-40 truncate lowercase tracking-tighter">{user.email}</span>
-                                        </div>
-                                        <button
-                                            onClick={handleLogout}
-                                            className="flex items-center gap-2 text-[var(--foreground)]/60 hover:text-red-500 transition-colors font-mono text-[9px] uppercase tracking-widest pl-2"
-                                        >
-                                            Cerrar Sesión
-                                            <LogOut className="w-3.5 h-3.5" />
-                                        </button>
-                                    </>
-                                ) : (
-                                    <Link
-                                        href="/dashboard"
-                                        className="text-[var(--foreground)]/60 hover:text-[var(--accent)] transition-colors font-mono uppercase text-[9px] tracking-[0.15em] border border-[var(--accent)]/10 px-4 py-1.5 rounded-full hover:bg-[var(--accent)]/5"
-                                    >
-                                        Ir a Consola
-                                    </Link>
+                    {/* Nav links */}
+                    <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-slate-500">
+                        {navLinks.map(l => (
+                            <Link key={l.href} href={l.href}
+                                className="hover:text-violet-600 transition-colors flex items-center gap-1.5">
+                                {l.label}
+                                {l.href === '/matecitodb' && (
+                                    <span className="px-1.5 py-0.5 bg-violet-100 text-violet-600 text-[9px] font-bold uppercase tracking-wider rounded-full">
+                                        beta
+                                    </span>
                                 )}
+                            </Link>
+                        ))}
+                    </nav>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-3">
+                        {user ? (
+                            <div className="hidden md:flex items-center gap-3">
+                                <Link href="/dashboard"
+                                    className="px-4 py-2 text-sm font-semibold text-violet-600 bg-violet-50 rounded-lg hover:bg-violet-100 transition-colors">
+                                    Consola
+                                </Link>
+                                <button onClick={handleLogout}
+                                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                    title="Cerrar sesión">
+                                    <LogOut className="w-4 h-4" />
+                                </button>
                             </div>
                         ) : (
-                            <Link
-                                href="/login"
-                                className="hidden sm:block text-[var(--foreground)]/60 hover:text-[var(--accent)] transition-colors font-mono uppercase text-[9px] tracking-[0.15em] border border-[var(--accent)]/10 px-4 py-1.5 rounded-full hover:bg-[var(--accent)]/5"
-                            >
-                                Login
-                            </Link>
+                            <div className="hidden md:flex items-center gap-3">
+                                <a href="https://wa.me/541124025239?text=Hola%2C%20quiero%20consultarles%20sobre%20una%20p%C3%A1gina%20web"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-4 py-2 text-sm font-semibold text-white bg-violet-600 rounded-lg hover:bg-violet-700 transition-colors shadow-sm">
+                                    Empezar proyecto
+                                </a>
+                            </div>
                         )}
-                        
-                        <a
-                            href="https://wa.me/541124025239"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="hidden sm:block"
-                        >
-                            <Button variant="outline" className="rounded-full font-mono uppercase tracking-[0.2em] text-[8px] px-4 h-8 border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--background)]">
-                                Contacto
-                            </Button>
-                        </a>
 
-                        {/* HAMBURGER (Mobile) */}
-                        <button
-                            onClick={() => setIsMenuOpen(!isMenuOpen)}
-                            className="flex flex-col gap-1 md:hidden p-2 group focus:outline-none"
-                            aria-label="Toggle Menu"
-                        >
-                            <span className={`h-[1px] w-6 bg-[var(--accent)] transition-all duration-300 ${isMenuOpen ? "rotate-45 translate-y-1" : ""}`}></span>
-                            <span className={`h-[1px] w-6 bg-[var(--accent)] transition-all duration-300 ${isMenuOpen ? "opacity-0" : ""}`}></span>
-                            <span className={`h-[1px] w-6 bg-[var(--accent)] transition-all duration-300 ${isMenuOpen ? "-rotate-45 -translate-y-1" : ""}`}></span>
+                        {/* Mobile hamburger */}
+                        <button onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            className="md:hidden p-2 text-slate-500 hover:text-slate-900 rounded-lg transition-colors">
+                            {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                         </button>
                     </div>
                 </div>
             </header>
 
-            {/* MOBILE MENU */}
-            <div
-                className={`fixed inset-0 bg-[var(--background)] transition-transform duration-500 ease-[cubic-bezier(0.85,0,0.15,1)] md:hidden ${isMenuOpen ? "translate-x-0" : "translate-x-full"}`}
-                style={{ zIndex: 1000 }}
-            >
-                <div className="relative flex flex-col h-full pt-20 pb-12 px-10">
-                    <nav className="flex flex-col gap-8">
-                        {navLinks.map((link, idx) => (
-                            <div key={link.label} className="flex flex-col gap-4">
-                                <Link
-                                    href={link.href || "#"}
-                                    onClick={() => setIsMenuOpen(false)}
-                                    className="group flex items-end gap-2 border-b border-[var(--accent)]/10 pb-4"
-                                >
-                                    <span className="font-mono text-[8px] text-[var(--foreground)] mb-1 font-bold">0{idx + 1}</span>
-                                    <span className="text-2xl font-bold text-[var(--accent)] uppercase tracking-tight">
-                                        {link.label}
+            {/* Mobile menu */}
+            <div className={`fixed inset-0 z-[1000] bg-white transition-transform duration-400 ease-out md:hidden ${
+                isMenuOpen ? "translate-x-0" : "translate-x-full"
+            }`}>
+                <div className="flex flex-col h-full pt-20 pb-10 px-8 gap-6">
+                    <nav className="flex flex-col gap-1">
+                        {navLinks.map(l => (
+                            <Link key={l.href} href={l.href}
+                                onClick={() => setIsMenuOpen(false)}
+                                className="py-3 px-4 text-lg font-semibold text-slate-700 hover:text-violet-600 hover:bg-violet-50 rounded-xl transition-all flex items-center gap-2">
+                                {l.label}
+                                {l.href === '/matecitodb' && (
+                                    <span className="px-1.5 py-0.5 bg-violet-100 text-violet-600 text-[9px] font-bold uppercase tracking-wider rounded-full">
+                                        beta
                                     </span>
-                                </Link>
-                            </div>
+                                )}
+                            </Link>
                         ))}
                     </nav>
-
-                    <div className="mt-auto flex flex-col gap-6">
-                        <Link
-                            href="/dashboard"
-                            onClick={() => setIsMenuOpen(false)}
-                            className="bg-[var(--foreground)]/5 border border-[var(--accent)]/10 p-5 group flex justify-between items-center"
-                        >
-                            <span className="text-sm font-bold text-[var(--accent)] uppercase tracking-widest">Dashboard</span>
-                            <span className="text-[var(--accent)] transition-transform group-hover:translate-x-1">→</span>
-                        </Link>
-                        
-                        <a
-                            href="https://wa.me/541124025239"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={() => setIsMenuOpen(false)}
-                            className="bg-[var(--accent)] text-[var(--background)] py-4 text-center font-mono text-[10px] uppercase tracking-[0.2em] font-black rounded-full"
-                        >
-                            WhatsApp Directo ↗
-                        </a>
+                    <div className="mt-auto flex flex-col gap-3">
+                        {user ? (
+                            <>
+                                <Link href="/dashboard" onClick={() => setIsMenuOpen(false)}
+                                    className="py-3 text-center font-bold text-white bg-violet-600 rounded-xl hover:bg-violet-700 transition-all">
+                                    Ir a Consola
+                                </Link>
+                                <button onClick={handleLogout}
+                                    className="py-3 text-center font-semibold text-red-500 border border-red-200 rounded-xl hover:bg-red-50 transition-all">
+                                    Cerrar Sesión
+                                </button>
+                            </>
+                        ) : (
+                            <a href="https://wa.me/541124025239?text=Hola%2C%20quiero%20consultarles%20sobre%20una%20p%C3%A1gina%20web"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => setIsMenuOpen(false)}
+                                className="py-3 text-center font-bold text-white bg-violet-600 rounded-xl">
+                                Empezar proyecto
+                            </a>
+                        )}
                     </div>
                 </div>
             </div>

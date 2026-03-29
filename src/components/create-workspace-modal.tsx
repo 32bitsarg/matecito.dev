@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import pb from '@/lib/pocketbase'
+import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { WorkspaceService } from '@/services/api.service'
 import { toast } from 'sonner'
 import { slugify } from '@/lib/utils'
 import { X, Loader2 } from 'lucide-react'
-import { useWorkspace } from '@/contexts/WorkspaceContext'
 
 export default function CreateWorkspaceModal() {
     const { refreshWorkspaces } = useWorkspace()
@@ -31,22 +31,7 @@ export default function CreateWorkspaceModal() {
 
         setLoading(true)
         try {
-            const response = await fetch('/api/workspaces/create', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name,
-                    slug,
-                    token: pb.authStore.token,
-                    userId: pb.authStore.record?.id
-                })
-            })
-
-            const data = await response.json()
-
-            if (!data.success) {
-                throw new Error(data.error || 'Error al crear el workspace')
-            }
+            await WorkspaceService.create(name, slug)
 
             toast.success('¡Workspace creado con éxito! 🚀')
             setIsOpen(false)

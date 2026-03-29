@@ -28,7 +28,7 @@ export default function RecordModal({
 
     useEffect(() => {
         if (record) {
-            setFormData(record)
+            setFormData(record.data || record)
         } else {
             const initialData: any = {}
             collection?.fields?.forEach((field: any) => {
@@ -77,7 +77,7 @@ export default function RecordModal({
             }
 
             if (record) {
-                await updateRecord(collection.name, record.id, dataToSend)
+                await updateRecord(record.id, dataToSend)
                 toast.success('Cambios guardados correctamente')
             } else {
                 await createRecord(collection.name, dataToSend)

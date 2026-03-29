@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import pb from '@/lib/pocketbase'
+import { clearToken, isAuthenticated } from '@/lib/api'
+import { AuthService } from '@/services/api.service'
 import { toast } from 'sonner'
 import Link from 'next/link'
 
@@ -12,22 +13,12 @@ export default function LoginPage() {
     const [password, setPassword] = useState('')
     const [loading, setLoading] = useState(false)
 
-    // Sincronización agresiva en el montaje del Login
+    // Sincronización en el montaje del Login
     useEffect(() => {
-        const checkExisting = () => {
-            const isValid = pb.authStore.isValid
-            const hasRecord = !!pb.authStore.record
-
-            if (isValid && hasRecord) {
-                console.log("[Login] Valid session found. Redirecting...");
-                router.push('/dashboard')
-            } else if (isValid && !hasRecord) {
-                console.warn("[Login] Partial session found. Clearing store.");
-                pb.authStore.clear()
-            }
+        if (isAuthenticated()) {
+            console.log("[Login] Valid session found. Redirecting...");
+            router.push('/dashboard')
         }
-
-        checkExisting()
     }, [router])
 
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -45,26 +36,19 @@ export default function LoginPage() {
         }
 
         try {
-            // Aseguramos que la store esté limpia antes de intentar nada
-            pb.authStore.clear()
-            
-            const authData = await pb.collection('users').authWithPassword(formEmail, formPassword)
-            
-            if (authData.record) {
-                toast.success('Sesión iniciada correctamente.')
-                // Forzamos un hard redirect al dashboard para asegurar que todo el estado global 
-                // se inicialice con la nueva sesión limpia.
-                window.location.href = '/dashboard'
-            } else {
-                throw new Error("No se pudo recuperar el perfil de usuario.")
-            }
+            // Limpiamos sesión previa
+            clearToken()
+
+            // AuthService.login() llama a POST /api/v1/platform/auth/login
+            // y guarda el token + user en localStorage automáticamente
+            await AuthService.login(formEmail, formPassword)
+
+            toast.success('Sesión iniciada correctamente.')
+            // Hard redirect para asegurar limpieza de estado global
+            window.location.href = '/dashboard'
         } catch (error: any) {
             console.error('[Login Error]', error)
-            if (error.status === 400 || error.status === 403) {
-                toast.error('Credenciales inválidas.')
-            } else {
-                toast.error('Error de conexión con el servidor.')
-            }
+            toast.error(error.message || 'Error al iniciar sesión.')
         } finally {
             setLoading(false)
         }
@@ -76,8 +60,7 @@ export default function LoginPage() {
                 {/* Beta Warning */}
                 <div className="rounded-2xl border border-[var(--accent)]/10 bg-[var(--accent)]/5 p-4 text-center">
                     <p className="text-[10px] uppercase tracking-widest text-[var(--foreground)] opacity-60 font-mono leading-relaxed">
-                        Esta función está en fase de desarrollo. <br />
-                        Si querés tener acceso, participá en el <Link href="/insights" className="text-[var(--accent)] hover:underline">journal</Link>.
+                        Esta función está en fase de desarrollo.
                     </p>
                 </div>
 
@@ -151,3 +134,4 @@ export default function LoginPage() {
         </div>
     )
 }
+

@@ -1,17 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  /* THEME: REFINED DARK ENGINEERING */
-  --background: #1c1c1c;  /* User choice */
-  --foreground: #ededed;  /* Light text */
-  --accent: #37ffd0;      /* User choice (Cyan) */
-  --secondary: #262626;   /* Slightly lighter than background */
-  --border: #333333;      /* Subtle but visible */
-  --sidebar: #121212;     /* Even darker than background */
-  --card: #222222;        /* Card background */
-  --muted: #a1a1aa;       /* Muted text */
+  /* THEME: WHITE / OCEAN PURPLE */
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --accent: #7c3aed;
+  --accent-hover: #6d28d9;
+  --secondary: #f1f5f9;
+  --border: #e2e8f0;
+  --sidebar: #ffffff;
+  --card: #ffffff;
+  --muted: #64748b;
+  --muted-foreground: #94a3b8;
 
-  /* Fonts */
   --font-sans: 'Inter', ui-sans-serif, system-ui;
   --font-mono: 'CommitMono', ui-monospace, SFMono-Regular;
 }
@@ -43,66 +44,36 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom Scrollbar styled for Engineering look */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #222;
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #333;
-}
-
-/* Subtle utility for "Glassmorphism" Engineering style */
-.glass-panel {
-  background: rgba(18, 18, 18, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
-}
-
-/* Animations typical of premium UIs */
+/* Animations */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
+.animate-fade-in { animation: fadeIn 0.35s ease-out forwards; }
 
-.animate-fade-in {
-  animation: fadeIn 0.4s ease-out forwards;
-}
-
-/* Grid background subtle like Supabase */
+/* Grid background */
 .bg-grid-subtle {
-  background-image: radial-gradient(var(--border) 1px, transparent 1px);
+  background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
 @keyframes marquee {
-  0% { transform: translateX(0); }
+  0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
-
 .animate-marquee {
   display: flex;
   width: max-content;
   animation: marquee 50s linear infinite;
 }
+.animate-marquee:hover { animation-play-state: paused; }
 
-.animate-marquee:hover {
-  animation-play-state: paused;
-}
+/* Shadow utilities */
+.shadow-card { box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.07), 0 1px 2px -1px rgb(0 0 0 / 0.07); }
+.shadow-card-hover { box-shadow: 0 4px 16px 0 rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.08); }

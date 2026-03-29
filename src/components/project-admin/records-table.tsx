@@ -217,7 +217,7 @@ export default function RecordsTable({
                             {collection.fields.map((field: any) => (
                                 <td key={field.id} className="p-4 text-sm align-middle">
                                     <CellRenderer 
-                                        value={record[field.name]} 
+                                        value={record.data ? record.data[field.name] : null} 
                                         type={field.type} 
                                         fieldName={field.name}
                                         record={record}
@@ -226,7 +226,7 @@ export default function RecordsTable({
                             ))}
                             <td className="p-4 align-middle">
                                 <div className="text-[10px] text-muted font-medium bg-white/5 w-fit px-2 py-1 rounded-lg border border-white/5">
-                                    {new Date(record.created).toLocaleString()}
+                                    {new Date(record.createdAt || record.created).toLocaleString()}
                                 </div>
                             </td>
                             <td className="p-4 align-middle" onClick={(e) => e.stopPropagation()}>

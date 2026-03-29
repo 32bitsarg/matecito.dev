@@ -27,12 +27,12 @@ const commitMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Matecito.Dev | Landing Pages en Argentina, Pergamino & Buenos Aires",
-  description: "Creamos Landing Pages de alta conversión en toda Argentina. Ingeniería de software con sede en Pergamino y Buenos Aires. Expertos en SEO local y bases de datos de baja latencia.",
-  keywords: ["Diseño web Pergamino", "Desarrollo web Pergamino", "SEO Pergamino", "Landing Pages Buenos Aires", "Bases de datos Sudamérica", "Ingeniería de Software Argentina"],
+  title: "Matecito.Dev — Páginas Web y Landings para Emprendimientos y Pymes",
+  description: "Creamos páginas web y landings de alta conversión para emprendimientos y pymes en Argentina. Diseño profesional, SEO optimizado y resultados medibles.",
+  keywords: ["páginas web pymes Argentina", "landing page emprendimiento", "diseño web Pergamino", "desarrollo web Argentina", "SEO local Argentina"],
   openGraph: {
-    title: "Matecito.Dev | Landing Pages en Argentina, Pergamino & Buenos Aires",
-    description: "Creamos Landing Pages de alta conversión en toda Argentina. Ingeniería de software con sede en Pergamino y Buenos Aires.",
+    title: "Matecito.Dev — Páginas Web para Emprendimientos y Pymes",
+    description: "Potenciá tu emprendimiento con una página web profesional. Diseño + SEO + conversión.",
     url: "https://matecito.dev",
     siteName: "Matecito.Dev",
     locale: "es_AR",
@@ -40,10 +40,12 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Matecito.Dev | Landing Pages en Argentina, Pergamino & Buenos Aires",
-    description: "Creamos Landing Pages de alta conversión en toda Argentina con infraestructura local en Sudamérica.",
+    title: "Matecito.Dev — Páginas Web para Emprendimientos y Pymes",
+    description: "Potenciá tu emprendimiento con una página web profesional. Diseño + SEO + conversión.",
   },
 };
+
+import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
 
 export default function RootLayout({
   children,
@@ -73,10 +75,12 @@ export default function RootLayout({
       <body
         className={`${clashDisplay.variable} ${commitMono.variable} flex min-h-screen flex-col font-sans antialiased`}
       >
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <ConditionalFooter />
-        <Toaster position="top-right" richColors theme="light" />
+        <WorkspaceProvider>
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <ConditionalFooter />
+          <Toaster position="top-right" richColors theme="light" />
+        </WorkspaceProvider>
       </body>
     </html>
   );
