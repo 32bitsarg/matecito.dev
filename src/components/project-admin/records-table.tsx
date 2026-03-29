@@ -78,7 +78,7 @@ export default function RecordsTable({
     const handleDelete = async (id: string) => {
         if (!confirm('¿Estás seguro de eliminar este registro?')) return
         try {
-            await deleteRecord(collection.name, id)
+            await deleteRecord(id)
             toast.success('Registro eliminado')
             onRefresh()
         } catch (err: any) {

@@ -52,7 +52,7 @@ interface ProjectContextType {
     projectId: string
 
     fetchCollections: () => Promise<any>
-    createCollection: (name: string) => Promise<any>
+    createCollection: (data: string | { name: string; type?: string; fields?: any[] }) => Promise<any>
     updateCollection: (collectionName: string, newName: string) => Promise<any>
     deleteCollection: (collectionName: string) => Promise<void>
     getCollectionSchema: (collectionName: string) => Collection | undefined
@@ -192,10 +192,11 @@ export function ProjectProvider({
 
     const fetchCollections = useCallback(() => mutateCollections(), [mutateCollections])
 
-    const createCollection = useCallback(async (name: string) => {
+    const createCollection = useCallback(async (data: string | { name: string; type?: string; fields?: any[] }) => {
         setLoading(true)
         try {
-            const res = await pApi.post('/collections', { collection: name })
+            const body = typeof data === 'string' ? { collection: data } : data
+            const res = await pApi.post('/collections', body)
             mutateCollections()
             return res
         } finally {

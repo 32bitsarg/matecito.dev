@@ -62,7 +62,7 @@ export default function CellRenderer({ value, type, record }: CellRendererProps)
         case 'file':
             const isImage = /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(value);
             if (isImage) {
-                const url = getFileUrl(record, value, { thumb: '100x100' });
+                const url = getFileUrl(record, value);
                 return (
                     <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-border group/img">
                         <img 
