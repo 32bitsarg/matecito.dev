@@ -3,7 +3,9 @@
  * Cliente HTTP central PRO
  */
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://api.matecito.dev'
+// En el navegador, usamos el host local para aprovechar el proxy de rewrites (evitar CORS)
+// En el servidor (SSR), usamos la URL real del backend para llegar a la plataforma
+const BASE_URL = typeof window !== 'undefined' ? '' : 'https://api.matecito.dev'
 
 const TOKEN_KEY         = 'matecito_token'
 const REFRESH_TOKEN_KEY = 'matecito_refresh_token'
@@ -99,7 +101,7 @@ export function isAuthenticated(): boolean {
 // ─── Core request ────────────────────────────────────────
 
 type RequestOptions = {
-  method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
+  method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE' | 'HEAD'
   auth?: boolean
   body?: any
   params?: Record<string, string>
@@ -121,8 +123,9 @@ async function request<T = any>(
 
   try {
     // ── URL ─────────────────────────────
-
-    const url = new URL(`${BASE_URL}${path}`)
+    // Si la URL es relativa (/api/v1/...), necesitamos pasarle el origin base
+    const baseOrigin = typeof window !== 'undefined' ? window.location.origin : undefined
+    const url = new URL(`${BASE_URL}${path}`, baseOrigin)
 
     if (params) {
       Object.entries(params).forEach(([k, v]) => {
@@ -227,8 +230,12 @@ export const api = {
     return request<T>(path, { method: 'PUT', body })
   },
 
-  delete<T = any>(path: string) {
-    return request<T>(path, { method: 'DELETE' })
+  delete<T = any>(path: string, body?: any, params?: Record<string, string>) {
+    return request<T>(path, { method: 'DELETE', body, params })
+  },
+
+  head(path: string, params?: Record<string, string>) {
+    return request(path, { method: 'HEAD', params })
   },
 
   public: {

@@ -14,6 +14,8 @@ import {
   AuthService,
   WorkspaceService,
   ProjectService,
+  MemberService,
+  InviteService,
   type PlatformUser,
   type Workspace,
   type Project,
@@ -30,11 +32,16 @@ interface WorkspaceContextValue {
   projects: Project[]
   loading: boolean
   isInitialized: boolean
+  members: any[]
+  invites: any[]
   error: string | null
 
   setCurrentWorkspace: (workspace: Workspace) => void
   refreshWorkspaces: () => Promise<void>
   refreshProjects: (workspaceId: string) => Promise<void>
+  refreshMembers: (workspaceId: string) => Promise<void>
+  refreshInvites: (workspaceId: string) => Promise<void>
+  checkPermission: (requiredRole: 'owner' | 'admin' | 'developer' | 'viewer') => boolean
   logout: () => void
 }
 
@@ -49,6 +56,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [currentWorkspace, setCurrentWorkspace] = useState<Workspace | null>(null)
   const [projects, setProjects] = useState<Project[]>([])
+  const [members, setMembers] = useState<any[]>([])
+  const [invites, setInvites] = useState<any[]>([])
   const [initialized, setInitialized] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -63,6 +72,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     setWorkspaces([])
     setCurrentWorkspace(null)
     setProjects([])
+    setMembers([])
+    setInvites([])
     setError(null)
   }, [])
 
@@ -86,6 +97,24 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  const refreshMembers = useCallback(async (workspaceId: string) => {
+    try {
+      const res = await MemberService.list(workspaceId)
+      setMembers(res.members ?? res)
+    } catch (err) {
+      setMembers([])
+    }
+  }, [])
+
+  const refreshInvites = useCallback(async (workspaceId: string) => {
+    try {
+      const res = await InviteService.list(workspaceId)
+      setInvites(res.invites ?? res)
+    } catch (err) {
+      setInvites([])
+    }
+  }, [])
+
   // ── Refresh Workspaces ──────────────────────────────────────────────────────
 
   const refreshWorkspaces = useCallback(async () => {
@@ -96,6 +125,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       if (list.length === 0) {
         setCurrentWorkspace(null)
         setProjects([])
+        setMembers([])
+        setInvites([])
         return
       }
 
@@ -106,13 +137,17 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       const selected = workspaceBySlug || list[0]
 
       setCurrentWorkspace(selected)
-      await refreshProjects(selected.id)
+      await Promise.all([
+        refreshProjects(selected.id),
+        refreshMembers(selected.id),
+        refreshInvites(selected.id)
+      ])
 
     } catch (err: any) {
       console.error('Error al cargar workspaces:', err.message)
       setError(err.message)
     }
-  }, [refreshProjects])
+  }, [refreshProjects, refreshMembers, refreshInvites])
 
   // ── Init ────────────────────────────────────────────────────────────────────
 
@@ -150,6 +185,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
           )
 
           setProjects(workspaceProjects)
+          refreshMembers(selected.id)
+          refreshInvites(selected.id)
         }
 
       } catch (err: any) {
@@ -165,7 +202,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     return () => {
       mounted = false
     }
-  }, [resetState])
+  }, [resetState, refreshMembers, refreshInvites])
 
   // ── Logout global listener ──────────────────────────────────────────────────
 
@@ -186,8 +223,31 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const handleSetCurrentWorkspace = useCallback((workspace: Workspace) => {
     setCurrentWorkspace(workspace)
     setProjects([])
-    refreshProjects(workspace.id)
-  }, [refreshProjects])
+    setMembers([])
+    setInvites([])
+    
+    Promise.all([
+      refreshProjects(workspace.id),
+      refreshMembers(workspace.id),
+      refreshInvites(workspace.id)
+    ])
+  }, [refreshProjects, refreshMembers, refreshInvites])
+
+  // ── Permisos ────────────────────────────────────────────────────────────────
+
+  const checkPermission = useCallback((requiredRole: 'owner' | 'admin' | 'developer' | 'viewer') => {
+    if (!currentWorkspace) return false
+    
+    const roleWeight: Record<string, number> = {
+      'owner': 4,
+      'admin': 3,
+      'developer': 2,
+      'viewer': 1
+    }
+    
+    const userRole = (currentWorkspace as any).role || 'viewer'
+    return roleWeight[userRole] >= roleWeight[requiredRole]
+  }, [currentWorkspace])
 
   // ── Logout manual ───────────────────────────────────────────────────────────
 
@@ -205,12 +265,17 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         workspaces,
         currentWorkspace,
         projects,
+        members,
+        invites,
         loading,
-        isInitialized: initialized, // ✅ FIX CLAVE
+        isInitialized: initialized,
         error,
         setCurrentWorkspace: handleSetCurrentWorkspace,
         refreshWorkspaces,
         refreshProjects,
+        refreshMembers,
+        refreshInvites,
+        checkPermission,
         logout,
       }}
     >

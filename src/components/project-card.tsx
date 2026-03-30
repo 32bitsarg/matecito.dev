@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { Copy, Calendar, ArrowRight, Trash2, Loader2, AlertTriangle, Database } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
+import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { ProjectService, type Project } from '@/services/api.service'
 
 interface ProjectCardProps {
@@ -16,6 +17,7 @@ interface ProjectCardProps {
 export default function ProjectCard({ project, workspaceSlug, onDelete }: ProjectCardProps) {
     const [isDeleting, setIsDeleting] = useState(false)
     const [showConfirm, setShowConfirm] = useState(false)
+    const { checkPermission } = useWorkspace()
 
     const projectSlug = project.subdomain
 
@@ -105,24 +107,26 @@ export default function ProjectCard({ project, workspaceSlug, onDelete }: Projec
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <button
-                        onClick={handleDelete}
-                        title="Eliminar proyecto"
-                        className={cn(
-                            "p-2 rounded-lg border text-sm transition-all",
-                            showConfirm
-                                ? "bg-red-500 border-red-500 text-white"
-                                : "border-slate-200 text-slate-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50"
-                        )}
-                    >
-                        {isDeleting ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : showConfirm ? (
-                            <AlertTriangle className="w-3.5 h-3.5" />
-                        ) : (
-                            <Trash2 className="w-3.5 h-3.5" />
-                        )}
-                    </button>
+                    {checkPermission('admin') && (
+                        <button
+                            onClick={handleDelete}
+                            title="Eliminar proyecto"
+                            className={cn(
+                                "p-2 rounded-lg border text-sm transition-all",
+                                showConfirm
+                                    ? "bg-red-500 border-red-500 text-white"
+                                    : "border-slate-200 text-slate-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50"
+                            )}
+                        >
+                            {isDeleting ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : showConfirm ? (
+                                <AlertTriangle className="w-3.5 h-3.5" />
+                            ) : (
+                                <Trash2 className="w-3.5 h-3.5" />
+                            )}
+                        </button>
+                    )}
 
                     <Link
                         href={`/dashboard/${workspaceSlug}/${projectSlug}`}

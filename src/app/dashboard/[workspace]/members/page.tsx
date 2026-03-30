@@ -6,10 +6,11 @@ import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { MemberService, InviteService } from '@/services/api.service'
 import {
     Users, Plus, Trash2, Loader2, Crown, Shield,
-    Code2, Eye, Mail, X, ChevronDown
+    Code2, Eye, Mail, X, ChevronDown, Send
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import InviteMemberModal from '@/components/invite-member-modal'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -37,50 +38,41 @@ const ROLE_META: Record<Role, { label: string; icon: any; color: string }> = {
 
 export default function MembersPage() {
     const { workspace: workspaceSlug } = useParams()
-    const { currentWorkspace, user } = useWorkspace()
+    const { 
+        currentWorkspace, 
+        user, 
+        members, 
+        invites, 
+        loading, 
+        refreshMembers, 
+        refreshInvites,
+        checkPermission
+    } = useWorkspace()
 
-    const [members, setMembers] = useState<Member[]>([])
-    const [loading, setLoading] = useState(true)
     const [showInvite, setShowInvite] = useState(false)
-    const [inviteEmail, setInviteEmail] = useState('')
-    const [inviteRole, setInviteRole] = useState<Role>('viewer')
-    const [inviting, setInviting] = useState(false)
     const [removingId, setRemovingId] = useState<string | null>(null)
+    const [cancelingEmail, setCancelingEmail] = useState<string | null>(null)
     const [updatingId, setUpdatingId] = useState<string | null>(null)
 
     const workspaceId = currentWorkspace?.id ?? ''
-    const myRole = currentWorkspace?.role as Role
-    const canManage = ['owner', 'admin'].includes(myRole)
+    const canManage = checkPermission('admin')
 
-    const loadMembers = useCallback(async () => {
-        if (!workspaceId) return
-        setLoading(true)
-        try {
-            const res = await MemberService.list(workspaceId)
-            setMembers(res.members ?? [])
-        } catch (err: any) {
-            toast.error('Error al cargar miembros: ' + err.message)
-        } finally {
-            setLoading(false)
+
+
+    const handleCancelInvite = async (email: string) => {
+        if (cancelingEmail !== email) {
+            setCancelingEmail(email)
+            setTimeout(() => setCancelingEmail(e => e === email ? null : e), 3000)
+            return
         }
-    }, [workspaceId])
-
-    useEffect(() => { loadMembers() }, [loadMembers])
-
-    const handleInvite = async (e: React.FormEvent) => {
-        e.preventDefault()
-        if (!inviteEmail.trim()) return
-        setInviting(true)
         try {
-            await InviteService.create(workspaceId, inviteEmail.trim(), inviteRole)
-            toast.success(`Invitación enviada a ${inviteEmail}`)
-            setInviteEmail('')
-            setShowInvite(false)
-            loadMembers()
+            await InviteService.delete(workspaceId, email)
+            toast.success('Invitación cancelada')
+            refreshInvites(workspaceId)
         } catch (err: any) {
-            toast.error(err.message || 'Error al invitar')
+            toast.error(err.message)
         } finally {
-            setInviting(false)
+            setCancelingEmail(null)
         }
     }
 
@@ -88,7 +80,7 @@ export default function MembersPage() {
         setUpdatingId(memberId)
         try {
             await MemberService.update(workspaceId, memberId, newRole)
-            setMembers(prev => prev.map(m => m.user_id === memberId ? { ...m, role: newRole } : m))
+            refreshMembers(workspaceId)
             toast.success('Rol actualizado')
         } catch (err: any) {
             toast.error(err.message)
@@ -105,7 +97,7 @@ export default function MembersPage() {
         }
         try {
             await MemberService.remove(workspaceId, memberId)
-            setMembers(prev => prev.filter(m => m.user_id !== memberId))
+            refreshMembers(workspaceId)
             toast.success('Miembro removido')
         } catch (err: any) {
             toast.error(err.message)
@@ -140,49 +132,15 @@ export default function MembersPage() {
                 )}
             </div>
 
-            {/* Invite form */}
-            {showInvite && (
-                <div className="bg-white border border-violet-200 rounded-2xl p-5 shadow-sm space-y-4">
-                    <div className="flex items-center justify-between">
-                        <p className="font-bold text-slate-900 flex items-center gap-2">
-                            <Mail className="w-4 h-4 text-violet-500" />
-                            Invitar a un colaborador
-                        </p>
-                        <button onClick={() => setShowInvite(false)}
-                            className="p-1 text-slate-400 hover:text-slate-600 rounded-lg transition-colors">
-                            <X className="w-4 h-4" />
-                        </button>
-                    </div>
+            {/* Invite modal */}
+            <InviteMemberModal
+                isOpen={showInvite}
+                onClose={() => setShowInvite(false)}
+                workspaceId={workspaceId}
+                onInvited={() => refreshInvites(workspaceId)}
+            />
 
-                    <form onSubmit={handleInvite} className="flex gap-2">
-                        <input
-                            type="email"
-                            required
-                            placeholder="email@ejemplo.com"
-                            value={inviteEmail}
-                            onChange={e => setInviteEmail(e.target.value)}
-                            className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 outline-none focus:border-violet-400 focus:bg-white transition-all"
-                        />
-                        <select
-                            value={inviteRole}
-                            onChange={e => setInviteRole(e.target.value as Role)}
-                            className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 outline-none focus:border-violet-400 transition-all"
-                        >
-                            {ROLES.filter(r => r !== 'owner').map(r => (
-                                <option key={r} value={r}>{ROLE_META[r].label}</option>
-                            ))}
-                        </select>
-                        <button type="submit" disabled={inviting}
-                            className="px-4 py-2.5 bg-violet-600 text-white text-sm font-semibold rounded-xl hover:bg-violet-700 disabled:opacity-50 transition-colors flex items-center gap-2">
-                            {inviting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                            Invitar
-                        </button>
-                    </form>
-                    <p className="text-xs text-slate-400">
-                        Si el usuario no existe todavía, se le enviará una invitación cuando se registre.
-                    </p>
-                </div>
-            )}
+
 
             {/* Members list */}
             <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
@@ -201,11 +159,12 @@ export default function MembersPage() {
                     </div>
                 ) : (
                     <ul className="divide-y divide-slate-50">
-                        {members.map(member => {
-                            const meta = ROLE_META[member.role] ?? ROLE_META.viewer
+                        {members.map((member: any) => {
+                            const role = member.role as Role
+                            const meta = ROLE_META[role] ?? ROLE_META.viewer
                             const Icon = meta.icon
                             const isMe = member.user_id === user?.id
-                            const isOwner = member.role === 'owner'
+                            const isOwner = role === 'owner'
                             const canEdit = canManage && !isOwner && !isMe
 
                             return (
@@ -239,7 +198,7 @@ export default function MembersPage() {
                                                 <Loader2 className="w-4 h-4 animate-spin text-violet-500" />
                                             ) : (
                                                 <select
-                                                    value={member.role}
+                                                    value={role}
                                                     onChange={e => handleRoleChange(member.user_id, e.target.value as Role)}
                                                     className={cn(
                                                         "pl-2 pr-6 py-1 text-xs font-semibold rounded-lg border outline-none cursor-pointer transition-all appearance-none",
@@ -278,6 +237,45 @@ export default function MembersPage() {
                     </ul>
                 )}
             </div>
+
+            {/* Pending Invites list */}
+            {invites.length > 0 && (
+                <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                    <div className="px-5 py-3 border-b border-slate-100 bg-amber-50/30 flex items-center justify-between">
+                        <p className="text-[10px] font-bold text-amber-600 uppercase tracking-widest">Invitaciones Pendientes</p>
+                        <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold">
+                            {invites.length}
+                        </span>
+                    </div>
+
+                    <ul className="divide-y divide-slate-50">
+                        {invites.map((invite: any) => (
+                            <li key={invite.email} className="flex items-center gap-4 px-5 py-3 hover:bg-slate-50 transition-colors opacity-80">
+                                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0 border border-slate-200">
+                                    <Mail className="w-4 h-4 text-slate-400" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-slate-700 truncate">{invite.email}</p>
+                                    <p className="text-[10px] text-slate-400">Rol: {invite.role}</p>
+                                </div>
+                                {canManage && (
+                                    <button 
+                                        onClick={() => handleCancelInvite(invite.email)}
+                                        className={cn(
+                                            "px-2 py-1 rounded-lg text-[10px] font-bold transition-all",
+                                            cancelingEmail === invite.email
+                                                ? "bg-red-500 text-white"
+                                                : "text-slate-400 hover:text-red-500 hover:bg-red-50"
+                                        )}
+                                    >
+                                        {cancelingEmail === invite.email ? 'Confirmar' : 'Cancelar'}
+                                    </button>
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
 
             {/* Roles explanation */}
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-3">

@@ -19,7 +19,8 @@ export default function DashboardPage() {
         currentWorkspace,
         loading,
         isInitialized,
-        refreshProjects
+        refreshProjects,
+        checkPermission
     } = useWorkspace()
 
     const [searchQuery, setSearchQuery] = useState('')
@@ -100,7 +101,7 @@ export default function DashboardPage() {
                     </div>
 
                     {/* New Project */}
-                    {currentWorkspace && (
+                    {currentWorkspace && checkPermission('developer') && (
                         <button
                             onClick={handleOpenNewProject}
                             className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white text-sm font-semibold rounded-xl hover:bg-violet-700 transition-colors shadow-sm"
@@ -148,7 +149,7 @@ export default function DashboardPage() {
                     <EmptySearchState query={searchQuery} onClear={handleClearSearch} />
                 )
             ) : (
-                <EmptyProjectsState onCreate={handleOpenNewProject} />
+                <EmptyProjectsState onCreate={handleOpenNewProject} canCreate={checkPermission('developer')} />
             )}
 
             <CreateWorkspaceModal />
@@ -180,7 +181,7 @@ function EmptySearchState({ query, onClear }: { query: string; onClear: () => vo
     )
 }
 
-function EmptyProjectsState({ onCreate }: { onCreate: () => void }) {
+function EmptyProjectsState({ onCreate, canCreate }: { onCreate: () => void, canCreate: boolean }) {
     return (
         <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 py-20 text-center">
             <div className="w-14 h-14 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-center mb-4">
@@ -190,13 +191,15 @@ function EmptyProjectsState({ onCreate }: { onCreate: () => void }) {
             <p className="text-sm text-slate-400 mb-6">
                 Creá tu primer proyecto para empezar.
             </p>
-            <button
-                onClick={onCreate}
-                className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 text-white text-sm font-semibold rounded-xl hover:bg-violet-700 transition-colors shadow-sm"
-            >
-                <Plus className="w-4 h-4" />
-                Crear proyecto
-            </button>
+            {canCreate && (
+                <button
+                    onClick={onCreate}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 text-white text-sm font-semibold rounded-xl hover:bg-violet-700 transition-colors shadow-sm"
+                >
+                    <Plus className="w-4 h-4" />
+                    Crear proyecto
+                </button>
+            )}
         </div>
     )
 }

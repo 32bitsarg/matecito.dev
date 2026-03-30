@@ -5,6 +5,7 @@ import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { User, Save, Loader2, RefreshCw, Calendar, Mail } from 'lucide-react'
 import { toast } from 'sonner'
 import api from '@/lib/api'
+import { NewsletterService } from '@/services/api.service'
 
 export default function ProfilePage() {
     const { user } = useWorkspace()
@@ -12,6 +13,7 @@ export default function ProfilePage() {
     const [name, setName] = useState('')
     const [username, setUsername] = useState('')
     const [loading, setLoading] = useState(false)
+    const [newsLoading, setNewsLoading] = useState(false)
 
     useEffect(() => {
         if (user) {
@@ -35,6 +37,19 @@ export default function ProfilePage() {
             toast.error(err.message || 'Error al actualizar')
         } finally {
             setLoading(false)
+        }
+    }
+
+    const handleNewsletter = async () => {
+        if (!user?.email) return
+        setNewsLoading(true)
+        try {
+            await NewsletterService.subscribe(user.email)
+            toast.success('¡Suscrito correctamente!')
+        } catch (err: any) {
+            toast.error(err.message || 'Error al suscribirse')
+        } finally {
+            setNewsLoading(false)
         }
     }
 
@@ -128,6 +143,36 @@ export default function ProfilePage() {
                     Guardar cambios
                 </button>
             </form>
+
+            {/* Newsletter Section */}
+            <div className="bg-gradient-to-br from-violet-600 to-indigo-700 rounded-3xl p-6 text-white shadow-xl shadow-violet-200 space-y-4 relative overflow-hidden group">
+                <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all duration-500" />
+                <div className="absolute -left-4 -bottom-4 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl" />
+                
+                <div className="relative flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
+                        <Mail className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-lg">Novedades de Matecito</h3>
+                        <p className="text-violet-100 text-xs">Recibí actualizaciones sobre nuevas funciones y mejoras.</p>
+                    </div>
+                </div>
+
+                <div className="relative pt-2">
+                    <button 
+                        onClick={handleNewsletter}
+                        disabled={newsLoading}
+                        className="w-full py-3 bg-white text-violet-700 font-bold rounded-2xl hover:bg-violet-50 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                        {newsLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                        Suscribirse al Newsletter
+                    </button>
+                    <p className="text-[10px] text-violet-200 text-center mt-3">
+                        Enviamos correos con moderación. Podés darte de baja en cualquier momento.
+                    </p>
+                </div>
+            </div>
         </div>
     )
 }

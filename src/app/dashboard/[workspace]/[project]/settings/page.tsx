@@ -103,6 +103,14 @@ export default function SettingsPage() {
 
     const removeOrigin = (o: string) => setAllowedOrigins(prev => prev.filter(x => x !== o))
 
+    const addCurrentOrigin = () => {
+        const origin = window.location.origin
+        if (!allowedOrigins.includes(origin)) {
+            setAllowedOrigins(o => [...o, origin])
+            toast.success('Dominio actual añadido')
+        }
+    }
+
     const copy = (text: string, label: string) => {
         navigator.clipboard.writeText(text)
         toast.success(`${label} copiada`)
@@ -256,13 +264,18 @@ export default function SettingsPage() {
                         </div>
                     )}
 
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                         <input
                             type="text" value={newOrigin} onChange={e => setNewOrigin(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && addOrigin()}
                             placeholder="https://miapp.com"
                             className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-mono text-slate-900 focus:border-violet-400 focus:bg-white outline-none transition-all"
                         />
+                        <button onClick={addCurrentOrigin}
+                            title="Añadir dominio actual"
+                            className="p-2.5 bg-violet-50 text-violet-600 border border-violet-100 rounded-xl hover:bg-violet-100 transition-all">
+                            <Globe className="w-4 h-4" />
+                        </button>
                         <button onClick={addOrigin}
                             className="flex items-center gap-1.5 px-4 py-2.5 bg-slate-100 border border-slate-200 text-slate-600 text-xs font-semibold rounded-xl hover:bg-slate-200 transition-all">
                             <Plus className="w-3.5 h-3.5" /> Agregar

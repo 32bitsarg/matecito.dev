@@ -87,9 +87,21 @@ export const AuthService = {
     return data
   },
 
-  logout(): void {
-    clearToken()
-    window.location.href = '/login'
+  async updateProfile(payload: { name?: string; username?: string; avatarSeed?: string }): Promise<PlatformUser> {
+    const data = await api.patch('/api/v1/platform/me', payload)
+    setStoredUser(data.user ?? data)
+    return data.user ?? data
+  },
+
+  async logout(): Promise<void> {
+    try {
+      await api.post('/api/v1/platform/auth/logout')
+    } catch (err) {
+      console.warn('Backend logout failed', err)
+    } finally {
+      clearToken()
+      window.location.href = '/login'
+    }
   },
 }
 
@@ -270,8 +282,32 @@ export const AuthUserService = {
 
 export const InviteService = {
 
+  async list(workspaceId: string) {
+    return api.get(`/api/v1/platform/workspaces/${workspaceId}/invites`)
+  },
+
   async create(workspaceId: string, email: string, role: string) {
     return api.post(`/api/v1/platform/workspaces/${workspaceId}/invites`, { email, role })
+  },
+
+  async delete(workspaceId: string, email: string) {
+    // Según la lista: DELETE /workspaces/:workspaceId/invites
+    return api.delete(`/api/v1/platform/workspaces/${workspaceId}/invites`, { email })
+  },
+
+  async cancelByToken(token: string) {
+    // Según la lista: DELETE /invites/:token
+    return api.delete(`/api/v1/platform/invites/${token}`)
+  },
+
+  async getInfo(token: string) {
+    // Según la lista: GET /invites/:token
+    return api.get(`/api/v1/platform/invites/${token}`)
+  },
+
+  async check(token: string) {
+    // Según la lista: HEAD /invites/:token
+    return api.head(`/api/v1/platform/invites/${token}`)
   },
 
   async accept(token: string) {
@@ -284,5 +320,13 @@ export const InviteService = {
 export const HealthService = {
   async check() {
     return api.get('/health')
+  },
+}
+
+// ─── Newsletter ───────────────────────────────────────────────────────────────
+
+export const NewsletterService = {
+  async subscribe(email: string) {
+    return api.post('/api/v1/platform/newsletter', { email })
   },
 }

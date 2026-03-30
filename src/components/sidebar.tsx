@@ -126,13 +126,24 @@ export default function Sidebar() {
                         <div className="px-1 mb-3 space-y-0.5">
                             <Link href={`/dashboard/${workspaceSlug}/members`}
                                 className={cn(
-                                    "flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all",
+                                    "flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all outline-none",
                                     pathname === `/dashboard/${workspaceSlug}/members`
                                         ? "bg-violet-50 text-violet-700 font-semibold"
                                         : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
                                 )}>
                                 <Users className={cn("w-4 h-4 shrink-0", pathname === `/dashboard/${workspaceSlug}/members` ? "text-violet-600" : "text-slate-400")} />
                                 <span className="truncate">Equipo</span>
+                            </Link>
+
+                            <Link href={`/dashboard/${workspaceSlug}/settings`}
+                                className={cn(
+                                    "flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all outline-none",
+                                    pathname === `/dashboard/${workspaceSlug}/settings`
+                                        ? "bg-violet-50 text-violet-700 font-semibold"
+                                        : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+                                )}>
+                                <Settings className={cn("w-4 h-4 shrink-0", pathname === `/dashboard/${workspaceSlug}/settings` ? "text-violet-600" : "text-slate-400")} />
+                                <span className="truncate">Configuración</span>
                             </Link>
                         </div>
 
