@@ -47,10 +47,8 @@ export function Navbar() {
                 <div className="max-w-7xl mx-auto flex h-14 items-center justify-between px-6">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-                        <div className="w-7 h-7 rounded-lg bg-violet-600 flex items-center justify-center shadow-sm">
-                            <span className="text-white font-black text-xs">m</span>
-                        </div>
-                        <span className="font-bold text-base text-slate-900 tracking-tight">
+                        <img src="/logos/matecitonobg.png" alt="Matecito.dev" className="w-8 h-8 object-contain invert" />
+                        <span className="font-bold text-lg text-slate-900 tracking-tight">
                             matecito<span className="text-violet-500">.dev</span>
                         </span>
                     </Link>

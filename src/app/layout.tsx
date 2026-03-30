@@ -43,6 +43,11 @@ export const metadata: Metadata = {
     title: "Matecito.Dev — Páginas Web para Emprendimientos y Pymes",
     description: "Potenciá tu emprendimiento con una página web profesional. Diseño + SEO + conversión.",
   },
+  icons: {
+    icon: "/logos/matecitologo.png",
+    shortcut: "/logos/matecitologo.png",
+    apple: "/logos/matecitologo.png",
+  },
 };
 
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";

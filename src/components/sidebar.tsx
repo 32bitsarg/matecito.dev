@@ -38,9 +38,7 @@ export default function Sidebar() {
             {/* Logo/Brand */}
             <div className="h-14 flex items-center px-5 border-b border-slate-100">
                 <Link href="/dashboard" className="flex items-center gap-2 group">
-                    <div className="w-7 h-7 rounded-lg bg-violet-600 flex items-center justify-center shadow-sm">
-                        <Database className="w-3.5 h-3.5 text-white" />
-                    </div>
+                    <img src="/logos/matecitonobg.png" alt="Matecito Logo" className="w-7 h-7 object-contain invert" />
                     <span className="font-bold text-slate-900 tracking-tight text-sm">matecitodb</span>
                 </Link>
             </div>
