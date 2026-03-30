@@ -23,10 +23,9 @@ export function Navbar() {
         document.body.style.overflow = isMenuOpen ? "hidden" : "";
     }, [isMenuOpen]);
 
-    const handleLogout = () => {
-        logout();
+    const handleLogout = async () => {
+        await logout();
         setIsMenuOpen(false);
-        window.location.href = '/login';
     };
 
     if (isDashboard) return null;

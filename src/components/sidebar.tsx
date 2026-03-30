@@ -28,9 +28,8 @@ export default function Sidebar() {
     const isProjectContext = !!projectSlug
     const base = `/dashboard/${workspaceSlug}/${projectSlug}`
 
-    const handleLogout = () => {
-        logout?.()
-        window.location.href = '/login'
+    const handleLogout = async () => {
+        await logout?.()
     }
 
     return (

@@ -42,7 +42,7 @@ interface WorkspaceContextValue {
   refreshMembers: (workspaceId: string) => Promise<void>
   refreshInvites: (workspaceId: string) => Promise<void>
   checkPermission: (requiredRole: 'owner' | 'admin' | 'developer' | 'viewer') => boolean
-  logout: () => void
+  logout: () => Promise<void>
 }
 
 // ─── Contexto ─────────────────────────────────────────────────────────────────
@@ -251,9 +251,9 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
   // ── Logout manual ───────────────────────────────────────────────────────────
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
     resetState()
-    AuthService.logout()
+    await AuthService.logout()
   }, [resetState])
 
   // ───────────────────────────────────────────────────────────────────────────
