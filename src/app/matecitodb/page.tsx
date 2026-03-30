@@ -252,7 +252,7 @@ export default function MatecitoDB() {
                             Usado en producción en{' '}
                             <a href="https://recienllegue.com.ar" target="_blank" rel="noopener noreferrer"
                                 className="underline underline-offset-2 hover:text-violet-200 transition-colors">
-                                recienllegue.ar
+                                recienllegue.com.ar
                             </a>
                         </span>
                     </div>
