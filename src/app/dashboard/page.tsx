@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import ProjectCard from '@/components/project-card'
 import CreateWorkspaceModal from '@/components/create-workspace-modal'
 import NewProjectModal from '@/components/new-project-modal'
-import { Plus, Search, X, FolderOpen, LayoutGrid } from 'lucide-react'
+import { Plus, Search, X, FolderOpen, LayoutGrid, AlertTriangle, RefreshCw } from 'lucide-react'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { type Project } from '@/services/api.service'
 
@@ -19,6 +19,7 @@ export default function DashboardPage() {
         currentWorkspace,
         loading,
         isInitialized,
+        error,
         refreshProjects,
         checkPermission
     } = useWorkspace()
@@ -59,6 +60,27 @@ export default function DashboardPage() {
         return (
             <div className="flex h-[60vh] items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-600 border-t-transparent" />
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="flex h-[60vh] items-center justify-center">
+                <div className="flex flex-col items-center gap-4 text-center max-w-sm">
+                    <div className="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center">
+                        <AlertTriangle className="w-6 h-6 text-red-500" />
+                    </div>
+                    <div>
+                        <p className="font-semibold text-slate-800 mb-1">Error al cargar el dashboard</p>
+                        <p className="text-sm text-slate-400">{error}</p>
+                    </div>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-200 transition-colors">
+                        <RefreshCw className="w-4 h-4" /> Reintentar
+                    </button>
+                </div>
             </div>
         )
     }

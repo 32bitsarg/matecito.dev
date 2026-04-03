@@ -182,7 +182,7 @@ export default function DataPage() {
         if (!selectedCollection) return
         setLoadingRecords(true)
         try {
-            const res = await fetchRecords(selectedCollection, showDeleted ? 'include_deleted=true' : undefined)
+            const res = await fetchRecords(selectedCollection, showDeleted ? { include_deleted: 'true' } : undefined)
             const rows: RecordRow[] = Array.isArray(res) ? res : (res.records ?? [])
             setRecords(rows)
             setTotal(res.pagination?.total ?? rows.length)

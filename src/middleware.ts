@@ -4,10 +4,12 @@ import type { NextRequest } from "next/server";
 export function middleware(request: NextRequest) {
     const response = NextResponse.next();
 
+    const isDev = process.env.NODE_ENV !== 'production'
+
     // Content Security Policy
     const cspHeader = [
         "default-src 'self';",
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://*.matecito.dev;",
+        `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://*.matecito.dev;`,
         "connect-src 'self' https://*.matecito.dev wss://*.matecito.dev https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://stats.g.doubleclick.net https://*.google.com https://*.google.com.ar http://localhost:*;",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;",
         "img-src 'self' blob: data: https://*.matecito.dev https://cdn.simpleicons.org https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://*.googletagmanager.com https://*.google.com https://*.google.com.ar http://localhost:*;",

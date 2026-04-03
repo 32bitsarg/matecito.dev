@@ -47,7 +47,7 @@ export default function ConnectPage() {
     }
 
     const projectUrl = `https://${project.subdomain}.matecito.dev`
-    const envSnippet = `# .env.local\nNEXT_PUBLIC_MATEBASE_URL=${projectUrl}\nNEXT_PUBLIC_MATEBASE_ANON_KEY=${project.anon_key}\nMATEBASE_SERVICE_KEY=${project.service_key}`
+    const envSnippet = `# .env.local\nNEXT_PUBLIC_MATECITO_URL=${projectUrl}\nNEXT_PUBLIC_MATECITO_ANON_KEY=${project.anon_key}\nMATECITO_SERVICE_KEY=${project.service_key}`
 
     const toggleScope = (s: string) => {
         if (s === '*') { setSelectedScopes(['*']); return }
@@ -266,9 +266,9 @@ export default function ConnectPage() {
                 <div className="p-5 bg-slate-900">
                     <pre className="text-xs font-mono leading-relaxed overflow-x-auto">
                         <span className="text-slate-500"># .env.local</span>{'\n'}
-                        <span className="text-violet-400">NEXT_PUBLIC_MATEBASE_URL</span><span className="text-slate-400">={projectUrl}</span>{'\n'}
-                        <span className="text-violet-400">NEXT_PUBLIC_MATEBASE_ANON_KEY</span><span className="text-slate-400">={project.anon_key}</span>{'\n'}
-                        <span className="text-red-400">MATEBASE_SERVICE_KEY</span><span className="text-slate-400">={project.service_key}</span>
+                        <span className="text-violet-400">NEXT_PUBLIC_MATECITO_URL</span><span className="text-slate-400">={projectUrl}</span>{'\n'}
+                        <span className="text-violet-400">NEXT_PUBLIC_MATECITO_ANON_KEY</span><span className="text-slate-400">={project.anon_key}</span>{'\n'}
+                        <span className="text-red-400">MATECITO_SERVICE_KEY</span><span className="text-slate-400">={project.service_key}</span>
                     </pre>
                 </div>
             </div>
@@ -291,8 +291,8 @@ export default function ConnectPage() {
                         <pre className="text-xs font-mono text-slate-300 leading-relaxed overflow-x-auto">{`import { createClient } from 'matecitodb'
 
 const db = createClient(
-  process.env.NEXT_PUBLIC_MATEBASE_URL,
-  { anonKey: process.env.NEXT_PUBLIC_MATEBASE_ANON_KEY }
+  process.env.NEXT_PUBLIC_MATECITO_URL,
+  { apiKey: process.env.NEXT_PUBLIC_MATECITO_ANON_KEY }
 )
 
 const { data } = await db.from('posts').get()`}</pre>
@@ -301,7 +301,7 @@ const { data } = await db.from('posts').get()`}</pre>
                         <pre className="text-xs font-mono text-slate-300 leading-relaxed overflow-x-auto">{`import { createClient } from 'matecitodb-rn'
 
 const db = createClient('${projectUrl}', {
-  anonKey: '${project.anon_key}'
+  apiKey: '${project.anon_key}'
 })
 
 await db.auth.initialize()

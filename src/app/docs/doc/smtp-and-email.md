@@ -1,87 +1,108 @@
-# SMTP y Plantillas de Correo (Email Templates)
+# SMTP y Email Templates
 
-MatecitoDB te permite enviar correos transaccionales y gestionar tus plantillas directamente desde el SDK. Estas son herramientas administrativas y requieren el uso de una `serviceKey`.
+Enviá emails transaccionales y gestioná tus templates desde el SDK. Requiere `serviceKey`.
 
-## Configuración SMTP
+---
 
-Accesible a través de `db.smtp`.
+## Configurar SMTP
 
 ````carousel
 ```ts
-// Establecer configuración SMTP
+// Configurar conexión SMTP
 await db.smtp.set({
   host: 'smtp.gmail.com',
   port: 587,
   user: 'noreply@miapp.com',
-  pass: 'tu-password-de-app',
-  from_name: 'MiApp',
-  from_email: 'noreply@miapp.com',
+  pass: 'app-password',
+  from: 'Mi App <noreply@miapp.com>',
 })
 
-// Actualizar configuración parcialmente
+// Actualizar parcialmente
 await db.smtp.update({ port: 465 })
 
-// Enviar un correo de prueba para verificar la configuración
+// Enviar email de prueba para verificar la configuración
 const { error } = await db.smtp.test('admin@miapp.com')
+if (!error) console.log('SMTP funciona correctamente')
 ```
 <!-- slide -->
 ```dart
-// Establecer configuración SMTP
+// Configurar
 await db.smtp.set(
   host: 'smtp.gmail.com',
   port: 587,
   user: 'noreply@miapp.com',
-  pass: 'tu-password-de-app',
-  from_name: 'MiApp',
-  from_email: 'noreply@miapp.com',
+  pass: 'app-password',
+  from: 'Mi App <noreply@miapp.com>',
 );
 
-// Actualizar configuración parcialmente
+// Actualizar parcialmente
 await db.smtp.update(port: 465);
 
-// Enviar un correo de prueba para verificar la configuración
+// Email de prueba
 final err = await db.smtp.test('admin@miapp.com');
+if (err == null) print('SMTP funciona correctamente');
 ```
 ````
 
-## Plantillas de Correo (Email Templates)
+---
 
-Puedes gestionar tus plantillas de correo transaccionales con soporte para interpolación de variables tipo `{{variable}}`. Accesible a través de `db.emailTemplates`.
+## Email Templates
+
+Los templates soportan interpolación de variables con `{{nombre_variable}}`.
 
 ````carousel
 ```ts
-// Sembrar plantillas de sistema por defecto (bienvenida, reset-password, etc.)
+// Generar templates del sistema por defecto
+// (welcome, reset-password, verify-email, etc.)
 await db.emailTemplates.seed()
 
-// Crear una nueva plantilla
+// Crear template personalizado
 const { data: tmpl } = await db.emailTemplates.create({
-  name: 'pedido_confirmado',
-  subject: '¡Pedido {{n_pedido}} confirmado!',
-  html_body: '<h1>Hola {{nombre_usuario}}</h1><p>¡Tu pedido está en camino!</p>',
+  name:    'pedido_confirmado',
+  subject: 'Tu pedido {{order_id}} fue confirmado',
+  body:    `
+    <h1>¡Hola {{user_name}}!</h1>
+    <p>Tu pedido <strong>{{order_id}}</strong> está en camino.</p>
+    <p>Total: ${{total}}</p>
+  `,
 })
 
-// Listar todas las plantillas
+// Listar todos los templates
 const { data: list } = await db.emailTemplates.list()
 
-// Eliminar una plantilla
+// Actualizar template existente
+await db.emailTemplates.update('template-uuid', {
+  subject: 'Asunto actualizado',
+  body:    '<p>Nuevo cuerpo del email</p>',
+})
+
+// Eliminar template
 await db.emailTemplates.delete('template-uuid')
 ```
 <!-- slide -->
 ```dart
-// Sembrar plantillas de sistema por defecto (bienvenida, reset-password, etc.)
+// Templates del sistema
 await db.emailTemplates.seed();
 
-// Crear una nueva plantilla
+// Crear template
 final res = await db.emailTemplates.create(
-  name: 'pedido_confirmado',
-  subject: '¡Pedido {{n_pedido}} confirmado!',
-  html_body: '<h1>Hola {{nombre_usuario}}</h1><p>¡Tu pedido está en camino!</p>',
+  name:    'pedido_confirmado',
+  subject: 'Tu pedido {{order_id}} fue confirmado',
+  body:    '''
+    <h1>¡Hola {{user_name}}!</h1>
+    <p>Tu pedido <strong>{{order_id}}</strong> está en camino.</p>
+  ''',
 );
 
-// Listar todas las plantillas
-final listRes = await db.emailTemplates.list();
+// Listar
+final list = await db.emailTemplates.list();
 
-// Eliminar una plantilla
+// Actualizar
+await db.emailTemplates.update('template-uuid', {
+  'subject': 'Asunto actualizado',
+});
+
+// Eliminar
 await db.emailTemplates.delete('template-uuid');
 ```
 ````

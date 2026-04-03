@@ -1,117 +1,416 @@
-# Registros y Operaciones CRUD
+# Records & CRUD
 
-El QueryBuilder te permite interactuar con tus datos de forma fluida y segura (type-safe). Accédelo a través de `db.from('nombre_coleccion')`.
+El `QueryBuilder` te permite interactuar con tus datos de forma fluida y type-safe. Accedé con `db.from('nombre_coleccion')`. El builder es **thenable** — podés usar `await` directamente sobre la cadena.
 
-## Lectura de Registros
+---
+
+## Consultar registros
 
 ````carousel
 ```ts
-// Listar todos los posts
-const { data: posts } = await db.from('posts').find()
+// Traer todos
+const records = await db.from('posts').find()
 
-// Buscar uno por filtro
-const { data: post } = await db.from('posts').eq('titulo', 'Mi Post').findOne()
+// Con filtros y opciones
+const { data: posts, error } = await db.from('posts')
+  .select('id, title, author')
+  .eq('status', 'publicado')
+  .gte('views', 100)
+  .ilike('title', '%matecito%')
+  .latest()
+  .limit(20)
+  .page(2)
 
-// Contar registros
-const { count } = await db.from('posts').eq('publico', true).count()
+// Pagination info
+const { data, total, pages, nextCursor } = await db.from('posts').find()
+
+// Por ID
+const { data: post } = await db.from('posts').getOne('abc-123')
+
+// Primero que coincide
+const { data: post } = await db.from('posts')
+  .eq('slug', 'mi-post')
+  .getFirst()
+
+// findOne — acepta ID string o mapa de filtros
+const post = await db.from('posts').findOne('abc-123')
+const post = await db.from('posts').findOne({ slug: 'mi-post' })
+
+// Contar
+const count = await db.from('posts').eq('status', 'publicado').count()
 ```
 <!-- slide -->
 ```dart
-// Listar todos los posts
-final res = await db.from('posts').find();
+// Traer todos
+final records = await db.from('posts').find();
 
-// Buscar uno por filtro
-final postRes = await db.from('posts').eq('titulo', 'Mi Post').findOne();
+// Con filtros y opciones
+final res = await db.from('posts')
+    .select(['id', 'title', 'author'])
+    .eq('status', 'publicado')
+    .gte('views', 100)
+    .ilike('title', '%matecito%')
+    .latest()
+    .limit(20)
+    .page(2)
+    .get();
 
-// Contar registros
-final countRes = await db.from('posts').eq('publico', true).count();
+// Pagination info
+final posts     = res.data;
+final total     = res.total;
+final pages     = res.pages;
+final nextCursor = res.nextCursor;
+
+// Por ID
+final single = await db.from('posts').getOne('abc-123');
+
+// Primero que coincide
+final first = await db.from('posts').eq('slug', 'mi-post').getFirst();
+
+// findOne
+final post = await db.from('posts').findOne('abc-123');
+final post = await db.from('posts').findOne({'slug': 'mi-post'});
+
+// Contar
+final count = await db.from('posts').eq('status', 'publicado').count();
 ```
 ````
 
-## Escritura de Registros
+---
+
+## Filtros disponibles
+
+| Método | Operador SQL | Ejemplo |
+|--------|-------------|---------|
+| `.eq(col, val)` | `=` | `.eq('status', 'activo')` |
+| `.neq(col, val)` | `!=` | `.neq('role', 'admin')` |
+| `.gt(col, val)` | `>` | `.gt('price', 100)` |
+| `.gte(col, val)` | `>=` | `.gte('age', 18)` |
+| `.lt(col, val)` | `<` | `.lt('stock', 10)` |
+| `.lte(col, val)` | `<=` | `.lte('price', 500)` |
+| `.like(col, pattern)` | `LIKE` | `.like('name', 'Juan%')` |
+| `.ilike(col, pattern)` | `ILIKE` | `.ilike('title', '%café%')` |
+| `.inValues(col, arr)` | `IN (...)` | `.inValues('tag', ['a','b'])` |
+| `.notInValues(col, arr)` | `NOT IN (...)` | `.notInValues('status', ['spam'])` |
+| `.or(expr)` | `OR (...)` | ver abajo |
+| `.search(texto)` | `ILIKE` global | `.search('matecito')` |
+
+### Filtro OR
 
 ````carousel
 ```ts
-// Insertar un nuevo registro
-const { data, error } = await db.from('posts').insert({
-  title: 'Hola Mundo',
-  content: '¡Mi primer post!',
-})
+// Precio >= 100 O nombre contiene 'café'
+await db.from('products')
+  .or('price.gte.100,name.ilike.%café%')
+  .find()
+```
+<!-- slide -->
+```dart
+await db.from('products')
+    .or(['price.gte.100', 'name.ilike.%café%'])
+    .find();
+```
+````
 
-// Actualizar un registro existente
-await db.from('posts').eq('id', 'abc-123').update({
-  title: 'Título actualizado',
-})
+### Búsqueda full-text
 
-// Upsert (Insertar si no existe, de lo contrario actualizar)
-await db.from('posts').upsert({
-  id: 'abc-123',
-  title: 'Título actualizado o insertado',
+````carousel
+```ts
+// Busca el texto en todos los campos del registro
+await db.from('products').search('yerba mate').find()
+```
+<!-- slide -->
+```dart
+await db.from('products').search('yerba mate').find();
+```
+````
+
+### Fechas como filtro
+
+````carousel
+```ts
+// Acepta objetos Date — se envía como ISO 8601 completo (con hora)
+await db.from('events')
+  .gte('date', new Date('2025-01-01'))
+  .lt('date', new Date('2026-01-01'))
+  .find()
+```
+<!-- slide -->
+```dart
+await db.from('events')
+    .gte('date', DateTime(2025, 1, 1))
+    .lt('date', DateTime(2026, 1, 1))
+    .find();
+```
+````
+
+---
+
+## Seleccionar campos
+
+````carousel
+```ts
+// Traer solo algunos campos
+await db.from('posts').select('id, title, created_at').find()
+```
+<!-- slide -->
+```dart
+await db.from('posts').select(['id', 'title', 'created_at']).find();
+```
+````
+
+---
+
+## Ordenar y paginar
+
+````carousel
+```ts
+db.from('posts').latest()                            // ORDER BY created_at DESC
+db.from('posts').oldest()                            // ORDER BY created_at ASC
+db.from('posts').order('title', { ascending: true }) // ORDER BY title ASC
+db.from('posts').limit(50).page(3)
+```
+<!-- slide -->
+```dart
+db.from('posts').latest();
+db.from('posts').oldest();
+db.from('posts').order('title', ascending: true);
+db.from('posts').limit(50).page(3);
+```
+````
+
+---
+
+## Insertar
+
+````carousel
+```ts
+const { data: post, error } = await db.from('posts').insert({
+  title:   'Nuevo post',
+  content: 'Contenido...',
 })
 ```
 <!-- slide -->
 ```dart
-// Insertar un nuevo registro
 final res = await db.from('posts').insert({
-  'title': 'Hola Mundo',
-  'content': '¡Mi primer post!',
+  'title':   'Nuevo post',
+  'content': 'Contenido...',
 });
-
-// Actualizar un registro existente
-await db.from('posts').eq('id', 'abc-123').update({
-  'title': 'Título actualizado',
-});
-
-// Upsert
-await db.from('posts').upsert({
-  'id': 'abc-123',
-  'title': 'Título actualizado o insertado',
-});
+final post = res.data; // registro aplanado
 ```
 ````
 
-## Borrado Permanente vs. Borrado Suave (Soft Delete)
+---
 
-MatecitoDB soporta por defecto el "borrado suave". Puedes restaurar registros que hayan sido eliminados recientemente.
+## Actualizar
 
 ````carousel
 ```ts
-// Borrado suave (Soft-delete)
+// Por ID (un solo registro)
+await db.from('posts').eq('id', 'abc-123').update({ title: 'Nuevo título' })
+
+// Bulk update — todos los que coinciden con los filtros
+await db.from('posts').eq('status', 'borrador').update({ archived: true })
+
+// Merge — actualiza solo los campos enviados, preserva el resto
+await db.from('posts').eq('id', 'abc-123').merge({ views: 42 })
+
+// Con fecha de expiración
+await db.from('sessions').eq('id', 'xyz').update(
+  { active: true },
+  { expiresAt: new Date(Date.now() + 3600_000) }
+)
+```
+<!-- slide -->
+```dart
+// Por ID
+await db.from('posts').eq('id', 'abc-123').update({'title': 'Nuevo título'}).get();
+
+// Bulk update
+await db.from('posts').eq('status', 'borrador').update({'archived': true}).get();
+
+// Merge
+await db.from('posts').eq('id', 'abc-123').merge({'views': 42}).get();
+
+// Con expiración
+await db.from('sessions').eq('id', 'xyz').update(
+  {'active': true},
+  expiresAt: DateTime.now().add(const Duration(hours: 1)),
+).get();
+```
+````
+
+---
+
+## Upsert
+
+Inserta el registro si no existe; si existe (según el campo de conflicto), lo actualiza.
+
+````carousel
+```ts
+const { data, upserted } = await db.from('profiles').upsert(
+  { user_id: 'abc', bio: 'Dev apasionado' },
+  'user_id'
+)
+
+console.log(upserted) // true = insertado, false = actualizado
+```
+<!-- slide -->
+```dart
+final res = await db.from('profiles').upsert(
+  {'user_id': 'abc', 'bio': 'Dev apasionado'},
+  'user_id',
+).get();
+
+final upsertRes = res as MatecitoUpsertResponse;
+print(upsertRes.upserted); // true = insertado, false = actualizado
+```
+````
+
+---
+
+## Eliminar
+
+````carousel
+```ts
+// Soft-delete (recuperable)
 await db.from('posts').delete('abc-123')
 
-// Restaurar (si fue borrado suavemente)
+// Bulk soft-delete
+await db.from('posts').eq('status', 'spam').delete()
+
+// Restaurar
 await db.from('posts').restore('abc-123')
 
-// Borrado permanente (¡No se puede deshacer!)
+// Borrado permanente (irreversible)
 await db.from('posts').hardDelete('abc-123')
 ```
 <!-- slide -->
 ```dart
-// Borrado suave (Soft-delete)
-await db.from('posts').delete('abc-123');
+// Soft-delete
+await db.from('posts').delete('abc-123').get();
 
-// Restaurar (si fue borrado suavemente)
+// Bulk soft-delete
+await db.from('posts').eq('status', 'spam').delete().get();
+
+// Restaurar
 await db.from('posts').restore('abc-123');
 
-// Borrado permanente (¡No se puede deshacer!)
+// Borrado permanente
 await db.from('posts').hardDelete('abc-123');
 ```
 ````
 
-## Filtrado y Paginación
+---
 
-Puedes encadenar múltiples filtros y luego llamar a un método terminal como `.find()` o `.get()`.
+## Incluir registros eliminados y expirados
 
-- `.eq(col, val)` / `.neq(col, val)`
-- `.gt(col, val)` / `.gte(col, val)`
-- `.lt(col, val)` / `.lte(col, val)`
-- `.like(col, patron)`
-- `.inValues(col, [v1, v2])`
-- `.limit(10)`
-- `.page(2)`
-- `.latest()` / `.oldest()`
-- `.order(col, { ascending: true })`
+````carousel
+```ts
+// Ver registros soft-deleted
+const { data } = await db.from('posts').includeDeleted().find()
+
+// Ver registros con expires_at vencido
+const { data } = await db.from('sessions').includeExpired().find()
+```
+<!-- slide -->
+```dart
+final res = await db.from('posts').includeDeleted().find();
+final res = await db.from('sessions').includeExpired().find();
+```
+````
 
 ---
 
-Siguiente: [Esquema y Colecciones](collections.md)
+## Insertar múltiples (batch)
+
+````carousel
+```ts
+const records = await db.from('products').insertMany([
+  { name: 'Yerba', price: 500 },
+  { name: 'Mate',  price: 1200 },
+])
+```
+<!-- slide -->
+```dart
+final records = await db.from('products').insertMany([
+  {'name': 'Yerba', 'price': 500},
+  {'name': 'Mate',  'price': 1200},
+]);
+```
+````
+
+---
+
+## Paginar como stream
+
+````carousel
+```ts
+for await (const batch of db.from('posts').paginate({ batchSize: 100 })) {
+  console.log('Lote:', batch.length, 'posts')
+  processBatch(batch)
+}
+```
+<!-- slide -->
+```dart
+await for (final batch in db.from('posts').paginate(batchSize: 100)) {
+  print('Lote: ${batch.length} registros');
+  processBatch(batch);
+}
+```
+````
+
+---
+
+## Exportar
+
+````carousel
+```ts
+// Devuelve un Blob con todos los registros (hasta 10k)
+const blob = await db.from('posts').export({ format: 'csv' })
+const blob = await db.from('posts').export({ format: 'json' })
+
+// Descargar en el browser
+const url = URL.createObjectURL(blob)
+const a = document.createElement('a')
+a.href = url
+a.download = 'posts.csv'
+a.click()
+```
+<!-- slide -->
+```dart
+// Devuelve Uint8List
+final bytes = await db.from('posts').export(format: 'csv');
+final bytes = await db.from('posts').export(format: 'json');
+
+// Guardar en disco
+await File('/tmp/posts.csv').writeAsBytes(bytes);
+```
+````
+
+---
+
+## Suscribirse desde el builder
+
+````carousel
+```ts
+// Ver Realtime para más detalles
+const unsub = db.from('messages').subscribe((event) => {
+  console.log(event.action, event.record)
+})
+```
+<!-- slide -->
+```dart
+// Callback
+final unsub = db.from('messages').subscribe((event) {
+  print('${event.action}: ${event.record}');
+});
+
+// Stream
+db.from('messages').watch().listen((event) { ... });
+```
+````
+
+---
+
+Siguiente: [Autenticación](auth.md)

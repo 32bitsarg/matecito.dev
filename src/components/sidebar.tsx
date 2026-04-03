@@ -155,7 +155,7 @@ export default function Sidebar() {
                             </div>
                             <nav className="space-y-0.5">
                                 {projects.length > 0 ? (
-                                    projects.map(p => (
+                                    projects.map(p => p.subdomain ? (
                                         <Link key={p.id}
                                             href={`/dashboard/${workspaceSlug}/${p.subdomain}`}
                                             className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:text-violet-700 hover:bg-violet-50 transition-all group">
@@ -167,7 +167,7 @@ export default function Sidebar() {
                                             </div>
                                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
                                         </Link>
-                                    ))
+                                    ) : null)
                                 ) : (
                                     <div className="px-3 py-8 flex flex-col items-center text-center gap-3">
                                         <p className="text-xs text-slate-400 italic">Sin proyectos aún</p>

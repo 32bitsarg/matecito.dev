@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useProject } from '@/contexts/ProjectContext'
 import { AuthUserService } from '@/services/api.service'
-import { Users, RefreshCw, Search, Trash2, UserCheck, Mail, ChevronRight, Puzzle, Globe, Github } from 'lucide-react'
+import { Users, RefreshCw, Search, Trash2, UserCheck, Mail, ChevronRight, Puzzle, Globe, Github, Send, ShieldCheck, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import Link from 'next/link'
@@ -16,6 +16,7 @@ export default function UsersPage() {
     const [users, setUsers] = useState<any[]>([])
     const [loading, setLoading] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
+    const [resending, setResending] = useState<string | null>(null)
 
     const loadUsers = async () => {
         setLoading(true)
@@ -30,6 +31,18 @@ export default function UsersPage() {
     }
 
     useEffect(() => { loadUsers() }, [projectId])
+
+    const handleResendVerification = async (user: any) => {
+        setResending(user.id)
+        try {
+            await AuthUserService.resendVerification(projectId, user.id)
+            toast.success(`Email de verificación enviado a ${user.email}`)
+        } catch (err: any) {
+            toast.error(err.message || 'Error al reenviar el email')
+        } finally {
+            setResending(null)
+        }
+    }
 
     const handleDelete = async (user: any) => {
         if (!confirm(`¿Eliminar al usuario ${user.email}?`)) return
@@ -119,7 +132,8 @@ export default function UsersPage() {
                         <thead>
                             <tr className="border-b border-slate-100 bg-slate-50/60">
                                 <th className="px-6 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">Usuario</th>
-                                <th className="px-4 py-3 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">Estado</th>
+                                <th className="px-4 py-3 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">Método</th>
+                                <th className="px-4 py-3 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">Verificado</th>
                                 <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">Creado</th>
                                 <th className="px-6 py-3 text-right text-[10px] font-bold text-slate-400 uppercase tracking-wider">Acciones</th>
                             </tr>
@@ -158,12 +172,39 @@ export default function UsersPage() {
                                         </div>
                                     </td>
                                     <td className="px-4 py-4">
+                                        <div className="flex justify-center">
+                                            {user.email_verified ? (
+                                                <span className="flex items-center gap-1 text-[9px] font-bold uppercase px-2 py-1 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-lg">
+                                                    <ShieldCheck className="w-2.5 h-2.5" /> Verificado
+                                                </span>
+                                            ) : user.oauth_provider ? (
+                                                <span className="flex items-center gap-1 text-[9px] font-bold uppercase px-2 py-1 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg">
+                                                    <ShieldCheck className="w-2.5 h-2.5" /> OAuth
+                                                </span>
+                                            ) : (
+                                                <span className="flex items-center gap-1 text-[9px] font-bold uppercase px-2 py-1 bg-amber-50 text-amber-600 border border-amber-200 rounded-lg">
+                                                    <Clock className="w-2.5 h-2.5" /> Pendiente
+                                                </span>
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-4">
                                         <span className="text-[10px] text-slate-400 font-mono bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
                                             {new Date(user.created_at).toLocaleDateString()}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="flex justify-end items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            {!user.email_verified && !user.oauth_provider && (
+                                                <button onClick={() => handleResendVerification(user)}
+                                                    disabled={resending === user.id}
+                                                    className="p-2 rounded-xl hover:bg-blue-50 text-slate-400 hover:text-blue-500 transition-all disabled:opacity-50"
+                                                    title="Reenviar email de verificación">
+                                                    {resending === user.id
+                                                        ? <RefreshCw className="w-4 h-4 animate-spin" />
+                                                        : <Send className="w-4 h-4" />}
+                                                </button>
+                                            )}
                                             <button onClick={() => handleDelete(user)}
                                                 className="p-2 rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all"
                                                 title="Eliminar usuario">

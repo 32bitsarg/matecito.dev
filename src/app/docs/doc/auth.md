@@ -1,66 +1,68 @@
-# Autenticación y Gestión de Usuarios
+# Autenticación
 
-MatecitoDB proporciona un sistema completo de autenticación con soporte para usuarios regulares, gestión administrativa (Admin) y proveedores de OAuth.
+MatecitoDB incluye un sistema de autenticación completo: email/password, OAuth, verificación de email, reset de contraseña y gestión de usuarios admin.
 
-## Operaciones de Usuario Regular
-
-Accesible a través de `db.auth`.
+## Registro e inicio de sesión
 
 ````carousel
 ```ts
-// Inicio de sesión (Login)
-const { data: user, error } = await db.auth.signIn({
-  email: 'usuario@ejemplo.com',
-  password: 'password123',
+// Registrar
+const { data, error } = await db.auth.signUp({
+  email:    'usuario@ejemplo.com',
+  password: 'contraseña123',
+  username: 'miusuario',  // campo extra opcional
 })
 
-// Registro (Sign up)
-await db.auth.signUp({
-  email: 'nuevo@ejemplo.com',
-  password: 'password123',
+// Iniciar sesión
+const { data, error } = await db.auth.signIn({
+  email:    'usuario@ejemplo.com',
+  password: 'contraseña123',
 })
 
 // Cerrar sesión
 await db.auth.signOut()
 
-// Sesión actual
-const user = db.auth.user
-const token = db.auth.token
+// Estado actual
+const user     = db.auth.user
+const token    = db.auth.token
+const loggedIn = db.auth.isLoggedIn
 ```
 <!-- slide -->
 ```dart
-// Inicio de sesión (Login)
-final res = await db.auth.signIn(
-  email: 'usuario@ejemplo.com',
-  password: 'password123',
+// Registrar
+final res = await db.auth.signUp(
+  email:    'usuario@ejemplo.com',
+  password: 'contraseña123',
+  extra:    {'username': 'miusuario'},
 );
 
-// Registro (Sign up)
-await db.auth.signUp(
-  email: 'nuevo@ejemplo.com',
-  password: 'password123',
+// Iniciar sesión
+final res = await db.auth.signIn(
+  email:    'usuario@ejemplo.com',
+  password: 'contraseña123',
 );
 
 // Cerrar sesión
 await db.auth.signOut();
 
-// Sesión actual
-final user = db.auth.user;
-final token = db.auth.token;
+// Estado actual
+final user     = db.auth.user;
+final token    = db.auth.token;
+final loggedIn = db.auth.isLoggedIn;
 ```
 ````
 
-### Persistencia de Sesión
-El SDK persiste automáticamente la sesión en el `localStorage` (Web) o en `SharedPreferences` (Flutter/Móvil).
+La sesión se persiste automáticamente en `localStorage` (Web) o `SharedPreferences` (Flutter).
 
-### Observar Cambios en el Estado de Autenticación
-Puedes suscribirte a `onAuthChange` para reaccionar a eventos de inicio/cierre de sesión o refresco de tokens:
+---
+
+## Escuchar cambios de sesión
 
 ````carousel
 ```ts
 const unsubscribe = db.auth.onAuthChange((user) => {
   if (user) {
-    console.log('Usuario conectado:', user.email)
+    console.log('Sesión activa:', user.email)
   } else {
     console.log('Sesión cerrada')
   }
@@ -71,81 +73,207 @@ unsubscribe()
 ```
 <!-- slide -->
 ```dart
-final unsubscribe = db.auth.onAuthChange((user) {
+// Callback
+final unsub = db.auth.onAuthChange((user) {
   if (user != null) {
-    print('Usuario conectado: ${user.email}');
+    print('Sesión activa: ${user.email}');
   } else {
     print('Sesión cerrada');
   }
 });
+unsub();
 
-// Dejar de escuchar
-unsubscribe();
+// Stream (ideal para StreamBuilder / Provider)
+StreamBuilder<AuthUser?>(
+  stream: db.auth.authStateStream,
+  builder: (context, snapshot) {
+    final user = snapshot.data;
+    return user != null
+        ? Text('Hola, ${user.email}')
+        : const LoginScreen();
+  },
+)
 ```
 ````
 
-## Gestión Administrativa (Requiere `serviceKey`)
+---
 
-Accesible a través de `db.auth.admin`.
+## Perfil y contraseña
 
 ````carousel
 ```ts
-// Listar todos los usuarios
-const { data } = await db.auth.admin.listUsers({ 
-  limit: 20, 
-  search: 'juan' 
+// Obtener perfil fresco del servidor
+const { data: user } = await db.auth.getMe()
+
+// Actualizar perfil
+await db.auth.updateProfile({ name: 'Juan', avatar_seed: 'abc' })
+
+// Solicitar reset de contraseña (envía email)
+await db.auth.requestPasswordReset('usuario@ejemplo.com', {
+  resetUrlBase: 'https://miapp.com/reset',
 })
 
-// Eliminar un usuario
+// Confirmar nuevo password con el token del email
+await db.auth.resetPassword(token, 'nueva-contraseña')
+```
+<!-- slide -->
+```dart
+// Obtener perfil fresco
+await db.auth.getMe();
+
+// Actualizar perfil
+await db.auth.updateProfile({'name': 'Juan', 'avatar_seed': 'abc'});
+
+// Solicitar reset de contraseña
+await db.auth.requestPasswordReset(
+  'usuario@ejemplo.com',
+  resetUrlBase: 'https://miapp.com/reset',
+);
+
+// Confirmar nuevo password
+await db.auth.resetPassword(token, 'nueva-contraseña');
+```
+````
+
+---
+
+## Verificación de email
+
+````carousel
+```ts
+// Verificar con el token del link enviado por email
+const { data, error } = await db.auth.verifyEmail(token)
+
+// Reenviar email de verificación
+await db.auth.resendVerification({ email: 'usuario@ejemplo.com' })
+await db.auth.resendVerification({ userId: 'user-uuid' })
+```
+<!-- slide -->
+```dart
+// Verificar con el token del link
+await db.auth.verifyEmail(token);
+
+// Reenviar email de verificación
+await db.auth.resendVerification(email: 'usuario@ejemplo.com');
+await db.auth.resendVerification(userId: 'user-uuid');
+```
+````
+
+---
+
+## OAuth
+
+````carousel
+```ts
+// 1. Generar URL con state para protección CSRF
+const state = crypto.randomUUID()
+const url = db.auth.getOAuthUrl('google', 'https://miapp.com/callback', { state })
+
+// 2. Redirigir al usuario a `url`
+window.location.href = url
+
+// 3. En el callback, completar el flujo
+const { data, error } = await db.auth.handleOAuthCallback({
+  access_token:  searchParams.get('access_token'),
+  refresh_token: searchParams.get('refresh_token'),
+})
+
+// Inyectar sesión manualmente (SSO / server-side)
+db.auth.setSession({
+  accessToken:  'jwt...',
+  refreshToken: 'refresh...',
+})
+```
+<!-- slide -->
+```dart
+// 1. Generar URL con state para CSRF
+final state = const Uuid().v4();
+final url = db.auth.getOAuthUrl(
+  'google',
+  'https://miapp.com/callback',
+  state: state,
+);
+
+// 2. Abrir en el navegador
+await launchUrl(Uri.parse(url));
+
+// 3. Completar desde el deep link
+final res = await db.auth.handleOAuthCallback({
+  'access_token':  params['access_token'],
+  'refresh_token': params['refresh_token'],
+});
+
+// Inyectar sesión manualmente
+db.auth.setSession(
+  accessToken:  'jwt...',
+  refreshToken: 'refresh...',
+);
+```
+````
+
+---
+
+## Administración de usuarios (requiere `serviceKey`)
+
+````carousel
+```ts
+// Listar usuarios con búsqueda y paginación
+const { data } = await db.auth.admin.listUsers({
+  limit:  20,
+  page:   1,
+  search: 'juan',
+})
+
+// Eliminar usuario (irreversible)
 await db.auth.admin.deleteUser('user-uuid')
 ```
 <!-- slide -->
 ```dart
-// Listar todos los usuarios
+// Listar usuarios
 final res = await db.auth.admin.listUsers(
-  limit: 20, 
+  limit:  20,
+  page:   1,
   search: 'juan',
 );
 
-// Eliminar un usuario
+// Eliminar usuario
 await db.auth.admin.deleteUser('user-uuid');
 ```
 ````
 
-## Configuración de Proveedores OAuth
+---
 
-Accesible a través de `db.auth.oauth`.
+## Configurar proveedores OAuth (requiere `serviceKey`)
 
 ````carousel
 ```ts
-// Configurar Google OAuth
+// Configurar proveedor
 await db.auth.oauth.configure('google', {
-  clientId: 'TU_CLIENT_ID',
+  clientId:     'TU_CLIENT_ID',
   clientSecret: 'TU_CLIENT_SECRET',
+  redirectUri:  'https://miapp.com/callback',
 })
 
 // Listar proveedores activos
 const { data: providers } = await db.auth.oauth.listProviders()
 
-// Eliminar un proveedor
+// Eliminar proveedor
 await db.auth.oauth.remove('github')
 ```
 <!-- slide -->
 ```dart
-// Configurar Google OAuth
 await db.auth.oauth.configure('google',
-  clientId: 'TU_CLIENT_ID',
+  clientId:     'TU_CLIENT_ID',
   clientSecret: 'TU_CLIENT_SECRET',
+  redirectUri:  'https://miapp.com/callback',
 );
 
-// Listar proveedores activos
 final res = await db.auth.oauth.listProviders();
 
-// Eliminar un proveedor
 await db.auth.oauth.remove('github');
 ```
 ````
 
 ---
 
-Siguiente: [Registros y CRUD](records.md)
+Siguiente: [Records & CRUD](records.md)

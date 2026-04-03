@@ -1,97 +1,122 @@
-# Gestión de Esquema y Colecciones
+# Colecciones y Schema
 
-MatecitoDB te permite gestionar el esquema de tu base de datos (colecciones y campos) directamente desde el SDK. Esta es una herramienta administrativa y requiere el uso de una `serviceKey`.
+MatecitoDB te permite gestionar tu schema directamente desde el SDK. Requiere `serviceKey`.
 
-## Operaciones de Colección
+---
 
-Accesibles a través de `db.collections`.
+## Operaciones sobre colecciones
 
 ````carousel
 ```ts
 // Listar todas las colecciones
 const { data: cols } = await db.collections.list()
 
-// Crear una nueva colección
-await db.collections.create('eventos_calendario', {
+// Crear con campos iniciales
+await db.collections.create('products', {
   fields: [
-    { name: 'nombre-evento',  type: 'text',   required: true },
-    { name: 'fecha',  type: 'date',   required: true },
+    { name: 'name',     type: 'text',     required: true },
+    { name: 'price',    type: 'number',   required: true },
+    { name: 'in_stock', type: 'boolean' },
+    { name: 'image',    type: 'file' },
+    { name: 'category', type: 'relation', options: { collection: 'categories' } },
+    { name: 'tags',     type: 'select',   options: { values: ['nuevo', 'oferta'] } },
   ]
 })
 
-// Renombrar una colección
-const { error } = await db.collections.rename('nombre_viejo', 'nombre_nuevo')
+// Renombrar
+await db.collections.rename('old_name', 'new_name')
 
-// Eliminar una colección (¡Todos los registros se perderán!)
-await db.collections.delete('coleccion_temporal')
+// Eliminar (todos los registros se pierden)
+await db.collections.delete('temp_data')
 ```
 <!-- slide -->
 ```dart
-// Listar todas las colecciones
+// Listar colecciones
 final res = await db.collections.list();
 
-// Crear una nueva colección
-await db.collections.create('eventos_calendario', 
-  fields: [
-    {'name': 'nombre-evento', 'type': 'text', 'required': true},
-    {'name': 'fecha', 'type': 'date', 'required': true},
-  ],
-);
+// Crear con campos
+await db.collections.create('products', fields: [
+  {'name': 'name',     'type': 'text',     'required': true},
+  {'name': 'price',    'type': 'number',   'required': true},
+  {'name': 'in_stock', 'type': 'boolean'},
+  {'name': 'image',    'type': 'file'},
+  {'name': 'category', 'type': 'relation', 'options': {'collection': 'categories'}},
+]);
 
-// Renombrar una colección
-final err = await db.collections.rename('nombre_viejo', 'nombre_nuevo');
+// Renombrar
+await db.collections.rename('old_name', 'new_name');
 
-// Eliminar una colección (¡Todos los registros se perderán!)
-await db.collections.delete('coleccion_temporal');
-```
-````
-
-## Operaciones de Campos
-
-Puedes gestionar campos individuales dentro de una colección usando el generador fluido `fields(nombre)`.
-
-````carousel
-```ts
-// Listar todos los campos de una colección
-const { data: fields } = await db.collections.fields('posts').list()
-
-// Añadir un nuevo campo
-await db.collections.fields('posts').create({
-  name: 'imagen_portada',
-  type: 'file',
-  required: false,
-})
-
-// Actualizar un campo existente
-await db.collections.fields('posts').update(fieldId, {
-  required: true,
-})
-
-// Eliminar un campo (¡Los datos de este campo en los registros se perderán!)
-await db.collections.fields('posts').delete(fieldId)
-```
-<!-- slide -->
-```dart
-// Listar todos los campos de una colección
-final res = await db.collections.fields('posts').list();
-
-// Añadir un nuevo campo
-final newField = await db.collections.fields('posts').create(
-  name: 'imagen_portada',
-  type: 'file',
-  required: false,
-);
-
-// Actualizar un campo existente
-await db.collections.fields('posts').update(fieldId, 
-  required: true,
-);
-
-// Eliminar un campo
-await db.collections.fields('posts').delete(fieldId);
+// Eliminar
+await db.collections.delete('temp_data');
 ```
 ````
 
 ---
 
-Siguiente: [Suscripciones en Tiempo Real](realtime.md)
+## Tipos de campo
+
+| Tipo | Descripción |
+|------|-------------|
+| `text` | Cadena de texto |
+| `number` | Número (entero o decimal) |
+| `boolean` | Verdadero / Falso |
+| `email` | Email validado |
+| `date` | Fecha y hora |
+| `file` | Referencia a archivo en Storage |
+| `json` | Objeto JSON libre |
+| `relation` | FK a otra colección |
+| `select` | Lista de valores fijos |
+
+---
+
+## Operaciones sobre campos
+
+````carousel
+```ts
+// Listar campos de una colección
+const { data: fields } = await db.collections.fields('products').list()
+
+// Agregar campo
+await db.collections.fields('products').create({
+  name:     'discount',
+  type:     'number',
+  required: false,
+})
+
+// Actualizar campo (ej. volverlo requerido)
+await db.collections.fields('products').update(fieldId, {
+  required: true,
+})
+
+// Eliminar campo (los datos de ese campo en los registros se pierden)
+await db.collections.fields('products').delete(fieldId)
+```
+<!-- slide -->
+```dart
+// Listar campos
+final res = await db.collections.fields('products').list();
+
+// Agregar
+await db.collections.fields('products').create(
+  name:     'discount',
+  type:     'number',
+  required: false,
+);
+
+// Actualizar
+await db.collections.fields('products').update(fieldId, required: true);
+
+// Eliminar
+await db.collections.fields('products').delete(fieldId);
+```
+````
+
+---
+
+## Permisos por colección
+
+Podés controlar quién puede leer y escribir en cada colección. Ver [Permisos](../README.md#permisos) para más detalles.
+
+---
+
+Siguiente: [Realtime](realtime.md)

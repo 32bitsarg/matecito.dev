@@ -1,74 +1,118 @@
-# Almacenamiento y Archivos (Storage)
+# Storage & Archivos
 
-El módulo de Almacenamiento de MatecitoDB te permite subir y gestionar archivos en tu proyecto.
+El módulo Storage te permite subir, listar y gestionar archivos en tu proyecto.
 
-## Subida de Archivos
+---
 
-Puedes subir archivos directamente desde tu aplicación.
+## Subir archivos
 
 ````carousel
 ```ts
-// Web (Objeto File)
-const fileInput = document.getElementById('miArchivo') as HTMLInputElement
+// Desde un File (browser)
+const fileInput = document.getElementById('avatar') as HTMLInputElement
 const file = fileInput.files?.[0]
 
-if (file) {
-  const { data, error } = await db.storage.upload(file, {
-    path: 'avatares/usuario-1.png',
-    public: true,
-  })
-}
+const { data, error } = await db.storage.upload(file, {
+  path:   'avatars/user-1.png',
+  public: true,
+})
 
-// Subida desde URL (Lado del servidor)
-await db.storage.uploadFromUrl('https://ejemplo.com/img.jpg', {
-  path: 'otros/ejemplo.jpg',
+console.log(data.url)  // URL pública del archivo
+
+// Desde URL (server-side)
+await db.storage.uploadFromUrl('https://ejemplo.com/foto.jpg', {
+  path: 'imports/foto.jpg',
 })
 ```
 <!-- slide -->
 ```dart
-// Flutter (Objeto File)
 import 'dart:io';
 
-final file = File('ruta/a/mi/imagen.png');
-final res = await db.storage.upload(file, 
-  path: 'avatares/usuario-1.png',
+// Desde File
+final res = await db.storage.upload(
+  File('ruta/imagen.png'),
+  path:   'avatars/user-1.png',
   public: true,
 );
+print(res.data?.url);
 
-// Subida desde bytes
-final resBytes = await db.storage.uploadBytes(miUint8List, 
-  path: 'datos/test.json',
-  contentType: 'application/json',
+// Desde bytes (útil con image_picker, etc.)
+final res = await db.storage.uploadBytes(
+  imageBytes,
+  path:        'avatars/user-1.jpg',
+  contentType: 'image/jpeg',
+  public:      true,
 );
-```
-````
-
-## Listar y Gestionar Archivos
-
-````carousel
-```ts
-// Listar archivos en un directorio
-const { data: files } = await db.storage.list('avatares/')
-
-// Eliminar un archivo
-const { error } = await db.storage.delete('avatares/usuario-1.png')
-
-// Obtener URL pública
-const url = db.storage.getPublicUrl('avatares/usuario-1.png')
-```
-<!-- slide -->
-```dart
-// Listar archivos en un directorio
-final res = await db.storage.list('avatares/');
-
-// Eliminar un archivo
-final err = await db.storage.delete('avatares/usuario-1.png');
-
-// Obtener URL pública
-final url = db.storage.getPublicUrl('avatares/usuario-1.png');
 ```
 ````
 
 ---
 
-Siguiente: [Estadísticas y Logs](stats-and-logs.md)
+## Subir con progreso (Flutter)
+
+````carousel
+```dart
+await db.storage.upload(
+  File('video.mp4'),
+  path: 'videos/intro.mp4',
+  onProgress: (sent, total) {
+    final percent = (sent / total * 100).toStringAsFixed(1);
+    print('Subiendo: $percent%');
+  },
+);
+```
+````
+
+---
+
+## Listar y gestionar archivos
+
+````carousel
+```ts
+// Listar archivos en una carpeta
+const { data: files } = await db.storage.list('avatars/')
+
+for (const file of files) {
+  console.log(file.url, file.size, file.mime)
+}
+
+// Eliminar archivo
+const { error } = await db.storage.delete('avatars/user-1.png')
+
+// URL pública (sin hacer request)
+const url = db.storage.getPublicUrl('avatars/user-1.png')
+```
+<!-- slide -->
+```dart
+// Listar
+final res = await db.storage.list('avatars/');
+for (final file in res.data ?? []) {
+  print('${file.url} — ${file.size} bytes');
+}
+
+// Eliminar
+await db.storage.delete('avatars/user-1.png');
+
+// URL pública
+final url = db.storage.getPublicUrl('avatars/user-1.png');
+```
+````
+
+---
+
+## Propiedades del archivo (`StorageFile`)
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | string | UUID del archivo |
+| `url` | string | URL pública |
+| `mime` | string | Tipo MIME (ej. `image/png`) |
+| `size` | number | Tamaño en bytes |
+| `width` | number? | Ancho (si es imagen) |
+| `height` | number? | Alto (si es imagen) |
+| `variant` | string | Variante del archivo |
+| `createdAt` | Date | Fecha de subida |
+
+---
+
+Siguiente: [Colecciones](collections.md)

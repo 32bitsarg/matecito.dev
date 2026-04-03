@@ -1,87 +1,128 @@
-# Operaciones en Tiempo Real (Realtime)
+# Realtime
 
-El módulo Realtime de MatecitoDB te permite suscribirte a cambios en vivo en tus registros.
+El módulo Realtime te permite suscribirte a cambios en vivo en tus colecciones mediante WebSockets. La conexión se mantiene automáticamente con reconexión exponencial y heartbeat (ping/pong cada 30 segundos).
 
-## Monitorizar una Colección
+---
 
-Puedes escuchar todos los cambios en una colección con una simple llamada:
+## Suscribirse a una colección
 
 ````carousel
 ```ts
-// Basado en Callback
-const unsubscribe = db.from('posts').subscribe((event) => {
-  console.log('Acción:', event.action)  // 'created', 'updated', o 'deleted'
-  console.log('Datos:',   event.record)
+// Escuchar todos los cambios
+const unsub = db.from('messages').subscribe((event) => {
+  console.log(event.action)     // 'created' | 'updated' | 'deleted'
+  console.log(event.collection) // 'messages'
+  console.log(event.record)     // el registro como objeto plano
+  console.log(event.recordId)   // ID del registro
 })
 
 // Dejar de escuchar
-unsubscribe()
+unsub()
 ```
 <!-- slide -->
 ```dart
-// Basado en Stream (Ideal para Flutter)
-db.from('posts').watch().listen((event) {
-  print('Acción: ${event.action}');  // 'created', 'updated', o 'deleted'
-  print('Datos: ${event.record}');
+// Callback
+final unsub = db.from('messages').subscribe<Map<String,dynamic>>((event) {
+  print(event.action);      // RealtimeAction.created / updated / deleted
+  print(event.collection);  // 'messages'
+  print(event.record);      // Map<String,dynamic>
+  print(event.recordId);
 });
+unsub();
 
-// Basado en Callback
-final unsubscribe = db.from('posts').subscribe((event) {
-  print('Acción: ${event.action}');
-});
-
-// Dejar de escuchar
-unsubscribe();
-```
-````
-
-## Monitorizar Registros Específicos
-
-Puedes filtrar qué registros te interesan usando filtros antes de suscribirte:
-
-````carousel
-```ts
-// Solo escuchar actualizaciones en un post específico
-db.from('posts')
-  .eq('id', 'abc-123')
-  .subscribe((event) => {
-    if (event.action === 'updated') {
-      console.log('¡El post se ha actualizado!')
-    }
-  })
-```
-<!-- slide -->
-```dart
-// Solo escuchar actualizaciones en un post específico
-db.from('posts')
-  .eq('id', 'abc-123')
-  .watch()
-  .listen((event) {
-    if (event.action == 'updated') {
-      print('¡El post se ha actualizado!');
-    }
-  });
-```
-````
-
-## Monitorizar el Estado de la Conexión
-
-Puedes recibir notificaciones si la conexión se pierde o se restablece:
-
-````carousel
-```ts
-db.realtime.onStatusChange((status) => {
-  console.log('Estado Realtime:', status) // 'connected', 'reconnecting', 'disconnected'
-})
-```
-<!-- slide -->
-```dart
-db.realtime.onStatusChange((status) {
-  print('Estado Realtime: $status');
+// Stream (ideal para StreamBuilder)
+db.from('messages').watch().listen((event) {
+  print('${event.action}: ${event.record}');
 });
 ```
 ````
 
 ---
 
-Siguiente: [Almacenamiento y Archivos](storage.md)
+## StreamBuilder en Flutter
+
+````carousel
+```dart
+StreamBuilder<RealtimeEvent>(
+  stream: db.from('chat').watch(),
+  builder: (context, snapshot) {
+    if (!snapshot.hasData) return const SizedBox.shrink();
+    final event = snapshot.data!;
+
+    switch (event.action) {
+      case RealtimeAction.created:
+        print('Nuevo mensaje: ${event.record?['text']}');
+      case RealtimeAction.updated:
+        print('Mensaje editado');
+      case RealtimeAction.deleted:
+        print('Mensaje eliminado: ${event.recordId}');
+      default:
+        break;
+    }
+    return const SizedBox.shrink();
+  },
+)
+```
+````
+
+---
+
+## Estado de la conexión
+
+````carousel
+```ts
+const unsub = db.realtime.onStatusChange((status) => {
+  // 'connected' | 'disconnected'
+  console.log('Realtime:', status)
+})
+
+unsub() // dejar de escuchar
+
+// Saber si está conectado
+console.log(db.realtime.isConnected)
+```
+<!-- slide -->
+```dart
+final unsub = db.realtime.onStatusChange((status) {
+  // 'connected' | 'disconnected'
+  print('Realtime: $status');
+});
+unsub();
+
+// Saber si está conectado
+print(db.realtime.isConnected);
+```
+````
+
+---
+
+## Desconectar manualmente
+
+````carousel
+```ts
+// Cierra el WebSocket y limpia todas las suscripciones
+db.realtime.disconnect()
+```
+<!-- slide -->
+```dart
+db.realtime.disconnect();
+```
+````
+
+---
+
+## Reconexión automática
+
+El SDK maneja la reconexión automáticamente cuando:
+
+- Se pierde la conexión de red
+- El servidor cierra el socket inesperadamente
+- Un pong no llega en 5 segundos después del ping (conexión zombi)
+
+El tiempo entre reintentos crece exponencialmente desde 2 segundos hasta un máximo de 30 segundos.
+
+Al reconectarse, el SDK re-suscribe automáticamente a todas las colecciones activas.
+
+---
+
+Siguiente: [Storage](storage.md)

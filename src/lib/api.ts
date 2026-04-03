@@ -31,7 +31,7 @@ async function tryRefreshToken(): Promise<string | null> {
       if (!res.ok) return null
 
       const data = await res.json()
-      const newToken = data.access_token ?? data.token
+      const newToken = data.access_token
       if (!newToken) return null
 
       setToken(newToken)
@@ -94,8 +94,23 @@ export function setStoredUser(user: any): void {
   localStorage.setItem(USER_KEY, JSON.stringify(user))
 }
 
+function _decodeJwtExp(token: string): number | null {
+  try {
+    const parts = token.split('.')
+    if (parts.length !== 3) return null
+    const payload = JSON.parse(atob(parts[1]))
+    return typeof payload.exp === 'number' ? payload.exp : null
+  } catch {
+    return null
+  }
+}
+
 export function isAuthenticated(): boolean {
-  return !!getToken()
+  const token = getToken()
+  if (!token) return false
+  const exp = _decodeJwtExp(token)
+  if (exp === null) return true // no exp claim → assume valid
+  return exp * 1000 > Date.now() + 30_000 // 30s safety margin
 }
 
 // ─── Core request ────────────────────────────────────────
@@ -107,6 +122,24 @@ type RequestOptions = {
   params?: Record<string, string>
 }
 
+async function _fetchWithTimeout(
+  url: URL,
+  method: string,
+  headers: HeadersInit,
+  body: any,
+  signal: AbortSignal
+): Promise<{ res: Response; data: any }> {
+  const res = await fetch(url.toString(), {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+    signal,
+  })
+  let data: any = null
+  try { data = await res.json() } catch { /* no body */ }
+  return { res, data }
+}
+
 async function request<T = any>(
   path: string,
   {
@@ -114,16 +147,14 @@ async function request<T = any>(
     auth = true,
     body,
     params,
-  }: RequestOptions = {}
+    _isRetry = false,
+  }: RequestOptions & { _isRetry?: boolean } = {}
 ): Promise<T> {
 
-  // 🔥 AbortController por request
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), 15000)
 
   try {
-    // ── URL ─────────────────────────────
-    // Si la URL es relativa (/api/v1/...), necesitamos pasarle el origin base
     const baseOrigin = typeof window !== 'undefined' ? window.location.origin : undefined
     const url = new URL(`${BASE_URL}${path}`, baseOrigin)
 
@@ -133,59 +164,36 @@ async function request<T = any>(
       })
     }
 
-    // ── Headers ─────────────────────────
-
     const headers: HeadersInit = {}
-    if (body !== undefined) {
-      headers['Content-Type'] = 'application/json'
-    }
+    if (body !== undefined) headers['Content-Type'] = 'application/json'
 
     if (auth) {
       const token = getToken()
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`
-      }
+      if (token) headers['Authorization'] = `Bearer ${token}`
     }
 
-    // ── Fetch ───────────────────────────
-
-    const res = await fetch(url.toString(), {
-      method,
-      headers,
-      body: body ? JSON.stringify(body) : undefined,
-      signal: controller.signal,
-    })
-
-    let data: any = null
-
-    try {
-      data = await res.json()
-    } catch {
-      // puede no haber body
-    }
-
-    // ── Errors ──────────────────────────
+    const { res, data } = await _fetchWithTimeout(url, method, headers, body, controller.signal)
 
     if (!res.ok) {
-      if (res.status === 401 && auth) {
-        // Intentar refresh antes de logout
+      if (res.status === 401 && auth && !_isRetry) {
         const newToken = await tryRefreshToken()
         if (newToken) {
-          // Reintentar la request original con el nuevo token
+          // Retry once with the new token — _isRetry prevents further refresh loops
           const retryHeaders: HeadersInit = {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${newToken}`,
           }
-          const retryRes = await fetch(url.toString(), {
-            method,
-            headers: retryHeaders,
-            body: body ? JSON.stringify(body) : undefined,
-          })
-          let retryData: any = null
-          try { retryData = await retryRes.json() } catch { /* sin body */ }
+          const { res: retryRes, data: retryData } = await _fetchWithTimeout(
+            url, method, retryHeaders, body, controller.signal
+          )
           if (retryRes.ok) return retryData as T
+          // Retry also failed — fall through to error
+          throw new ApiError(
+            retryData?.error || retryData?.message || 'Request failed',
+            retryRes.status,
+            retryData
+          )
         }
-        // Refresh falló → logout
         clearToken()
       }
 
@@ -199,13 +207,8 @@ async function request<T = any>(
     return data as T
 
   } catch (err: any) {
-
-    if (err.name === 'AbortError') {
-      throw new Error('Request timeout (15s)')
-    }
-
+    if (err.name === 'AbortError') throw new Error('Request timeout (15s)')
     throw err
-
   } finally {
     clearTimeout(timeout)
   }

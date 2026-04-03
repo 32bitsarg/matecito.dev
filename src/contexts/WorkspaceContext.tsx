@@ -100,7 +100,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const refreshMembers = useCallback(async (workspaceId: string) => {
     try {
       const res = await MemberService.list(workspaceId)
-      setMembers(res.members ?? res)
+      setMembers(res.members ?? [])
     } catch (err) {
       setMembers([])
     }
@@ -109,7 +109,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const refreshInvites = useCallback(async (workspaceId: string) => {
     try {
       const res = await InviteService.list(workspaceId)
-      setInvites(res.invites ?? res)
+      setInvites(res.invites ?? [])
     } catch (err) {
       setInvites([])
     }
@@ -209,6 +209,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const handleLogout = () => {
       resetState()
+      window.location.href = '/login'
     }
 
     window.addEventListener('auth:logout', handleLogout)

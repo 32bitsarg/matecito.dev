@@ -276,6 +276,10 @@ export const AuthUserService = {
   async delete(projectId: string, userId: string): Promise<void> {
     return api.delete(`/api/v1/project/${projectId}/auth/users/${userId}`)
   },
+
+  async resendVerification(projectId: string, userId: string): Promise<void> {
+    return api.post(`/api/v1/project/${projectId}/auth/resend-verification`, { userId })
+  },
 }
 
 // ─── Invites ──────────────────────────────────────────────────────────────────

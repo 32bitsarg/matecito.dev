@@ -61,7 +61,7 @@ interface ProjectContextType {
     updateField: (collectionName: string, fieldId: string, data: Partial<Pick<Field, 'name' | 'type' | 'required' | 'options'>>) => Promise<Field>
     deleteField: (collectionName: string, fieldId: string) => Promise<void>
 
-    fetchRecords: (collectionName: string, filter?: string) => Promise<any>
+    fetchRecords: (collectionName: string, params?: Record<string, string>) => Promise<any>
     getRecord: (collectionName: string, id: string) => Promise<any>
     createRecord: (collectionName: string, data: any) => Promise<any>
     updateRecord: (id: string, data: any) => Promise<any>
@@ -249,18 +249,17 @@ export function ProjectProvider({
 
     // ── Records ───────────────────────────────────────────
 
-    const fetchRecords = useCallback(async (collectionName: string, filter = '') => {
+    const fetchRecords = useCallback(async (collectionName: string, extraParams?: Record<string, string>) => {
         setLoading(true)
         setError(null)
 
         try {
-            const params: Record<string, string> = { collection: collectionName }
-            if (filter) params.filter = filter
+            const params: Record<string, string> = { collection: collectionName, ...extraParams }
 
             const res = await pApi.get('/records', params)
 
             if (activeRef.current === projectId) {
-                setRecords(res.records ?? res)
+                setRecords(res.records ?? [])
             }
 
             return res

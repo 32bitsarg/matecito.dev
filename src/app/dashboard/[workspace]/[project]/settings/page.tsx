@@ -71,8 +71,8 @@ export default function SettingsPage() {
         setRegenerating(true)
         try {
             const res = await regenerateApiKey()
-            setAnonKey(res?.anon_key || res?.api_keys?.anon || '')
-            setServiceKey(res?.service_key || res?.api_keys?.service || '')
+            setAnonKey(res?.api_keys?.anon || '')
+            setServiceKey(res?.api_keys?.service || '')
             toast.success('Keys regeneradas')
         } catch { toast.error('Error al regenerar') }
         finally { setRegenerating(false) }
