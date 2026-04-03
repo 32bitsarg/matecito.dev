@@ -36,8 +36,8 @@ export default function LoginPage() {
         }
 
         try {
-            // Limpiamos sesión previa
-            clearToken()
+            // Limpiamos sesión previa sin disparar el evento auth:logout global
+            clearToken(true)
 
             // AuthService.login() llama a POST /api/v1/platform/auth/login
             // y guarda el token + user en localStorage automáticamente

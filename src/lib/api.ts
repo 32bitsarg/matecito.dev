@@ -72,13 +72,15 @@ export function setToken(token: string): void {
   localStorage.setItem(TOKEN_KEY, token)
 }
 
-export function clearToken(): void {
+export function clearToken(silent = false): void {
   localStorage.removeItem(TOKEN_KEY)
   localStorage.removeItem(REFRESH_TOKEN_KEY)
   localStorage.removeItem(USER_KEY)
 
-  // 🔥 dispara logout global
-  window.dispatchEvent(new Event('auth:logout'))
+  // 🔥 dispara logout global (skip si silent=true, p.ej. antes de un login)
+  if (!silent) {
+    window.dispatchEvent(new Event('auth:logout'))
+  }
 }
 
 // ─── User helpers ────────────────────────────────────────
