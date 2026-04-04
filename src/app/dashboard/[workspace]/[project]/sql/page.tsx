@@ -179,7 +179,17 @@ export default function SqlEditorPage() {
                         </div>
 
                         {/* Table */}
-                        {result.rows?.length > 0 ? (
+                        {['CREATE', 'DROP', 'ALTER', 'INSERT', 'UPDATE', 'DELETE'].includes(result.command) && result.rows?.length === 0 ? (
+                            <div className="flex items-center justify-center flex-1 text-emerald-600 text-sm font-semibold gap-2">
+                                <Check className="w-4 h-4" />
+                                {result.command === 'CREATE' && 'Tabla creada correctamente'}
+                                {result.command === 'DROP' && 'Tabla eliminada correctamente'}
+                                {result.command === 'ALTER' && 'Tabla modificada correctamente'}
+                                {result.command === 'INSERT' && `${result.row_count ?? 0} fila(s) insertada(s)`}
+                                {result.command === 'UPDATE' && `${result.row_count ?? 0} fila(s) actualizada(s)`}
+                                {result.command === 'DELETE' && `${result.row_count ?? 0} fila(s) eliminada(s)`}
+                            </div>
+                        ) : result.rows?.length > 0 ? (
                             <div className="overflow-auto flex-1">
                                 <table className="w-full text-xs border-collapse">
                                     <thead className="sticky top-0 z-10">
@@ -215,7 +225,7 @@ export default function SqlEditorPage() {
                             </div>
                         ) : (
                             <div className="flex items-center justify-center flex-1 text-slate-400 text-sm">
-                                {result.command === 'SELECT' ? 'Sin resultados' : `${result.command ?? 'OK'} — ${result.row_count ?? 0} fila(s) afectada(s)`}
+                                Sin resultados
                             </div>
                         )}
                     </div>
