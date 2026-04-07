@@ -6,7 +6,7 @@ import { useParams, usePathname } from 'next/navigation'
 import {
     Database, Settings, Plus, Folder, LayoutDashboard,
     Code2, ArrowLeft, Users, Shield, Terminal, LogOut, ChevronDown, FlaskConical,
-    Table2, UserCircle, Mail, Webhook
+    Table2, UserCircle, Mail, Webhook, Bell
 } from 'lucide-react'
 import WorkspaceSelector from '@/components/workspace-selector'
 import { cn } from '@/lib/utils'
@@ -78,7 +78,7 @@ export default function Sidebar() {
                                 <SidebarLink href={`${base}/data`} active={pathname.startsWith(`${base}/data`)}
                                     icon={Table2} label="Registros" />
                                 <SidebarLink href={`${base}/schema`} active={pathname.startsWith(`${base}/schema`)}
-                                    icon={Database} label="Esquema" />
+                                    icon={Database} label="Tablas" />
                                 <SidebarLink href={`${base}/api`} active={pathname.startsWith(`${base}/api`)}
                                     icon={Code2} label="API Explorer" />
                                 <SidebarLink href={`${base}/sql`} active={pathname.startsWith(`${base}/sql`)}
@@ -88,6 +88,8 @@ export default function Sidebar() {
                             <NavSection label="Usuarios">
                                 <SidebarLink href={`${base}/auth`} active={pathname.startsWith(`${base}/auth`)}
                                     icon={Users} label="Usuarios" />
+                                <SidebarLink href={`${base}/notifications`} active={pathname.startsWith(`${base}/notifications`)}
+                                    icon={Bell} label="Notificaciones" />
                             </NavSection>
 
                             <NavSection label="Archivos">

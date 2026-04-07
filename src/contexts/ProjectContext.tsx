@@ -118,6 +118,9 @@ interface ProjectContextType {
     updateEmailTemplate: (id: string, data: any) => Promise<any>
     deleteEmailTemplate: (id: string) => Promise<void>
     seedEmailTemplates: () => Promise<any>
+
+    // Notifications
+    sendNotification: (payload: { user_ids: string[]; title: string; body: string; data?: Record<string, string> }) => Promise<{ successCount: number; failureCount: number; reason?: string }>
 }
 
 // ─── Context ──────────────────────────────────────────────
@@ -185,7 +188,7 @@ export function ProjectProvider({
         mutate: mutateCollections,
     } = useSWR<Collection[]>(
         projectId ? `project/${projectId}/collections` : null,
-        () => pApi.get('/collections').then(d => d.collections ?? d),
+        () => pApi.get('/collections?include=fields,counts').then(d => d.collections ?? d),
     )
 
     // ── Collections ───────────────────────────────────────
@@ -472,6 +475,10 @@ export function ProjectProvider({
         return await pApi.post('/email-templates/seed')
     }, [pApi])
 
+    const sendNotification = useCallback(async (payload: { user_ids: string[]; title: string; body: string; data?: Record<string, string> }) => {
+        return await pApi.post('/notifications/send', payload)
+    }, [pApi])
+
     const healthCheck = useCallback(async () => {
         return await api.get('/health')
     }, [])
@@ -540,6 +547,7 @@ export function ProjectProvider({
                 updateEmailTemplate,
                 deleteEmailTemplate,
                 seedEmailTemplates,
+                sendNotification,
             }}
         >
             {children}

@@ -660,7 +660,7 @@ export default function SchemaEditorPage() {
                         <Database className="w-5 h-5 text-violet-600" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-extrabold text-slate-900">Esquema de Datos</h1>
+                        <h1 className="text-2xl font-extrabold text-slate-900">Tablas</h1>
                         <p className="text-xs text-slate-400">{collections.length} colección{collections.length !== 1 ? 'es' : ''}</p>
                     </div>
                 </div>

@@ -168,7 +168,12 @@ export default function DataPage() {
 
     const currentCollection = collections.find(c => c.name === selectedCollection)
     const fields = currentCollection?.fields ?? []
-    const dataColumns = fields.length > 0 ? fields.slice(0, 5).map(f => f.name) : []
+    const SYSTEM_KEYS = new Set(['created_at', 'updated_at', 'created_by'])
+    const definedColumns = fields.filter(f => !SYSTEM_KEYS.has(f.name)).slice(0, 6).map(f => f.name)
+    const derivedColumns = definedColumns.length === 0 && records.length > 0
+        ? Object.keys(records[0].data ?? {}).filter(k => !SYSTEM_KEYS.has(k)).slice(0, 6)
+        : []
+    const dataColumns = definedColumns.length > 0 ? definedColumns : derivedColumns
 
     const selectCollection = useCallback((name: string) => {
         const params = new URLSearchParams(searchParams.toString())
@@ -387,7 +392,7 @@ export default function DataPage() {
                                                     <th key={col} className="text-left px-4 py-2.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">{col}</th>
                                                 ))}
                                                 {dataColumns.length === 0 && (
-                                                    <th className="text-left px-4 py-2.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">data</th>
+                                                    <th className="text-left px-4 py-2.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">campos</th>
                                                 )}
                                                 <th className="text-left px-4 py-2.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Creado</th>
                                                 <th className="w-24" />
@@ -418,7 +423,13 @@ export default function DataPage() {
                                                             ))
                                                             : (
                                                                 <td className="px-4 py-2.5">
-                                                                    <span className="text-slate-400 text-xs font-mono">{Object.keys(record.data ?? {}).slice(0, 3).join(', ')}</span>
+                                                                    <span className="text-slate-400 text-xs font-mono">
+                                                                        {Object.entries(record.data ?? {})
+                                                                            .filter(([k]) => !SYSTEM_KEYS.has(k))
+                                                                            .slice(0, 3)
+                                                                            .map(([k, v]) => `${k}: ${typeof v === 'object' ? JSON.stringify(v) : String(v ?? '')}`)
+                                                                            .join(' · ') || '—'}
+                                                                    </span>
                                                                 </td>
                                                             )
                                                         }
