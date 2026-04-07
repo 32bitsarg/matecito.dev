@@ -121,6 +121,9 @@ interface ProjectContextType {
 
     // Notifications
     sendNotification: (payload: { user_ids: string[]; title: string; body: string; data?: Record<string, string> }) => Promise<{ successCount: number; failureCount: number; reason?: string }>
+    fetchFirebaseConfig: () => Promise<{ configured: boolean; project_id?: string; updated_at?: string }>
+    saveFirebaseConfig: (credentials: Record<string, any>) => Promise<{ ok: boolean; project_id: string }>
+    deleteFirebaseConfig: () => Promise<void>
 }
 
 // ─── Context ──────────────────────────────────────────────
@@ -479,6 +482,18 @@ export function ProjectProvider({
         return await pApi.post('/notifications/send', payload)
     }, [pApi])
 
+    const fetchFirebaseConfig = useCallback(async () => {
+        return await pApi.get('/notifications/firebase-config')
+    }, [pApi])
+
+    const saveFirebaseConfig = useCallback(async (credentials: Record<string, any>) => {
+        return await pApi.put('/notifications/firebase-config', { credentials })
+    }, [pApi])
+
+    const deleteFirebaseConfig = useCallback(async () => {
+        await pApi.delete('/notifications/firebase-config')
+    }, [pApi])
+
     const healthCheck = useCallback(async () => {
         return await api.get('/health')
     }, [])
@@ -548,6 +563,9 @@ export function ProjectProvider({
                 deleteEmailTemplate,
                 seedEmailTemplates,
                 sendNotification,
+                fetchFirebaseConfig,
+                saveFirebaseConfig,
+                deleteFirebaseConfig,
             }}
         >
             {children}
