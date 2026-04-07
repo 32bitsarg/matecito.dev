@@ -45,8 +45,9 @@ export function Footer() {
                     </div>
                 </div>
 
-                <div className="pt-8 text-xs text-slate-600 text-center sm:text-left">
+                <div className="pt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-slate-600">
                     <span>© {new Date().getFullYear()} Matecito.Dev. Todos los derechos reservados.</span>
+                    <Link href="/privacidad" className="hover:text-violet-400 transition-colors">Política de Privacidad</Link>
                 </div>
             </div>
         </footer>
