@@ -120,7 +120,7 @@ interface ProjectContextType {
     seedEmailTemplates: () => Promise<any>
 
     // Notifications
-    sendNotification: (payload: { user_ids: string[]; title: string; body: string; data?: Record<string, string> }) => Promise<{ successCount: number; failureCount: number; reason?: string }>
+    sendNotification: (payload: { user_ids: string[]; title: string; body: string; data?: Record<string, string> }) => Promise<{ successCount: number; failureCount: number; reason?: string; errors?: { code: string; message: string }[] }>
     fetchFirebaseConfig: () => Promise<{ configured: boolean; project_id?: string; updated_at?: string }>
     saveFirebaseConfig: (credentials: Record<string, any>) => Promise<{ ok: boolean; project_id: string }>
     deleteFirebaseConfig: () => Promise<void>

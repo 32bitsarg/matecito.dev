@@ -165,7 +165,7 @@ export default function NotificationsPage() {
     const [body,        setBody]        = useState('')
     const [extraData,   setExtraData]   = useState('')
     const [sending,     setSending]     = useState(false)
-    const [result,      setResult]      = useState<{ successCount: number; failureCount: number; reason?: string } | null>(null)
+    const [result,      setResult]      = useState<{ successCount: number; failureCount: number; reason?: string; errors?: { code: string; message: string }[] } | null>(null)
 
     const handleSend = async () => {
         if (!title.trim() || !body.trim()) { toast.error('Título y mensaje son requeridos'); return }
@@ -313,7 +313,12 @@ export default function NotificationsPage() {
                         {!result.reason && result.successCount === 0 && result.failureCount > 0 && (
                             <>
                                 <p className="font-semibold text-red-700">Todas las notificaciones fallaron</p>
-                                <p className="text-red-600">Verificá que el Service Account JSON sea del mismo proyecto Firebase que usás en tu app.</p>
+                                {result.errors && result.errors.length > 0
+                                    ? result.errors.map((e, i) => (
+                                        <p key={i} className="text-red-600 font-mono">{e.code}: {e.message}</p>
+                                    ))
+                                    : <p className="text-red-600">Verificá que el Service Account sea del mismo proyecto Firebase que tu app.</p>
+                                }
                             </>
                         )}
                         {!result.reason && (result.successCount > 0 || result.failureCount === 0) && (
