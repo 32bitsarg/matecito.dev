@@ -3,6 +3,7 @@
 import { use } from 'react'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { ProjectProvider } from '@/contexts/ProjectContext'
+import { ProjectNav } from '@/components/layout/project-nav'
 import { notFound } from 'next/navigation'
 
 interface Params {
@@ -33,12 +34,13 @@ export default function ProjectLayout({
     if (!project) return notFound()
 
     return (
-        <ProjectProvider 
+        <ProjectProvider
             projectId={project.id}
-            subdomain={project.subdomain ?? ''} 
+            subdomain={project.subdomain ?? ''}
             project={project}
         >
-            <div className="animate-fade-in h-full">
+            <ProjectNav />
+            <div className="px-6 py-5 animate-fade-in">
                 {children}
             </div>
         </ProjectProvider>

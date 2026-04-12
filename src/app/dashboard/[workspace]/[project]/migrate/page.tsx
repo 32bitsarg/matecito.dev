@@ -115,7 +115,7 @@ export default function MigratePage() {
             <tbody className="divide-y" style={{ borderColor: 'var(--border)' }}>
               {COMPARISON.map(row => (
                 <tr key={row.feature} className="transition-colors hover:bg-[var(--bg-secondary)]"
-                  style={{ backgroundColor: 'var(--bg-primary)' }}>
+                  style={{ backgroundColor: 'var(--bg-tertiary)' }}>
                   <td className="px-4 py-2.5 text-xs" style={{ color: 'var(--fg-secondary)' }}>{row.feature}</td>
                   <td className="px-4 py-2.5 text-center">
                     {row.v1
@@ -140,7 +140,7 @@ export default function MigratePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {V2_FEATURES.map(f => (
             <div key={f.title} className="flex gap-3 p-3 rounded-xl border"
-              style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
+              style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)' }}>
               <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
                 style={{ backgroundColor: 'var(--accent-soft)', color: 'var(--accent)' }}>
                 {f.icon}
@@ -159,7 +159,7 @@ export default function MigratePage() {
         <button
           onClick={() => setShowPaths(v => !v)}
           className="w-full flex items-center justify-between px-4 py-3 text-left transition-colors hover:bg-[var(--bg-secondary)]"
-          style={{ backgroundColor: 'var(--bg-primary)' }}
+          style={{ backgroundColor: 'var(--bg-tertiary)' }}
         >
           <span className="text-sm font-semibold" style={{ color: 'var(--fg-secondary)' }}>
             ¿Qué cambia en v2? — Referencia de rutas y SDK
@@ -194,7 +194,7 @@ export default function MigratePage() {
               <div
                 key={project.id}
                 className="flex items-center justify-between p-4 rounded-xl border"
-                style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}
+                style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)' }}
               >
                 <div className="flex items-center gap-3">
                   <Database className="w-5 h-5" style={{ color: 'var(--fg-tertiary)' }} />

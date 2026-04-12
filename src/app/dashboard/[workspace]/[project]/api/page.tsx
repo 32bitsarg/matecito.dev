@@ -7,10 +7,10 @@ import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
 const METHOD_STYLES: Record<string, string> = {
-    GET:    'bg-blue-50 text-blue-600 border-blue-200',
-    POST:   'bg-emerald-50 text-emerald-600 border-emerald-200',
-    PATCH:  'bg-amber-50 text-amber-600 border-amber-200',
-    DELETE: 'bg-red-50 text-red-600 border-red-200',
+    GET:    'bg-blue-950/20 text-blue-400 border-blue-800/40',
+    POST:   'bg-emerald-950/20 text-emerald-400 border-emerald-800/40',
+    PATCH:  'bg-amber-950/20 text-amber-400 border-amber-800/40',
+    DELETE: 'bg-red-950/20 text-red-400 border-red-800/40',
 }
 
 export default function ApiExplorerPage() {
@@ -84,7 +84,7 @@ export default function ApiExplorerPage() {
             </div>
 
             {collections.length === 0 ? (
-                <div className="bg-[var(--bg-primary)] rounded-xl border border-dashed border-[var(--border)] p-16 text-center">
+                <div className="bg-[var(--bg-tertiary)] rounded-xl border border-dashed border-[var(--border)] p-16 text-center">
                     <Database className="w-10 h-10 text-[var(--fg-tertiary)] mx-auto mb-3" />
                     <p className="text-sm text-[var(--fg-tertiary)]">No hay colecciones. Creá una en el Esquema de Datos.</p>
                 </div>
@@ -113,7 +113,7 @@ export default function ApiExplorerPage() {
                                     const isGet = ep.method === 'GET'
                                     return (
                                         <div key={id}
-                                            className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] overflow-hidden hover:border-[var(--border)] transition-all">
+                                            className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] overflow-hidden hover:border-[var(--border)] transition-all">
                                             <div className="flex items-center justify-between gap-4 p-4">
                                                 <div className="flex items-center gap-3 flex-1 min-w-0">
                                                     <span className={cn("text-[10px] font-bold px-2 py-1 rounded border w-16 text-center", METHOD_STYLES[ep.method])}>
@@ -133,7 +133,7 @@ export default function ApiExplorerPage() {
                                                     <button
                                                         onClick={() => testEndpoint(col, ep.method)}
                                                         disabled={isLoading}
-                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--accent-soft)] text-[var(--accent)] text-[10px] font-bold rounded-lg hover:bg-violet-100 transition-all border border-[var(--border)] disabled:opacity-50">
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--accent-soft)] text-[var(--accent)] text-[10px] font-bold rounded-lg hover:bg-violet-900/30 transition-all border border-[var(--border)] disabled:opacity-50">
                                                         {isLoading
                                                             ? <Loader2 className="w-3 h-3 animate-spin" />
                                                             : <Play className="w-3 h-3" />

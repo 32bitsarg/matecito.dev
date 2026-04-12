@@ -7,7 +7,7 @@ export default function NotFound() {
   const router = useRouter()
 
   return (
-    <div className="h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--fg-primary)' }}>
+    <div className="h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--fg-primary)' }}>
       <div className="text-center max-w-md">
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: 'var(--bg-secondary)' }}>
           <Database className="w-8 h-8" style={{ color: 'var(--fg-tertiary)' }} />

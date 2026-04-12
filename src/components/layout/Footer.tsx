@@ -2,52 +2,61 @@ import Link from "next/link"
 
 export function Footer() {
     return (
-        <footer className="w-full bg-slate-900 text-slate-400">
-            <div className="max-w-7xl mx-auto px-8 py-16">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-12 pb-12 border-b border-slate-800">
-
+        <footer className="px-6 py-12 border-t" style={{ backgroundColor: '#000', borderColor: 'rgba(255,255,255,0.07)' }}>
+            <div className="max-w-4xl mx-auto">
+                <div className="flex flex-col sm:flex-row items-start justify-between gap-10 mb-10">
                     {/* Brand */}
-                    <div className="md:col-span-2 space-y-4">
-                        <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-lg bg-violet-600 flex items-center justify-center shadow-sm">
-                                <span className="text-white font-black text-xs">m</span>
-                            </div>
-                            <span className="font-bold text-white text-base tracking-tight">
-                                matecito<span className="text-violet-400">.dev</span>
+                    <div className="shrink-0">
+                        <div className="flex items-center gap-2 mb-3">
+                            <img src="/logos/matecitonobg.png" alt="matecito.dev" className="w-6 h-6 object-contain" />
+                            <span className="font-bold text-base tracking-tight" style={{ color: '#f0f0f0' }}>
+                                matecito<span style={{ color: '#6d001a' }}>.dev</span>
                             </span>
                         </div>
-                        <p className="text-sm leading-relaxed max-w-xs">
-                            Creamos páginas web y landings para emprendimientos y pymes. También estamos construyendo matecitodb, un backend-as-a-service hecho en Argentina.
+                        <p className="text-sm max-w-[200px] leading-relaxed" style={{ color: 'rgba(240,240,240,0.35)' }}>
+                            Software desde Pergamino,<br />Buenos Aires, Argentina.
                         </p>
-                        <p className="text-xs text-slate-600">Construido en Argentina 🇦🇷</p>
                     </div>
 
-                    {/* Servicios */}
-                    <div className="space-y-4">
-                        <p className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Servicios</p>
-                        <nav className="flex flex-col gap-2.5 text-sm">
-                            <Link href="/#servicios" className="hover:text-violet-400 transition-colors">Landing Pages</Link>
-                            <Link href="/#servicios" className="hover:text-violet-400 transition-colors">Sitios Web</Link>
-                            <Link href="/#servicios" className="hover:text-violet-400 transition-colors">SEO</Link>
-                            <a href="https://wa.me/541124025239?text=Hola%2C%20quiero%20consultarles%20sobre%20una%20p%C3%A1gina%20web"
-                                target="_blank" rel="noopener noreferrer"
-                                className="hover:text-violet-400 transition-colors">Contacto</a>
-                        </nav>
-                    </div>
-
-                    {/* matecitodb */}
-                    <div className="space-y-4">
-                        <p className="text-xs font-semibold text-slate-300 uppercase tracking-wider">matecitodb</p>
-                        <nav className="flex flex-col gap-2.5 text-sm">
-                            <Link href="/docs" className="hover:text-violet-400 transition-colors">Documentación</Link>
-                            <Link href="/#newsletter" className="hover:text-violet-400 transition-colors">Acceder a la beta</Link>
-                        </nav>
+                    {/* Links */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-12 gap-y-6 text-sm">
+                        <div className="flex flex-col gap-2.5">
+                            <p className="text-[11px] font-bold uppercase tracking-widest mb-0.5"
+                                style={{ color: 'rgba(240,240,240,0.25)' }}>
+                                Productos
+                            </p>
+                            <Link href="/matecitodb" className="transition-colors hover:text-white"
+                                style={{ color: 'rgba(240,240,240,0.50)' }}>matecitodb</Link>
+                            <Link href="/apps" className="transition-colors hover:text-white"
+                                style={{ color: 'rgba(240,240,240,0.50)' }}>Apps & Juegos</Link>
+                            <Link href="/web" className="transition-colors hover:text-white"
+                                style={{ color: 'rgba(240,240,240,0.50)' }}>Webs & Landings</Link>
+                        </div>
+                        <div className="flex flex-col gap-2.5">
+                            <p className="text-[11px] font-bold uppercase tracking-widest mb-0.5"
+                                style={{ color: 'rgba(240,240,240,0.25)' }}>
+                                Cuenta
+                            </p>
+                            <Link href="/dashboard" className="transition-colors hover:text-white"
+                                style={{ color: 'rgba(240,240,240,0.50)' }}>Dashboard</Link>
+                            <Link href="/login" className="transition-colors hover:text-white"
+                                style={{ color: 'rgba(240,240,240,0.50)' }}>Iniciar sesión</Link>
+                        </div>
+                        <div className="flex flex-col gap-2.5">
+                            <p className="text-[11px] font-bold uppercase tracking-widest mb-0.5"
+                                style={{ color: 'rgba(240,240,240,0.25)' }}>
+                                Legal
+                            </p>
+                            <Link href="/privacidad" className="transition-colors hover:text-white"
+                                style={{ color: 'rgba(240,240,240,0.50)' }}>Privacidad</Link>
+                        </div>
                     </div>
                 </div>
 
-                <div className="pt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-slate-600">
-                    <span>© {new Date().getFullYear()} Matecito.Dev. Todos los derechos reservados.</span>
-                    <Link href="/privacidad" className="hover:text-violet-400 transition-colors">Política de Privacidad</Link>
+                <div className="pt-6 border-t flex flex-col sm:flex-row items-center justify-between gap-2 text-xs"
+                    style={{ borderColor: 'rgba(255,255,255,0.07)', color: 'rgba(240,240,240,0.25)' }}>
+                    <span>© {new Date().getFullYear()} matecito.dev</span>
+                    <span>Hecho con mate 🧉 en Pergamino</span>
                 </div>
             </div>
         </footer>

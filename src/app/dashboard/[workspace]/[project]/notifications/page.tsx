@@ -65,13 +65,13 @@ function FirebaseConfigSection() {
     }
 
     if (loading) return (
-        <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] p-5">
+        <div className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] p-5">
             <RefreshCw className="w-4 h-4 animate-spin text-[var(--fg-tertiary)]" />
         </div>
     )
 
     return (
-        <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] overflow-hidden">
+        <div className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] overflow-hidden">
             <button
                 onClick={() => setExpanded(v => !v)}
                 className="w-full flex items-center justify-between px-5 py-4 hover:bg-[var(--bg-secondary)] transition-colors">
@@ -93,7 +93,7 @@ function FirebaseConfigSection() {
                 </div>
                 <div className="flex items-center gap-2">
                     {configured && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-full">
+                        <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-950/20 text-emerald-400 border border-emerald-800/40 rounded-full">
                             Activo
                         </span>
                     )}
@@ -104,11 +104,11 @@ function FirebaseConfigSection() {
             {expanded && (
                 <div className="border-t border-[var(--border)] p-5 space-y-4">
                     {/* Instrucciones */}
-                    <div className="flex items-start gap-3 p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-700">
+                    <div className="flex items-start gap-3 p-3 bg-blue-950/20 border border-blue-800/40 rounded-xl text-xs text-blue-700">
                         <Info className="w-4 h-4 shrink-0 mt-0.5" />
                         <div className="space-y-1">
                             <p className="font-semibold">Cómo obtener el Service Account JSON</p>
-                            <ol className="list-decimal list-inside space-y-0.5 text-blue-600">
+                            <ol className="list-decimal list-inside space-y-0.5 text-blue-400">
                                 <li>Entrá a <strong>console.firebase.google.com</strong></li>
                                 <li>Seleccioná tu proyecto → Configuración → Cuentas de servicio</li>
                                 <li>Hacé click en <strong>"Generar nueva clave privada"</strong></li>
@@ -142,7 +142,7 @@ function FirebaseConfigSection() {
                             <button
                                 onClick={handleDelete}
                                 disabled={deleting}
-                                className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-primary)] border border-red-200 text-red-500 text-xs font-bold rounded-xl hover:bg-red-50 transition-all disabled:opacity-50">
+                                className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-primary)] border border-red-800/40 text-red-500 text-xs font-bold rounded-xl hover:bg-red-950/20 transition-all disabled:opacity-50">
                                 {deleting ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                                 Eliminar
                             </button>
@@ -211,7 +211,7 @@ export default function NotificationsPage() {
             <FirebaseConfigSection />
 
             {/* Send form */}
-            <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] divide-y divide-[var(--border)]">
+            <div className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] divide-y divide-[var(--border)]">
                 {/* Target */}
                 <div className="p-5 space-y-3">
                     <p className="text-xs font-bold text-[var(--fg-secondary)] uppercase tracking-wider">Destinatarios</p>
@@ -299,10 +299,10 @@ export default function NotificationsPage() {
             {result && (
                 <div className={cn(
                     "flex items-start gap-3 p-4 rounded-xl border animate-in slide-in-from-bottom-2 duration-300",
-                    result.reason ? "bg-amber-50 border-amber-200"
-                        : result.failureCount > 0 && result.successCount === 0 ? "bg-red-50 border-red-200"
+                    result.reason ? "bg-amber-950/20 border-amber-800/40"
+                        : result.failureCount > 0 && result.successCount === 0 ? "bg-red-950/20 border-red-800/40"
                         : result.failureCount > 0 ? "bg-orange-50 border-orange-200"
-                        : "bg-emerald-50 border-emerald-200"
+                        : "bg-emerald-950/20 border-emerald-800/40"
                 )}>
                     {result.reason || (result.failureCount > 0 && result.successCount === 0)
                         ? <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
@@ -315,16 +315,16 @@ export default function NotificationsPage() {
                                 <p className="font-semibold text-red-700">Todas las notificaciones fallaron</p>
                                 {result.errors && result.errors.length > 0
                                     ? result.errors.map((e, i) => (
-                                        <p key={i} className="text-red-600 font-mono">{e.code}: {e.message}</p>
+                                        <p key={i} className="text-red-400 font-mono">{e.code}: {e.message}</p>
                                     ))
-                                    : <p className="text-red-600">Verificá que el Service Account sea del mismo proyecto Firebase que tu app.</p>
+                                    : <p className="text-red-400">Verificá que el Service Account sea del mismo proyecto Firebase que tu app.</p>
                                 }
                             </>
                         )}
                         {!result.reason && (result.successCount > 0 || result.failureCount === 0) && (
                             <>
                                 <p className="font-semibold text-emerald-700">Enviado</p>
-                                <p className="text-emerald-600">{result.successCount} exitosas · {result.failureCount} fallidas</p>
+                                <p className="text-emerald-400">{result.successCount} exitosas · {result.failureCount} fallidas</p>
                             </>
                         )}
                     </div>

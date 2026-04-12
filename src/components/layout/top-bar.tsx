@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { cn } from '@/lib/utils'
-import { ChevronDown, Plus, Command, Search, Sun, Moon } from 'lucide-react'
+import { ChevronDown, Plus, Command, Search, Sun, Moon, ChevronRight } from 'lucide-react'
 
 export function TopBar() {
   const pathname = usePathname()
@@ -16,36 +16,51 @@ export function TopBar() {
 
   // Build breadcrumbs
   const parts = pathname.split('/').filter(Boolean)
-  const breadcrumbs = parts.map(p => {
-    if (p === 'dashboard') return { label: 'Dashboard', href: '/dashboard' }
-    if (p === 'profile') return { label: 'Perfil', href: '/dashboard/profile' }
-    if (p === 'members') return { label: 'Equipo', href: '' }
-    if (p === 'settings') return { label: 'Configuración', href: '' }
-    const project = projects.find(pr => pr.subdomain === p)
-    if (project) return { label: project.name, href: '' }
-    if (workspaces.find(w => w.slug === p)) return { label: p, href: `/dashboard/${p}` }
-    return { label: p.charAt(0).toUpperCase() + p.slice(1), href: '' }
-  })
+  // parts[0]=dashboard, parts[1]=workspace, parts[2]=project, parts[3+]=subpage
+  const workspaceSlug = parts[1]
+  const projectSlug   = parts[2]
+  const inProject     = parts[0] === 'dashboard' && parts.length >= 3 &&
+                        !['settings', 'members'].includes(parts[2])
+  const currentProject = inProject ? projects.find(pr => pr.subdomain === projectSlug) : null
 
   return (
-    <header className="h-11 flex items-center justify-between px-3 shrink-0 border-b"
-      style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
-      {/* Left: Breadcrumbs */}
-      <div className="flex items-center gap-0.5">
-        {breadcrumbs.map((crumb, i) => (
-          <div key={i} className="flex items-center gap-0.5">
-            {i > 0 && <span className="text-[var(--fg-tertiary)] text-xs">/</span>}
-            {crumb.href ? (
-              <button onClick={() => router.push(crumb.href)}
-                className="text-xs px-1 py-0.5 rounded hover:bg-[var(--bg-secondary)] transition-colors"
-                style={{ color: 'var(--fg-secondary)' }}>
-                {crumb.label}
-              </button>
-            ) : (
-              <span className="text-xs font-medium" style={{ color: 'var(--fg-primary)' }}>{crumb.label}</span>
-            )}
-          </div>
-        ))}
+    <header className="h-11 flex items-center justify-between px-4 shrink-0 border-b"
+      style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border)' }}>
+      {/* Left: Logo + breadcrumb */}
+      <div className="flex items-center gap-1.5 min-w-0">
+        <button
+          onClick={() => router.push('/dashboard')}
+          className="flex items-center gap-1.5 hover:opacity-80 transition-opacity shrink-0"
+        >
+          <img src="/logos/matecitologo.png" alt="Matecito" className="w-5 h-5 object-contain" />
+          <span className="text-sm font-semibold hidden sm:inline" style={{ color: 'var(--fg-primary)' }}>matecitodb</span>
+        </button>
+
+        {currentWorkspace && (
+          <>
+            <ChevronRight className="w-3 h-3 shrink-0 opacity-30" />
+            <button
+              onClick={() => router.push(`/dashboard/${workspaceSlug}`)}
+              className="text-xs transition-colors shrink-0 hidden sm:inline opacity-60 hover:opacity-100"
+              style={{ color: 'var(--fg-primary)' }}
+            >
+              {currentWorkspace.name}
+            </button>
+          </>
+        )}
+
+        {currentProject && (
+          <>
+            <ChevronRight className="w-3 h-3 shrink-0 opacity-30" />
+            <button
+              onClick={() => router.push(`/dashboard/${workspaceSlug}/${projectSlug}`)}
+              className="text-xs font-semibold truncate max-w-[140px] transition-colors hover:opacity-80"
+              style={{ color: 'var(--fg-primary)' }}
+            >
+              {currentProject.name}
+            </button>
+          </>
+        )}
       </div>
 
       {/* Right: Actions */}

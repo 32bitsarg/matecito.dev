@@ -65,8 +65,8 @@ export default function UsersPage() {
             {/* Header */}
             <div className="flex items-center justify-between pb-4 border-b border-[var(--border)]">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                        <Users className="w-5 h-5 text-blue-600" />
+                    <div className="w-10 h-10 rounded-xl bg-blue-950/20 flex items-center justify-center">
+                        <Users className="w-5 h-5 text-blue-400" />
                     </div>
                     <div>
                         <h1 className="text-2xl font-extrabold text-[var(--fg-primary)]">Usuarios</h1>
@@ -75,13 +75,13 @@ export default function UsersPage() {
                 </div>
                 <div className="flex items-center gap-2">
                     <Link href={`${base}/auth/providers`}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-[var(--bg-primary)] border border-[var(--border)] rounded-xl text-sm font-semibold text-[var(--fg-secondary)] hover:border-[var(--border)] hover:text-[var(--accent)] hover:bg-[var(--accent-soft)] transition-all">
+                        className="flex items-center gap-2 px-4 py-2.5 bg-[var(--bg-tertiary)] border border-[var(--border)] rounded-xl text-sm font-semibold text-[var(--fg-secondary)] hover:border-[var(--border)] hover:text-[var(--accent)] hover:bg-[var(--accent-soft)] transition-all">
                         <Puzzle className="w-4 h-4" />
                         Providers OAuth
                         <ChevronRight className="w-3.5 h-3.5" />
                     </Link>
                     <button onClick={loadUsers} disabled={loading}
-                        className="p-2.5 bg-[var(--bg-primary)] border border-[var(--border)] rounded-xl text-[var(--fg-tertiary)] hover:text-[var(--fg-secondary)] transition-all">
+                        className="p-2.5 bg-[var(--bg-tertiary)] border border-[var(--border)] rounded-xl text-[var(--fg-tertiary)] hover:text-[var(--fg-secondary)] transition-all">
                         <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
                     </button>
                 </div>
@@ -90,12 +90,12 @@ export default function UsersPage() {
             {/* Stats */}
             <div className="grid grid-cols-4 gap-4">
                 {[
-                    { label: "Total", value: users.length, icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
+                    { label: "Total", value: users.length, icon: Users, color: "text-blue-400", bg: "bg-blue-950/20" },
                     { label: "Con nombre", value: users.filter(u => u.name).length, icon: UserCheck, color: "text-[var(--accent)]", bg: "bg-[var(--accent-soft)]" },
-                    { label: "Hoy", value: users.filter(u => new Date(u.created_at).toDateString() === new Date().toDateString()).length, icon: Mail, color: "text-emerald-600", bg: "bg-emerald-50" },
-                    { label: "OAuth", value: users.filter(u => u.oauth_provider).length, icon: Globe, color: "text-amber-600", bg: "bg-amber-50" },
+                    { label: "Hoy", value: users.filter(u => new Date(u.created_at).toDateString() === new Date().toDateString()).length, icon: Mail, color: "text-emerald-400", bg: "bg-emerald-950/20" },
+                    { label: "OAuth", value: users.filter(u => u.oauth_provider).length, icon: Globe, color: "text-amber-400", bg: "bg-amber-950/20" },
                 ].map(s => (
-                    <div key={s.label} className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] p-5 flex items-center justify-between">
+                    <div key={s.label} className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] p-5 flex items-center justify-between">
                         <div>
                             <p className="text-xs text-[var(--fg-tertiary)] font-medium mb-1">{s.label}</p>
                             <p className={cn("text-2xl font-extrabold", s.color)}>{s.value}</p>
@@ -108,7 +108,7 @@ export default function UsersPage() {
             </div>
 
             {/* Table */}
-            <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] overflow-hidden">
+            <div className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] overflow-hidden">
                 <div className="px-5 py-3 border-b border-[var(--border)] flex items-center gap-3">
                     <div className="relative flex-1 max-w-sm">
                         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--fg-tertiary)]" />
@@ -143,7 +143,7 @@ export default function UsersPage() {
                                 <tr key={user.id} className="group hover:bg-[var(--bg-secondary)] transition-colors">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-100 to-violet-50 flex items-center justify-center border border-violet-100 shrink-0">
+                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-900/20 to-violet-900/10 flex items-center justify-center border border-violet-800/40 shrink-0">
                                                 <span className="text-[var(--accent)] font-bold text-sm uppercase">
                                                     {(user.email || user.username || '?')[0]}
                                                 </span>
@@ -157,15 +157,15 @@ export default function UsersPage() {
                                     <td className="px-4 py-4">
                                         <div className="flex justify-center">
                                             {user.oauth_provider === 'google' ? (
-                                                <span className="flex items-center gap-1 text-[9px] font-bold uppercase px-2 py-1 bg-red-50 text-red-600 border border-red-200 rounded-lg">
+                                                <span className="flex items-center gap-1 text-[9px] font-bold uppercase px-2 py-1 bg-red-950/20 text-red-400 border border-red-800/40 rounded-lg">
                                                     <Globe className="w-2.5 h-2.5" /> Google
                                                 </span>
                                             ) : user.oauth_provider === 'github' ? (
-                                                <span className="flex items-center gap-1 text-[9px] font-bold uppercase px-2 py-1 bg-[var(--bg-secondary)] text-[var(--fg-primary)] border border-slate-300 rounded-lg">
+                                                <span className="flex items-center gap-1 text-[9px] font-bold uppercase px-2 py-1 bg-[var(--bg-secondary)] text-[var(--fg-primary)] border border-slate-600/50 rounded-lg">
                                                     <Github className="w-2.5 h-2.5" /> GitHub
                                                 </span>
                                             ) : (
-                                                <span className="flex items-center gap-1 text-[9px] font-bold uppercase px-2 py-1 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-lg">
+                                                <span className="flex items-center gap-1 text-[9px] font-bold uppercase px-2 py-1 bg-emerald-950/20 text-emerald-400 border border-emerald-800/40 rounded-lg">
                                                     <UserCheck className="w-2.5 h-2.5" /> Email
                                                 </span>
                                             )}
@@ -174,15 +174,15 @@ export default function UsersPage() {
                                     <td className="px-4 py-4">
                                         <div className="flex justify-center">
                                             {user.email_verified ? (
-                                                <span className="flex items-center gap-1 text-[9px] font-bold uppercase px-2 py-1 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-lg">
+                                                <span className="flex items-center gap-1 text-[9px] font-bold uppercase px-2 py-1 bg-emerald-950/20 text-emerald-400 border border-emerald-800/40 rounded-lg">
                                                     <ShieldCheck className="w-2.5 h-2.5" /> Verificado
                                                 </span>
                                             ) : user.oauth_provider ? (
-                                                <span className="flex items-center gap-1 text-[9px] font-bold uppercase px-2 py-1 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg">
+                                                <span className="flex items-center gap-1 text-[9px] font-bold uppercase px-2 py-1 bg-blue-950/20 text-blue-400 border border-blue-800/40 rounded-lg">
                                                     <ShieldCheck className="w-2.5 h-2.5" /> OAuth
                                                 </span>
                                             ) : (
-                                                <span className="flex items-center gap-1 text-[9px] font-bold uppercase px-2 py-1 bg-amber-50 text-amber-600 border border-amber-200 rounded-lg">
+                                                <span className="flex items-center gap-1 text-[9px] font-bold uppercase px-2 py-1 bg-amber-950/20 text-amber-400 border border-amber-800/40 rounded-lg">
                                                     <Clock className="w-2.5 h-2.5" /> Pendiente
                                                 </span>
                                             )}
@@ -198,7 +198,7 @@ export default function UsersPage() {
                                             {!user.email_verified && !user.oauth_provider && (
                                                 <button onClick={() => handleResendVerification(user)}
                                                     disabled={resending === user.id}
-                                                    className="p-2 rounded-xl hover:bg-blue-50 text-[var(--fg-tertiary)] hover:text-blue-500 transition-all disabled:opacity-50"
+                                                    className="p-2 rounded-xl hover:bg-blue-950/20 text-[var(--fg-tertiary)] hover:text-blue-500 transition-all disabled:opacity-50"
                                                     title="Reenviar email de verificación">
                                                     {resending === user.id
                                                         ? <RefreshCw className="w-4 h-4 animate-spin" />
@@ -206,7 +206,7 @@ export default function UsersPage() {
                                                 </button>
                                             )}
                                             <button onClick={() => handleDelete(user)}
-                                                className="p-2 rounded-xl hover:bg-red-50 text-[var(--fg-tertiary)] hover:text-red-500 transition-all"
+                                                className="p-2 rounded-xl hover:bg-red-950/20 text-[var(--fg-tertiary)] hover:text-red-500 transition-all"
                                                 title="Eliminar usuario">
                                                 <Trash2 className="w-4 h-4" />
                                             </button>

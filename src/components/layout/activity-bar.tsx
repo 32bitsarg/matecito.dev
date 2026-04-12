@@ -95,6 +95,9 @@ export function ActivityBar() {
     return pathname === item.href || pathname.startsWith(item.href + '/')
   }
 
+  // In project view the ProjectNav handles navigation — hide sidebar
+  if (isProjectView) return null
+
   return (
     <aside
       className={cn(

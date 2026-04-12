@@ -28,7 +28,7 @@ function StorageBar({ usedMb, quotaMb }: { usedMb: number; quotaMb: number }) {
     const estimatedImgs = Math.floor((remainingMb * 1024) / avgKb)
 
     return (
-        <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] p-5 space-y-3">
+        <div className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] p-5 space-y-3">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <HardDrive className="w-4 h-4 text-[var(--fg-secondary)]" />
@@ -46,7 +46,7 @@ function StorageBar({ usedMb, quotaMb }: { usedMb: number; quotaMb: number }) {
                         "h-full rounded-full transition-all duration-700",
                         pct < 70  ? "bg-[var(--accent)]" :
                         pct < 90  ? "bg-amber-400"  :
-                                    "bg-red-500"
+                                    "bg-red-950/200"
                     )}
                     style={{ width: `${pct}%` }}
                 />
@@ -181,7 +181,7 @@ export default function StoragePage() {
                     <RefreshCw className="w-7 h-7 animate-spin text-violet-400" />
                 </div>
             ) : filtered.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] border-dashed">
+                <div className="flex flex-col items-center justify-center py-20 bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] border-dashed">
                     <Folder className="w-10 h-10 text-[var(--fg-tertiary)] mb-3" />
                     <p className="text-sm text-[var(--fg-tertiary)] font-medium">Sin archivos</p>
                     <p className="text-xs text-[var(--fg-tertiary)] mt-1">Subí tu primer archivo con el botón de arriba</p>
@@ -206,15 +206,15 @@ export default function StoragePage() {
                                 )}
                                 <div className="absolute inset-0 bg-[var(--bg-tertiary)]/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                     <a href={file.url} target="_blank"
-                                        className="p-2 bg-white/20 rounded-xl hover:bg-white/30 text-white transition-all">
+                                        className="p-2 bg-[var(--bg-elevated)] rounded-xl hover:opacity-80 text-white transition-all">
                                         <Eye className="w-4 h-4" />
                                     </a>
                                     <a href={file.url} download
-                                        className="p-2 bg-white/20 rounded-xl hover:bg-white/30 text-white transition-all">
+                                        className="p-2 bg-[var(--bg-elevated)] rounded-xl hover:opacity-80 text-white transition-all">
                                         <Download className="w-4 h-4" />
                                     </a>
                                     <button onClick={() => handleDelete(file)}
-                                        className="p-2 bg-white/20 rounded-xl hover:bg-red-500 text-white transition-all">
+                                        className="p-2 bg-red-950/20 rounded-xl hover:bg-red-950/40 text-white transition-all">
                                         <Trash2 className="w-4 h-4" />
                                     </button>
                                 </div>

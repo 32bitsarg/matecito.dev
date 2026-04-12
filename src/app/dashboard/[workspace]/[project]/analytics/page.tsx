@@ -67,21 +67,21 @@ export default function AnalyticsPage() {
 
       {/* Stats cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="p-4 rounded-xl border" style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
+        <div className="p-4 rounded-xl border" style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)' }}>
           <div className="flex items-center gap-2 mb-2">
             <MousePointerClick className="w-4 h-4" style={{ color: 'var(--fg-tertiary)' }} />
             <p className="text-[11px] font-medium text-[var(--fg-tertiary)]">Eventos totales</p>
           </div>
           <p className="text-2xl font-bold font-mono" style={{ color: 'var(--fg-primary)' }}>{totalEvents.toLocaleString()}</p>
         </div>
-        <div className="p-4 rounded-xl border" style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
+        <div className="p-4 rounded-xl border" style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)' }}>
           <div className="flex items-center gap-2 mb-2">
             <Users className="w-4 h-4" style={{ color: 'var(--fg-tertiary)' }} />
             <p className="text-[11px] font-medium text-[var(--fg-tertiary)]">Usuarios únicos</p>
           </div>
           <p className="text-2xl font-bold font-mono" style={{ color: 'var(--fg-primary)' }}>{totalUnique.toLocaleString()}</p>
         </div>
-        <div className="p-4 rounded-xl border" style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
+        <div className="p-4 rounded-xl border" style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)' }}>
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="w-4 h-4" style={{ color: 'var(--fg-tertiary)' }} />
             <p className="text-[11px] font-medium text-[var(--fg-tertiary)]">Tipos de evento</p>
@@ -92,13 +92,13 @@ export default function AnalyticsPage() {
 
       {/* Events chart (simple bar chart) */}
       {events.length > 0 && (
-        <div className="rounded-xl border p-4" style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
+        <div className="rounded-xl border p-4" style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)' }}>
           <p className="text-xs font-semibold mb-4" style={{ color: 'var(--fg-secondary)' }}>Eventos por tipo</p>
           <div className="space-y-3">
             {events.map((e: any, i: number) => {
               const maxCount = Math.max(...events.map((ev: any) => ev.count || 0))
               const pct = maxCount > 0 ? Math.round(((e.count || 0) / maxCount) * 100) : 0
-              const colors = ['bg-violet-500', 'bg-blue-500', 'bg-emerald-500', 'bg-amber-500', 'bg-pink-500', 'bg-cyan-500']
+              const colors = ['bg-violet-900/200', 'bg-blue-950/200', 'bg-emerald-950/200', 'bg-amber-950/200', 'bg-pink-500', 'bg-cyan-500']
               return (
                 <div key={i}>
                   <div className="flex items-center justify-between text-xs mb-1">
@@ -117,7 +117,7 @@ export default function AnalyticsPage() {
 
       {/* Funnel */}
       {funnel.length > 0 && (
-        <div className="rounded-xl border p-4" style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
+        <div className="rounded-xl border p-4" style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)' }}>
           <p className="text-xs font-semibold mb-4" style={{ color: 'var(--fg-secondary)' }}>Funnel de conversión</p>
           <div className="space-y-3">
             {funnel.map((step: any, i: number) => {
@@ -129,7 +129,7 @@ export default function AnalyticsPage() {
                     <span style={{ color: 'var(--fg-tertiary)' }}>{step.users} usuarios ({pct}%)</span>
                   </div>
                   <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
-                    <div className="h-full rounded-full bg-blue-500 transition-all duration-500" style={{ width: `${pct}%` }} />
+                    <div className="h-full rounded-full bg-blue-950/200 transition-all duration-500" style={{ width: `${pct}%` }} />
                   </div>
                 </div>
               )

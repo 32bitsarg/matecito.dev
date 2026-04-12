@@ -20,8 +20,8 @@ const LIMIT = 50
 // ─── Field types metadata ──────────────────────────────────────────────────────
 
 const FIELD_TYPES: { value: FieldType; label: string; icon: React.ElementType; color: string; bg: string }[] = [
-  { value: 'text',     label: 'Texto',    icon: Type,       color: 'text-blue-600',   bg: 'bg-blue-50 border-blue-200' },
-  { value: 'number',   label: 'Número',   icon: Hash,       color: 'text-amber-600',  bg: 'bg-amber-50 border-amber-200' },
+  { value: 'text',     label: 'Texto',    icon: Type,       color: 'text-blue-400',   bg: 'bg-blue-950/20 border-blue-800/40' },
+  { value: 'number',   label: 'Número',   icon: Hash,       color: 'text-amber-400',  bg: 'bg-amber-950/20 border-amber-800/40' },
   { value: 'bool',     label: 'Bool',     icon: ToggleLeft, color: 'text-green-600',  bg: 'bg-green-50 border-green-200' },
   { value: 'email',    label: 'Email',    icon: Mail,       color: 'text-pink-600',   bg: 'bg-pink-50 border-pink-200' },
   { value: 'date',     label: 'Fecha',    icon: Calendar,   color: 'text-purple-600', bg: 'bg-purple-50 border-purple-200' },
@@ -182,7 +182,7 @@ function RecordsTab({ collection }: { collection: Collection }) {
         </div>
         <button onClick={() => setShowDeleted(v => !v)}
           className={cn("flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs border transition-all",
-            showDeleted ? "bg-red-50 text-red-600 border-red-200" : "bg-[var(--bg-primary)] text-[var(--fg-tertiary)] border-[var(--border)]")}>
+            showDeleted ? "bg-red-950/20 text-red-400 border-red-800/40" : "bg-[var(--bg-primary)] text-[var(--fg-tertiary)] border-[var(--border)]")}>
           {showDeleted ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
         </button>
         <button onClick={load} className="p-1.5 text-[var(--fg-tertiary)] hover:text-[var(--fg-secondary)] hover:bg-[var(--bg-secondary)] rounded-lg">
@@ -223,11 +223,11 @@ function RecordsTab({ collection }: { collection: Collection }) {
               {filtered.map(record => {
                 const isDeleted = !!record.deleted_at
                 return (
-                  <tr key={record.id} className={cn("transition-colors group", isDeleted ? "bg-red-50/40 hover:bg-red-50" : "hover:bg-[var(--bg-secondary)]")}>
+                  <tr key={record.id} className={cn("transition-colors group", isDeleted ? "bg-red-950/20/40 hover:bg-red-950/20" : "hover:bg-[var(--bg-secondary)]")}>
                     <td className="px-4 py-2">
                       <div className="flex items-center gap-2">
                         <code className="text-[10px] text-[var(--fg-tertiary)] font-mono">{record.id.slice(0, 8)}…</code>
-                        {isDeleted && <span className="text-[9px] font-bold uppercase px-1 py-0.5 bg-red-100 text-red-500 border border-red-200 rounded">Eliminado</span>}
+                        {isDeleted && <span className="text-[9px] font-bold uppercase px-1 py-0.5 bg-red-900/30 text-red-500 border border-red-800/40 rounded">Eliminado</span>}
                       </div>
                     </td>
                     {dataColumns.length > 0
@@ -252,15 +252,15 @@ function RecordsTab({ collection }: { collection: Collection }) {
                         {!isDeleted && (
                           <>
                             <button onClick={() => openEdit(record)} className="p-1 rounded hover:bg-[var(--accent-soft)] text-[var(--fg-tertiary)] hover:text-[var(--accent)]"><Pencil className="w-3.5 h-3.5" /></button>
-                            <button onClick={() => handleDelete(record.id)} className={cn("p-1 rounded hover:bg-red-50 text-[var(--fg-tertiary)] transition-colors", deleting === record.id ? "text-red-600 bg-red-50" : "hover:text-red-500")}>
+                            <button onClick={() => handleDelete(record.id)} className={cn("p-1 rounded hover:bg-red-950/20 text-[var(--fg-tertiary)] transition-colors", deleting === record.id ? "text-red-400 bg-red-950/20" : "hover:text-red-500")}>
                               {deleting === record.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                             </button>
                           </>
                         )}
                         {isDeleted && (
                           <>
-                            <button onClick={() => handleRestore(record.id)} className="p-1 rounded hover:bg-emerald-50 text-[var(--fg-tertiary)] hover:text-emerald-600"><RotateCcw className="w-3.5 h-3.5" /></button>
-                            <button onClick={() => handleHardDelete(record.id)} className="p-1 rounded hover:bg-red-50 text-[var(--fg-tertiary)] hover:text-red-500"><Skull className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => handleRestore(record.id)} className="p-1 rounded hover:bg-emerald-950/20 text-[var(--fg-tertiary)] hover:text-emerald-400"><RotateCcw className="w-3.5 h-3.5" /></button>
+                            <button onClick={() => handleHardDelete(record.id)} className="p-1 rounded hover:bg-red-950/20 text-[var(--fg-tertiary)] hover:text-red-500"><Skull className="w-3.5 h-3.5" /></button>
                           </>
                         )}
                       </div>
@@ -277,7 +277,7 @@ function RecordsTab({ collection }: { collection: Collection }) {
       {modal && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ backgroundColor: 'var(--bg-overlay)', backdropFilter: 'blur(4px)' }}>
           <div className="absolute inset-0" onClick={() => setModal(null)} />
-          <div className="relative w-full max-w-lg bg-[var(--bg-primary)] rounded-xl overflow-hidden flex flex-col max-h-[85vh]">
+          <div className="relative w-full max-w-lg bg-[var(--bg-tertiary)] rounded-xl overflow-hidden flex flex-col max-h-[85vh]">
             <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
               <h3 className="font-bold text-[var(--fg-primary)]">{modal.mode === 'create' ? 'Nuevo registro' : 'Editar registro'}</h3>
               <button onClick={() => setModal(null)} className="p-1.5 rounded-lg hover:bg-[var(--bg-secondary)] text-[var(--fg-tertiary)]"><X className="w-4 h-4" /></button>
@@ -399,7 +399,7 @@ function StructureTab({ collection, onRename, onDelete }: { collection: Collecti
         </div>
         <div className="flex gap-1.5">
           <button onClick={onRename} className="p-1.5 rounded-lg text-[var(--fg-tertiary)] hover:text-[var(--accent)] hover:bg-[var(--accent-soft)]"><Edit3 className="w-4 h-4" /></button>
-          <button onClick={onDelete} className="p-1.5 rounded-lg text-[var(--fg-tertiary)] hover:text-red-500 hover:bg-red-50"><Trash2 className="w-4 h-4" /></button>
+          <button onClick={onDelete} className="p-1.5 rounded-lg text-[var(--fg-tertiary)] hover:text-red-500 hover:bg-red-950/20"><Trash2 className="w-4 h-4" /></button>
         </div>
       </div>
 
@@ -407,14 +407,14 @@ function StructureTab({ collection, onRename, onDelete }: { collection: Collecti
       {(collection.fields ?? []).map(f => {
         const m = getFieldMeta(f.type); const Icon = m.icon
         return (
-          <div key={f.id} className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border)] group hover:border-[var(--border)]">
+          <div key={f.id} className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)] group hover:border-[var(--border)]">
             <div className={cn('p-1.5 rounded-lg border shrink-0', m.bg)}><Icon className={cn('w-3.5 h-3.5', m.color)} /></div>
             <span className="text-sm font-mono text-[var(--fg-primary)] flex-1">{f.name}</span>
             <span className={cn('text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border', m.bg, m.color)}>{m.label}</span>
             {f.type === 'relation' && f.options?.target && <span className="text-[9px] font-mono text-[var(--accent)] bg-[var(--accent-soft)] px-2 py-0.5 rounded border border-[var(--border)]">→ {f.options.target}</span>}
             {f.type === 'select' && f.options?.values && <span className="text-[9px] text-[var(--fg-tertiary)]">{(f.options.values as string[]).join(', ')}</span>}
-            {f.required && <span className="text-[9px] font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded border border-red-200">Req</span>}
-            <button onClick={() => handleDeleteField(f)} className="opacity-0 group-hover:opacity-100 p-1 rounded text-[var(--fg-tertiary)] hover:text-red-500 hover:bg-red-50"><Trash2 className="w-3.5 h-3.5" /></button>
+            {f.required && <span className="text-[9px] font-bold text-red-500 bg-red-950/20 px-1.5 py-0.5 rounded border border-red-800/40">Req</span>}
+            <button onClick={() => handleDeleteField(f)} className="opacity-0 group-hover:opacity-100 p-1 rounded text-[var(--fg-tertiary)] hover:text-red-500 hover:bg-red-950/20"><Trash2 className="w-3.5 h-3.5" /></button>
           </div>
         )
       })}
@@ -505,7 +505,7 @@ export default function TablesPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex gap-4">
+    <div className="h-[calc(100vh-13rem)] flex gap-4">
       {/* Collections sidebar */}
       <aside className="w-52 shrink-0 flex flex-col bg-[var(--bg-primary)] border border-[var(--border)] rounded-xl overflow-hidden">
         <div className="px-4 py-3 border-b border-[var(--border)]">

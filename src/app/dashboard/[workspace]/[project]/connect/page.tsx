@@ -14,8 +14,8 @@ import { cn } from '@/lib/utils'
 
 // ─── Scope options ────────────────────────────────────────────────────────────
 const SCOPE_OPTIONS = [
-    { value: 'read',  label: 'Read',  desc: 'Solo GET/LIST',      color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200' },
-    { value: 'write', label: 'Write', desc: 'POST/PATCH/DELETE',   color: 'text-blue-600',    bg: 'bg-blue-50',    border: 'border-blue-200' },
+    { value: 'read',  label: 'Read',  desc: 'Solo GET/LIST',      color: 'text-emerald-400', bg: 'bg-emerald-950/20', border: 'border-emerald-800/40' },
+    { value: 'write', label: 'Write', desc: 'POST/PATCH/DELETE',   color: 'text-blue-400',    bg: 'bg-blue-950/20',    border: 'border-blue-800/40' },
     { value: '*',     label: 'All',   desc: 'Acceso completo',     color: 'text-[var(--accent)]',  bg: 'bg-[var(--accent-soft)]',  border: 'border-[var(--border)]' },
 ]
 
@@ -319,7 +319,7 @@ MCP: ${mcpWsUrl} (header: x-matecito-key)`
 
             {/* Project URL + system keys */}
             <div className="space-y-4">
-                <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] p-5 space-y-3">
+                <div className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] p-5 space-y-3">
                     <div className="flex items-center gap-2">
                         <Globe className="w-4 h-4 text-[var(--fg-tertiary)]" />
                         <span className="text-xs font-semibold text-[var(--fg-secondary)]">Project URL</span>
@@ -335,13 +335,13 @@ MCP: ${mcpWsUrl} (header: x-matecito-key)`
                 </div>
 
                 {/* Anon key */}
-                <div className="bg-[var(--bg-primary)] rounded-xl border border-l-4 border-emerald-300 p-5 space-y-3">
+                <div className="bg-[var(--bg-tertiary)] rounded-xl border border-l-4 border-emerald-300 p-5 space-y-3">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <Key className="w-4 h-4 text-emerald-600" />
+                            <Key className="w-4 h-4 text-emerald-400" />
                             <span className="text-xs font-semibold text-[var(--fg-secondary)]">Anon Key</span>
                         </div>
-                        <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded">Client-safe</span>
+                        <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 bg-emerald-950/20 text-emerald-400 border border-emerald-800/40 rounded">Client-safe</span>
                     </div>
                     <p className="text-xs text-[var(--fg-tertiary)]">Segura para usar en el frontend — NO expone datos privados.</p>
                     <div className="flex gap-2">
@@ -359,17 +359,17 @@ MCP: ${mcpWsUrl} (header: x-matecito-key)`
                 </div>
 
                 {/* Service key */}
-                <div className="bg-[var(--bg-primary)] rounded-xl border border-l-4 border-red-300 p-5 space-y-3">
+                <div className="bg-[var(--bg-tertiary)] rounded-xl border border-l-4 border-red-300 p-5 space-y-3">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <ShieldCheck className="w-4 h-4 text-red-500" />
                             <span className="text-xs font-semibold text-[var(--fg-secondary)]">Service Key</span>
                         </div>
-                        <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 bg-red-50 text-red-600 border border-red-200 rounded">Server only</span>
+                        <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 bg-red-950/20 text-red-400 border border-red-800/40 rounded">Server only</span>
                     </div>
-                    <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl">
+                    <div className="flex items-center gap-2 p-3 bg-red-950/20 border border-red-800/40 rounded-xl">
                         <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
-                        <span className="text-xs text-red-600 font-medium">Nunca uses esta key en el código del cliente.</span>
+                        <span className="text-xs text-red-400 font-medium">Nunca uses esta key en el código del cliente.</span>
                     </div>
                     <div className="flex gap-2">
                         <input readOnly type={revealService ? "text" : "password"} value={project.service_key || ''}
@@ -387,7 +387,7 @@ MCP: ${mcpWsUrl} (header: x-matecito-key)`
             </div>
 
             {/* Custom API Keys */}
-            <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] overflow-hidden">
+            <div className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] overflow-hidden">
                 <div className="px-6 py-4 border-b border-[var(--border)]">
                     <h3 className="font-bold text-[var(--fg-primary)]">API Keys Personalizadas</h3>
                     <p className="text-xs text-[var(--fg-tertiary)] mt-0.5">Creá keys con permisos limitados para casos de uso específicos</p>
@@ -403,7 +403,7 @@ MCP: ${mcpWsUrl} (header: x-matecito-key)`
                                     "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all",
                                     selectedScopes.includes(s.value)
                                         ? `${s.bg} ${s.color} ${s.border}`
-                                        : "bg-[var(--bg-primary)] text-[var(--fg-secondary)] border-[var(--border)] hover:border-slate-300"
+                                        : "bg-[var(--bg-primary)] text-[var(--fg-secondary)] border-[var(--border)] hover:border-slate-600/50"
                                 )}>
                                 <CheckSquare className="w-3 h-3" />
                                 {s.label}
@@ -420,14 +420,14 @@ MCP: ${mcpWsUrl} (header: x-matecito-key)`
 
                 {/* New key reveal (one-time) */}
                 {newKeyValue && (
-                    <div className="px-6 py-4 bg-amber-50 border-b border-amber-200 flex items-center gap-3 animate-in slide-in-from-top-2 duration-300">
+                    <div className="px-6 py-4 bg-amber-950/20 border-b border-amber-800/40 flex items-center gap-3 animate-in slide-in-from-top-2 duration-300">
                         <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
                         <div className="flex-1 min-w-0">
                             <p className="text-xs font-bold text-amber-700 mb-1">Copiá esta key ahora — no se mostrará de nuevo</p>
                             <code className="text-xs font-mono text-amber-800 break-all">{newKeyValue}</code>
                         </div>
                         <button onClick={() => copy(newKeyValue, 'Key copiada')}
-                            className="p-2 bg-amber-100 border border-amber-300 rounded-lg text-amber-600 hover:bg-amber-200 transition-all shrink-0">
+                            className="p-2 bg-amber-900/30 border border-amber-300 rounded-lg text-amber-400 hover:bg-amber-200 transition-all shrink-0">
                             <Copy className="w-3.5 h-3.5" />
                         </button>
                     </div>
@@ -466,7 +466,7 @@ MCP: ${mcpWsUrl} (header: x-matecito-key)`
                                         ) : null
                                     })}
                                     <button onClick={() => handleRevoke(k.id)} disabled={revoking === k.id}
-                                        className="p-1.5 text-[var(--fg-tertiary)] hover:text-red-500 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50">
+                                        className="p-1.5 text-[var(--fg-tertiary)] hover:text-red-500 hover:bg-red-950/20 rounded-lg transition-all disabled:opacity-50">
                                         {revoking === k.id ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                                     </button>
                                 </div>
@@ -477,7 +477,7 @@ MCP: ${mcpWsUrl} (header: x-matecito-key)`
             </div>
 
             {/* Env vars */}
-            <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] overflow-hidden">
+            <div className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] overflow-hidden">
                 <div className="px-5 py-3 border-b border-[var(--border)] flex items-center justify-between">
                     <span className="text-xs font-semibold text-[var(--fg-secondary)]">Variables de entorno</span>
                     <button onClick={() => copy(envSnippet, 'Variables copiadas')}
@@ -496,7 +496,7 @@ MCP: ${mcpWsUrl} (header: x-matecito-key)`
             </div>
 
             {/* ── AI & Claude Integration ─────────────────────────────────────── */}
-            <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] overflow-hidden">
+            <div className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] overflow-hidden">
                 <div className="px-5 py-4 border-b border-[var(--border)] flex items-center gap-2">
                     <Bot className="w-4 h-4" style={{ color: 'var(--accent)' }} />
                     <span className="text-sm font-bold text-[var(--fg-primary)]">AI & Claude Integration</span>
@@ -576,7 +576,7 @@ MCP: ${mcpWsUrl} (header: x-matecito-key)`
             </div>
 
             {/* ── Quick start (static) ─────────────────────────────────────────── */}
-            <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] overflow-hidden">
+            <div className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] overflow-hidden">
                 <div className="px-5 py-3 border-b border-[var(--border)]">
                     <div className="flex gap-1">
                         {[{id:'js',label:'JavaScript'},{id:'rn',label:'React Native'},{id:'flutter',label:'Flutter'}].map(t => (
@@ -624,7 +624,7 @@ final result = await db.from('posts').get();`}</pre>
             </div>
 
             {/* ── Interactive Quickstart ────────────────────────────────────────── */}
-            <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] overflow-hidden">
+            <div className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] overflow-hidden">
                 <div className="px-5 py-4 border-b border-[var(--border)]">
                     <h3 className="font-bold text-[var(--fg-primary)]">Quickstart interactivo</h3>
                     <p className="text-xs text-[var(--fg-tertiary)] mt-0.5">Seleccioná los módulos que vas a usar — el código se genera automáticamente.</p>
@@ -638,13 +638,13 @@ final result = await db.from('posts').get();`}</pre>
                             <button key={p.label}
                                 onClick={() => setSelectedModules(p.modules)}
                                 className="text-[11px] px-2.5 py-1 rounded-lg border transition-all hover:border-[var(--accent)] hover:text-[var(--accent)]"
-                                style={{ borderColor: 'var(--border)', color: 'var(--fg-secondary)', backgroundColor: 'var(--bg-primary)' }}>
+                                style={{ borderColor: 'var(--border)', color: 'var(--fg-secondary)', backgroundColor: 'var(--bg-tertiary)' }}>
                                 {p.label}
                             </button>
                         ))}
                         {selectedModules.length > 0 && (
                             <button onClick={() => setSelectedModules([])}
-                                className="text-[11px] px-2.5 py-1 rounded-lg border border-red-200 text-red-500 bg-red-50 transition-all hover:bg-red-100">
+                                className="text-[11px] px-2.5 py-1 rounded-lg border border-red-800/40 text-red-500 bg-red-950/20 transition-all hover:bg-red-900/30">
                                 Limpiar
                             </button>
                         )}

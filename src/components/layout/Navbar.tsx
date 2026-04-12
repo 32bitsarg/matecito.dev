@@ -31,37 +31,46 @@ export function Navbar() {
     if (isDashboard) return null;
 
     const navLinks = [
-        { href: "/matecitodb", label: "matecitodb" },
-        { href: "/#servicios", label: "Servicios" },
-        { href: "/#proyectos", label: "Proyectos" },
-        { href: "/#contacto", label: "Contacto" },
+        { href: "/matecitodb", label: "matecitodb", tag: "beta" },
+        { href: "/apps",       label: "Apps",        tag: null  },
+        { href: "/web",        label: "Webs",         tag: null  },
     ];
+
+    const isActive = (href: string) =>
+        href === '/' ? pathname === '/' : pathname.startsWith(href);
 
     return (
         <>
-            <header className={`sticky top-0 z-[1001] w-full transition-all duration-300 ${
-                scrolled
-                    ? "bg-white/95 backdrop-blur-xl border-b border-slate-200 shadow-sm"
-                    : "bg-white border-b border-slate-100"
-            }`}>
-                <div className="max-w-7xl mx-auto flex h-14 items-center justify-between px-6">
+            <header className="sticky top-0 z-[1001] w-full border-b transition-all duration-300"
+                style={{
+                    backgroundColor: scrolled ? 'rgba(0,0,0,0.92)' : '#000',
+                    borderColor: 'rgba(255,255,255,0.08)',
+                    backdropFilter: scrolled ? 'blur(12px)' : 'none',
+                }}>
+                <div className="max-w-5xl mx-auto flex h-14 items-center justify-between px-6">
+
                     {/* Logo */}
-                    <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-                        <img src="/logos/matecitonobg.png" alt="Matecito.dev" className="w-8 h-8 object-contain invert" />
-                        <span className="font-bold text-lg text-slate-900 tracking-tight">
-                            matecito<span className="text-violet-500">.dev</span>
+                    <Link href="/" className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
+                        <img src="/logos/matecitonobg.png" alt="Matecito.dev" className="w-7 h-7 object-contain" />
+                        <span className="font-bold text-base tracking-tight" style={{ color: '#f0f0f0' }}>
+                            matecito<span style={{ color: '#6d001a' }}>.dev</span>
                         </span>
                     </Link>
 
                     {/* Nav links */}
-                    <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-slate-500">
+                    <nav className="hidden md:flex items-center gap-1">
                         {navLinks.map(l => (
                             <Link key={l.href} href={l.href}
-                                className="hover:text-violet-600 transition-colors flex items-center gap-1.5">
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors"
+                                style={{
+                                    color: isActive(l.href) ? '#f0f0f0' : 'rgba(240,240,240,0.50)',
+                                    backgroundColor: isActive(l.href) ? 'rgba(255,255,255,0.07)' : 'transparent',
+                                }}>
                                 {l.label}
-                                {l.href === '/matecitodb' && (
-                                    <span className="px-1.5 py-0.5 bg-violet-100 text-violet-600 text-[9px] font-bold uppercase tracking-wider rounded-full">
-                                        beta
+                                {l.tag && (
+                                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wide"
+                                        style={{ backgroundColor: 'rgba(109,0,26,0.30)', color: '#f0f0f0', border: '1px solid rgba(109,0,26,0.50)' }}>
+                                        {l.tag}
                                     </span>
                                 )}
                             </Link>
@@ -69,53 +78,60 @@ export function Navbar() {
                     </nav>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-3">
+                    <div className="hidden md:flex items-center gap-2">
                         {user ? (
-                            <div className="hidden md:flex items-center gap-3">
+                            <>
                                 <Link href="/dashboard"
-                                    className="px-4 py-2 text-sm font-semibold text-violet-600 bg-violet-50 rounded-lg hover:bg-violet-100 transition-colors">
+                                    className="px-4 py-2 text-sm font-semibold rounded-lg transition-colors text-white"
+                                    style={{ backgroundColor: '#6d001a' }}>
                                     Consola
                                 </Link>
                                 <button onClick={handleLogout}
-                                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                    className="p-2 rounded-lg transition-colors"
+                                    style={{ color: 'rgba(240,240,240,0.40)' }}
                                     title="Cerrar sesión">
                                     <LogOut className="w-4 h-4" />
                                 </button>
-                            </div>
+                            </>
                         ) : (
-                            <div className="hidden md:flex items-center gap-3">
-                                <a href="https://wa.me/541124025239?text=Hola%2C%20quiero%20consultarles%20sobre%20una%20p%C3%A1gina%20web"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="px-4 py-2 text-sm font-semibold text-white bg-violet-600 rounded-lg hover:bg-violet-700 transition-colors shadow-sm">
-                                    Empezar proyecto
-                                </a>
-                            </div>
+                            <Link href="/login"
+                                className="px-4 py-2 text-sm font-semibold rounded-lg transition-opacity hover:opacity-80 text-white"
+                                style={{ backgroundColor: '#6d001a' }}>
+                                Iniciar sesión
+                            </Link>
                         )}
-
-                        {/* Mobile hamburger */}
-                        <button onClick={() => setIsMenuOpen(!isMenuOpen)}
-                            className="md:hidden p-2 text-slate-500 hover:text-slate-900 rounded-lg transition-colors">
-                            {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                        </button>
                     </div>
+
+                    {/* Mobile hamburger */}
+                    <button onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        className="md:hidden p-2 rounded-lg transition-colors"
+                        style={{ color: 'rgba(240,240,240,0.60)' }}>
+                        {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                    </button>
                 </div>
             </header>
 
             {/* Mobile menu */}
-            <div className={`fixed inset-0 z-[1000] bg-white transition-transform duration-400 ease-out md:hidden ${
-                isMenuOpen ? "translate-x-0" : "translate-x-full"
-            }`}>
-                <div className="flex flex-col h-full pt-20 pb-10 px-8 gap-6">
+            <div className="fixed inset-0 z-[1000] md:hidden transition-transform duration-300"
+                style={{
+                    backgroundColor: '#000',
+                    transform: isMenuOpen ? 'translateX(0)' : 'translateX(100%)',
+                }}>
+                <div className="flex flex-col h-full pt-20 pb-10 px-6 gap-4">
                     <nav className="flex flex-col gap-1">
                         {navLinks.map(l => (
                             <Link key={l.href} href={l.href}
                                 onClick={() => setIsMenuOpen(false)}
-                                className="py-3 px-4 text-lg font-semibold text-slate-700 hover:text-violet-600 hover:bg-violet-50 rounded-xl transition-all flex items-center gap-2">
+                                className="flex items-center gap-2 py-3 px-4 rounded-xl text-lg font-semibold transition-colors"
+                                style={{
+                                    color: isActive(l.href) ? '#f0f0f0' : 'rgba(240,240,240,0.50)',
+                                    backgroundColor: isActive(l.href) ? 'rgba(255,255,255,0.06)' : 'transparent',
+                                }}>
                                 {l.label}
-                                {l.href === '/matecitodb' && (
-                                    <span className="px-1.5 py-0.5 bg-violet-100 text-violet-600 text-[9px] font-bold uppercase tracking-wider rounded-full">
-                                        beta
+                                {l.tag && (
+                                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wide"
+                                        style={{ backgroundColor: 'rgba(109,0,26,0.30)', color: '#f0f0f0', border: '1px solid rgba(109,0,26,0.50)' }}>
+                                        {l.tag}
                                     </span>
                                 )}
                             </Link>
@@ -125,22 +141,22 @@ export function Navbar() {
                         {user ? (
                             <>
                                 <Link href="/dashboard" onClick={() => setIsMenuOpen(false)}
-                                    className="py-3 text-center font-bold text-white bg-violet-600 rounded-xl hover:bg-violet-700 transition-all">
+                                    className="py-3 text-center font-bold text-white rounded-xl"
+                                    style={{ backgroundColor: '#6d001a' }}>
                                     Ir a Consola
                                 </Link>
                                 <button onClick={handleLogout}
-                                    className="py-3 text-center font-semibold text-red-500 border border-red-200 rounded-xl hover:bg-red-50 transition-all">
+                                    className="py-3 text-center font-semibold rounded-xl border"
+                                    style={{ color: 'rgba(240,240,240,0.50)', borderColor: 'rgba(255,255,255,0.12)' }}>
                                     Cerrar Sesión
                                 </button>
                             </>
                         ) : (
-                            <a href="https://wa.me/541124025239?text=Hola%2C%20quiero%20consultarles%20sobre%20una%20p%C3%A1gina%20web"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                onClick={() => setIsMenuOpen(false)}
-                                className="py-3 text-center font-bold text-white bg-violet-600 rounded-xl">
-                                Empezar proyecto
-                            </a>
+                            <Link href="/login" onClick={() => setIsMenuOpen(false)}
+                                className="py-3 text-center font-bold text-white rounded-xl"
+                                style={{ backgroundColor: '#6d001a' }}>
+                                Iniciar sesión
+                            </Link>
                         )}
                     </div>
                 </div>

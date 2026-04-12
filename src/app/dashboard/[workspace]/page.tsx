@@ -44,7 +44,7 @@ export default function WorkspacePage() {
     toast.success('URL copiada')
   }
 
-  if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin" style={{ color: 'var(--accent)' }} /></div>
+  if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin" style={{ color: 'var(--fg-primary)' }} /></div>
 
   return (
     <div className="animate-fade-in">
@@ -62,9 +62,9 @@ export default function WorkspacePage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
         <button onClick={() => router.push(`/dashboard/${wsSlug}/members`)}
           className="flex items-center gap-3 p-4 rounded-xl border hover:border-[var(--border-hover)] transition-colors text-left"
-          style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
-          <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'var(--accent-soft)' }}>
-            <Users className="w-4 h-4" style={{ color: 'var(--accent)' }} />
+          style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)' }}>
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'var(--bg-elevated)' }}>
+            <Users className="w-4 h-4" style={{ color: 'var(--fg-primary)' }} />
           </div>
           <div>
             <p className="text-sm font-medium" style={{ color: 'var(--fg-primary)' }}>Equipo</p>
@@ -73,9 +73,9 @@ export default function WorkspacePage() {
         </button>
         <button onClick={() => router.push(`/dashboard/${wsSlug}/settings`)}
           className="flex items-center gap-3 p-4 rounded-xl border hover:border-[var(--border-hover)] transition-colors text-left"
-          style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
-          <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'var(--accent-soft)' }}>
-            <Settings className="w-4 h-4" style={{ color: 'var(--accent)' }} />
+          style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)' }}>
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'var(--bg-elevated)' }}>
+            <Settings className="w-4 h-4" style={{ color: 'var(--fg-primary)' }} />
           </div>
           <div>
             <p className="text-sm font-medium" style={{ color: 'var(--fg-primary)' }}>Configuración</p>
@@ -84,9 +84,9 @@ export default function WorkspacePage() {
         </button>
         <button onClick={() => window.dispatchEvent(new CustomEvent('open-new-project-modal'))}
           className="flex items-center gap-3 p-4 rounded-xl border hover:border-[var(--border-hover)] transition-colors text-left"
-          style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
-          <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'var(--accent-soft)' }}>
-            <Plus className="w-4 h-4" style={{ color: 'var(--accent)' }} />
+          style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)' }}>
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'var(--bg-elevated)' }}>
+            <Plus className="w-4 h-4" style={{ color: 'var(--fg-primary)' }} />
           </div>
           <div>
             <p className="text-sm font-medium" style={{ color: 'var(--fg-primary)' }}>Nuevo proyecto</p>
@@ -133,11 +133,12 @@ export default function WorkspacePage() {
             <div
               key={project.id}
               className="group flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-colors hover:border-[var(--border-hover)]"
-              style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}
+              style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)' }}
               onClick={() => router.push(`/dashboard/${wsSlug}/${project.subdomain}`)}
             >
-              <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: 'var(--accent-soft)' }}>
-                <Database className="w-4 h-4" style={{ color: 'var(--accent)' }} />
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-sm font-bold text-white select-none"
+                style={{ backgroundColor: 'var(--accent)', boxShadow: 'var(--shadow-glow)' }}>
+                {project.name?.[0]?.toUpperCase() ?? '?'}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 mb-0.5">

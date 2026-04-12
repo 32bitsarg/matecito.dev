@@ -113,8 +113,8 @@ function SmtpSection() {
             <div className={cn(
                 "flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-medium",
                 configured
-                    ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                    : "bg-amber-50 border-amber-200 text-amber-700"
+                    ? "bg-emerald-950/20 border-emerald-800/40 text-emerald-700"
+                    : "bg-amber-950/20 border-amber-800/40 text-amber-700"
             )}>
                 {configured
                     ? <><CheckCircle2 className="w-4 h-4 shrink-0" /> SMTP configurado y activo</>
@@ -123,7 +123,7 @@ function SmtpSection() {
             </div>
 
             {/* Form */}
-            <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] p-6 space-y-5">
+            <div className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] p-6 space-y-5">
                 <div className="flex items-center gap-2">
                     <Server className="w-4 h-4 text-[var(--fg-tertiary)]" />
                     <h3 className="font-bold text-[var(--fg-primary)]">Servidor SMTP</h3>
@@ -190,7 +190,7 @@ function SmtpSection() {
                 <div className="flex items-center justify-between pt-2">
                     {configured && (
                         <button onClick={handleDelete}
-                            className="text-xs text-red-500 hover:text-red-600 font-medium flex items-center gap-1.5">
+                            className="text-xs text-red-500 hover:text-red-400 font-medium flex items-center gap-1.5">
                             <Trash2 className="w-3.5 h-3.5" /> Eliminar config
                         </button>
                     )}
@@ -204,7 +204,7 @@ function SmtpSection() {
 
             {/* Test email */}
             {configured && (
-                <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] p-6 space-y-4">
+                <div className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] p-6 space-y-4">
                     <div className="flex items-center gap-2">
                         <Send className="w-4 h-4 text-[var(--fg-tertiary)]" />
                         <h3 className="font-bold text-[var(--fg-primary)]">Probar conexión</h3>
@@ -277,7 +277,7 @@ function TemplateEditor({ template, onSave, onClose }: {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--bg-tertiary)]/60 backdrop-blur-sm p-4">
-            <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <div className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)]">
                     <div className="flex items-center gap-2">
@@ -307,7 +307,7 @@ function TemplateEditor({ template, onSave, onClose }: {
                         {TEMPLATE_VARS.map(v => (
                             <button key={v.key} onClick={() => insertVar(v.key)}
                                 title={v.desc}
-                                className="text-[10px] font-mono px-2 py-1 bg-[var(--accent-soft)] border border-[var(--border)] text-violet-700 rounded-lg hover:bg-violet-100 transition-all">
+                                className="text-[10px] font-mono px-2 py-1 bg-[var(--accent-soft)] border border-[var(--border)] text-violet-700 rounded-lg hover:bg-violet-900/30 transition-all">
                                 {v.key}
                             </button>
                         ))}
@@ -483,7 +483,7 @@ function TemplatesSection() {
                         <p className="text-xs text-[var(--fg-tertiary)] mt-1">Configurá SMTP primero para generar los templates base</p>
                     </div>
                 ) : (
-                    <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] overflow-hidden divide-y divide-[var(--border)]">
+                    <div className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] overflow-hidden divide-y divide-[var(--border)]">
                         {templates.map(tpl => (
                             <div key={tpl.id}
                                 className="group flex items-center justify-between px-5 py-4 hover:bg-[var(--bg-secondary)] transition-colors">
@@ -510,7 +510,7 @@ function TemplatesSection() {
                                     </button>
                                     {!tpl.is_system && (
                                         <button onClick={() => handleDelete(tpl)}
-                                            className="p-1.5 rounded-lg hover:bg-red-50 text-[var(--fg-tertiary)] hover:text-red-500 transition-all">
+                                            className="p-1.5 rounded-lg hover:bg-red-950/20 text-[var(--fg-tertiary)] hover:text-red-500 transition-all">
                                             <Trash2 className="w-3.5 h-3.5" />
                                         </button>
                                     )}

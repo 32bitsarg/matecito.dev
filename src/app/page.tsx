@@ -1,255 +1,227 @@
 import type { Metadata } from "next"
-import NewsletterForm from "@/components/newsletter-form"
 import Link from "next/link"
-import { ArrowRight, Globe, Smartphone, Search, Zap, BarChart3, Sparkles, CheckCircle } from "lucide-react"
+import { ArrowRight, ArrowUpRight, Database, Globe, Layers } from "lucide-react"
+import { TerminalAnimation } from "@/components/ascii/TerminalAnimation"
 
 export const metadata: Metadata = {
-    title: "Matecito.Dev — Páginas Web y Landings para Emprendimientos y Pymes en Argentina",
-    description: "Creamos páginas web y landings de alta conversión para emprendimientos y pymes. Diseño profesional, SEO optimizado y resultados medibles. Pergamino y todo el país.",
+    title: "matecito.dev — desarrollo de software desde Argentina",
+    description: "Construimos software desde Pergamino, Argentina: matecitodb (BaaS para developers), apps web, juegos y páginas web para pymes y emprendimientos.",
     keywords: [
-        "páginas web para pymes Argentina",
-        "landing page emprendimiento",
-        "diseño web Pergamino",
-        "desarrollo web pymes",
-        "landing page conversión Argentina",
-        "páginas web Buenos Aires",
+        "desarrollo software Argentina", "BaaS Argentina", "matecitodb",
+        "apps web Argentina", "páginas web pymes Pergamino",
+        "landing page Argentina", "software Pergamino Buenos Aires",
     ],
     openGraph: {
-        title: "Matecito.Dev — Páginas Web para Emprendimientos y Pymes",
-        description: "Potenciá tu emprendimiento o pyme con una página web profesional de alta conversión. Diseño + SEO + resultados.",
+        title: "matecito.dev — desarrollo de software desde Argentina",
+        description: "BaaS para developers, apps web, juegos y páginas web para pymes. Desde Pergamino, Argentina.",
         url: "https://matecito.dev",
-        siteName: "Matecito.Dev",
+        siteName: "matecito.dev",
         locale: "es_AR",
         type: "website",
+        images: [{ url: "https://matecito.dev/og/home.png", width: 1200, height: 630, alt: "matecito.dev — software desde Argentina" }],
     },
     twitter: {
         card: "summary_large_image",
-        title: "Matecito.Dev — Páginas Web para Emprendimientos y Pymes",
-        description: "Potenciá tu emprendimiento o pyme con una página web profesional de alta conversión.",
+        title: "matecito.dev — software desde Argentina",
+        description: "BaaS, apps, juegos y webs. Desde Pergamino, Argentina.",
+    },
+    alternates: { canonical: "https://matecito.dev" },
+}
+
+const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "matecito.dev",
+    url: "https://matecito.dev",
+    logo: "https://matecito.dev/logos/matecitologo.png",
+    description: "Estudio de desarrollo de software en Pergamino, Argentina. Creamos BaaS, apps web, juegos y páginas web para pymes.",
+    address: { "@type": "PostalAddress", addressLocality: "Pergamino", addressRegion: "Buenos Aires", addressCountry: "AR" },
+    sameAs: [],
+    hasOfferCatalog: {
+        "@type": "OfferCatalog",
+        name: "Productos y servicios",
+        itemListElement: [
+            { "@type": "Offer", itemOffered: { "@type": "SoftwareApplication", name: "matecitodb", url: "https://matecito.dev/matecitodb" } },
+            { "@type": "Offer", itemOffered: { "@type": "Service", name: "Páginas web para pymes", url: "https://matecito.dev/web" } },
+            { "@type": "Offer", itemOffered: { "@type": "Service", name: "Apps y proyectos web", url: "https://matecito.dev/apps" } },
+        ],
     },
 }
 
+const PRODUCTS = [
+    {
+        href: "/matecitodb",
+        icon: Database,
+        tag: "beta",
+        eyebrow: "Para developers",
+        title: "matecitodb",
+        desc: "Backend-as-a-Service argentino. Auth, base de datos, storage y API REST listos en minutos. Sin configurar servidores.",
+        cta: "Ver matecitodb",
+        external: false,
+    },
+    {
+        href: "/apps",
+        icon: Layers,
+        tag: null,
+        eyebrow: "Proyectos",
+        title: "Apps & Juegos",
+        desc: "Apps web, juegos y herramientas que construimos. Desde reproductores de música hasta experimentos con IA y más.",
+        cta: "Ver proyectos",
+        external: false,
+    },
+    {
+        href: "/web",
+        icon: Globe,
+        tag: null,
+        eyebrow: "Servicios",
+        title: "Webs & Landings",
+        desc: "Diseñamos y desarrollamos sitios web y landing pages para emprendimientos y pymes. Rápido, SEO, a medida.",
+        cta: "Ver servicios",
+        external: false,
+    },
+]
+
 export default function Home() {
     return (
-        <div className="flex flex-col bg-white">
+        <>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        <main className="min-h-screen bg-black text-white">
 
-            {/* ── HERO ──────────────────────────────────────── */}
-            <section className="relative overflow-hidden py-28 px-6">
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#7c3aed08_1px,transparent_1px),linear-gradient(to_bottom,#7c3aed08_1px,transparent_1px)] bg-[size:32px_32px]" />
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-violet-100 rounded-full blur-[120px] opacity-50" />
+            {/* Hero */}
+            <section className="relative px-6 pt-28 pb-24 overflow-hidden">
+                {/* subtle dot grid */}
+                <div className="absolute inset-0 opacity-[0.04]"
+                    style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+                {/* crimson glow top-center */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[200px] rounded-full blur-[100px] opacity-20"
+                    style={{ backgroundColor: '#6d001a' }} />
 
-                <div className="relative max-w-4xl mx-auto text-center space-y-8">
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-violet-50 border border-violet-200 rounded-full text-violet-700 text-xs font-semibold">
-                        <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
-                        Pergamino · Buenos Aires · Todo el país
+                <div className="relative max-w-5xl mx-auto flex flex-col lg:flex-row items-center gap-16">
+                    {/* left — copy */}
+                    <div className="flex-1 text-center lg:text-left">
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-mono mb-10 border"
+                        style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(240,240,240,0.45)', backgroundColor: 'rgba(255,255,255,0.03)' }}>
+                        <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#6d001a' }} />
+                        Pergamino, Buenos Aires · Argentina
                     </div>
 
-                    <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.05]">
-                        Tu emprendimiento<br />
-                        <span className="text-violet-600">merece una web que venda</span>
+                    <h1 className="text-5xl sm:text-7xl font-extrabold tracking-tight leading-[1.0] mb-6">
+                        Software<br />
+                        <span style={{ color: '#6d001a' }}>desde Argentina</span>
                     </h1>
 
-                    <p className="text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed">
-                        Creamos páginas web y landings profesionales para emprendimientos y pymes.
-                        Diseño moderno, SEO optimizado y enfocado en convertir visitantes en clientes.
+                    <p className="text-lg sm:text-xl max-w-xl mx-auto leading-relaxed mb-12"
+                        style={{ color: 'rgba(240,240,240,0.50)' }}>
+                        Construimos herramientas para developers, apps para usuarios
+                        y webs para negocios.
                     </p>
 
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-                        <Link href="/#contacto"
-                            className="flex items-center gap-2 px-8 py-4 bg-violet-600 text-white font-bold text-sm rounded-xl hover:bg-violet-700 transition-all shadow-lg shadow-violet-200">
-                            Empezar mi proyecto
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                        <Link href="/apps"
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-85"
+                            style={{ backgroundColor: '#6d001a' }}>
+                            Ver proyectos
                             <ArrowRight className="w-4 h-4" />
                         </Link>
-                        <Link href="/#servicios"
-                            className="flex items-center gap-2 px-8 py-4 bg-white text-slate-700 font-semibold text-sm rounded-xl border border-slate-200 hover:bg-slate-50 transition-all">
-                            Ver servicios
+                        <Link href="/matecitodb"
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-colors border hover:bg-white/5"
+                            style={{ borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(240,240,240,0.70)' }}>
+                            Conocer matecitodb
                         </Link>
                     </div>
+                    </div>
+
+                    {/* right — terminal */}
+                    <div className="shrink-0 w-full lg:w-auto">
+                        <TerminalAnimation />
+                    </div>
                 </div>
             </section>
 
-            {/* ── SERVICIOS ─────────────────────────────────── */}
-            <section id="servicios" className="py-24 px-6 bg-slate-50 border-y border-slate-200">
-                <div className="max-w-6xl mx-auto">
-                    <div className="text-center mb-16 space-y-3">
-                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-violet-600">Lo que hacemos</p>
-                        <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">
-                            Soluciones web para hacer crecer tu negocio
-                        </h2>
-                        <p className="text-slate-500 max-w-xl mx-auto">
-                            Cada proyecto es único. Trabajamos con vos para entender tu negocio y crear algo que realmente funcione.
+            {/* Products */}
+            <section className="px-6 pb-24 border-t" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
+                <div className="max-w-4xl mx-auto">
+                    <p className="text-xs font-mono pt-16 pb-10 uppercase tracking-[0.2em]"
+                        style={{ color: 'rgba(240,240,240,0.30)' }}>
+                        Lo que hacemos
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        {PRODUCTS.map(p => {
+                            const Icon = p.icon
+                            return (
+                                <Link key={p.href} href={p.href}
+                                    className="group flex flex-col gap-5 p-6 rounded-2xl border transition-all hover:border-[rgba(255,255,255,0.20)] hover:-translate-y-px"
+                                    style={{ backgroundColor: '#0d0d0d', borderColor: 'rgba(255,255,255,0.09)' }}>
+
+                                    {/* Icon row */}
+                                    <div className="flex items-start justify-between">
+                                        <div className="w-11 h-11 rounded-xl flex items-center justify-center border"
+                                            style={{ backgroundColor: '#161616', borderColor: 'rgba(255,255,255,0.08)' }}>
+                                            <Icon className="w-5 h-5" style={{ color: 'rgba(240,240,240,0.60)' }} />
+                                        </div>
+                                        {p.tag ? (
+                                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
+                                                style={{ backgroundColor: 'rgba(109,0,26,0.25)', color: '#e0a0a0', border: '1px solid rgba(109,0,26,0.45)' }}>
+                                                {p.tag}
+                                            </span>
+                                        ) : (
+                                            <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-40 transition-opacity"
+                                                style={{ color: '#f0f0f0' }} />
+                                        )}
+                                    </div>
+
+                                    {/* Text */}
+                                    <div className="flex-1">
+                                        <p className="text-[11px] font-mono mb-1.5 uppercase tracking-wider"
+                                            style={{ color: 'rgba(240,240,240,0.30)' }}>
+                                            {p.eyebrow}
+                                        </p>
+                                        <h2 className="text-base font-bold mb-2" style={{ color: '#f0f0f0' }}>
+                                            {p.title}
+                                        </h2>
+                                        <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,240,240,0.45)' }}>
+                                            {p.desc}
+                                        </p>
+                                    </div>
+
+                                    {/* CTA */}
+                                    <div className="flex items-center gap-1.5 text-xs font-semibold transition-all opacity-0 group-hover:opacity-100 -translate-y-1 group-hover:translate-y-0"
+                                        style={{ color: 'rgba(240,240,240,0.70)' }}>
+                                        {p.cta}
+                                        <ArrowRight className="w-3.5 h-3.5" />
+                                    </div>
+                                </Link>
+                            )
+                        })}
+                    </div>
+                </div>
+            </section>
+
+            {/* Strip — matecitodb highlight */}
+            <section className="px-6 py-16 border-t border-b" style={{ borderColor: 'rgba(255,255,255,0.07)', backgroundColor: '#0a0a0a' }}>
+                <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                    <div>
+                        <p className="text-xs font-mono uppercase tracking-widest mb-2" style={{ color: 'rgba(109,0,26,0.9)' }}>
+                            En construcción
+                        </p>
+                        <h3 className="text-xl font-bold mb-1" style={{ color: '#f0f0f0' }}>
+                            matecitodb — BaaS para developers argentinos
+                        </h3>
+                        <p className="text-sm" style={{ color: 'rgba(240,240,240,0.45)' }}>
+                            Auth, base de datos, storage, realtime y funciones serverless. Un SDK. Listo para producción.
                         </p>
                     </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {[
-                            {
-                                icon: Globe,
-                                color: "bg-violet-50 text-violet-600",
-                                title: "Landing Pages",
-                                desc: "Una página enfocada en convertir. Perfecta para lanzar un producto, servicio o campaña publicitaria.",
-                                items: ["Diseño a medida", "Carga ultrarrápida", "Formulario de contacto", "Integración con WhatsApp"],
-                            },
-                            {
-                                icon: Smartphone,
-                                color: "bg-blue-50 text-blue-600",
-                                title: "Sitios Web Completos",
-                                desc: "Presencia digital profesional para tu pyme o emprendimiento. Varias páginas, catálogo, historia y más.",
-                                items: ["Diseño responsivo", "Panel de administración", "Blog / novedades", "Multi-idioma opcional"],
-                            },
-                            {
-                                icon: Search,
-                                color: "bg-emerald-50 text-emerald-600",
-                                title: "SEO & Posicionamiento",
-                                desc: "Que te encuentren en Google cuando te buscan. Optimizamos tu presencia orgánica de forma sostenible.",
-                                items: ["SEO técnico", "Contenido optimizado", "SEO local (Google Maps)", "Reportes mensuales"],
-                            },
-                            {
-                                icon: Zap,
-                                color: "bg-amber-50 text-amber-600",
-                                title: "Optimización de Performance",
-                                desc: "¿Tu web es lenta? La optimizamos para que cargue en menos de 2 segundos y no pierdas visitas.",
-                                items: ["Core Web Vitals", "Imágenes optimizadas", "Caché avanzado", "CDN configurado"],
-                            },
-                            {
-                                icon: BarChart3,
-                                color: "bg-rose-50 text-rose-600",
-                                title: "Analytics & Métricas",
-                                desc: "Entendé qué hace tu público en tu sitio. Configuramos herramientas para medir y mejorar continuamente.",
-                                items: ["Google Analytics 4", "Mapa de calor", "Embudos de conversión", "Dashboard personalizado"],
-                            },
-                            {
-                                icon: Globe,
-                                color: "bg-teal-50 text-teal-600",
-                                title: "Mantenimiento Web",
-                                desc: "Tu web actualizada, segura y funcionando siempre. Nosotros nos encargamos, vos te enfocás en tu negocio.",
-                                items: ["Actualizaciones mensuales", "Backup automático", "Soporte por WhatsApp", "Uptime monitoring"],
-                            },
-                        ].map(s => (
-                            <div key={s.title}
-                                className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 hover:border-violet-300 hover:shadow-md transition-all group">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${s.color}`}>
-                                    <s.icon className="w-5 h-5" />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-slate-900 mb-1">{s.title}</h3>
-                                    <p className="text-sm text-slate-500 leading-relaxed">{s.desc}</p>
-                                </div>
-                                <ul className="space-y-1.5">
-                                    {s.items.map(item => (
-                                        <li key={item} className="flex items-center gap-2 text-xs text-slate-500">
-                                            <CheckCircle className="w-3.5 h-3.5 text-violet-500 shrink-0" />
-                                            {item}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* ── POR QUÉ NOSOTROS ──────────────────────────── */}
-            <section id="proyectos" className="py-24 px-6">
-                <div className="max-w-5xl mx-auto">
-                    <div className="text-center mb-16 space-y-3">
-                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-violet-600">Por qué elegirnos</p>
-                        <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">
-                            Trabajamos como si fuera nuestro propio negocio
-                        </h2>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {[
-                            {
-                                n: "01",
-                                title: "Resultados medibles",
-                                desc: "No hacemos páginas web lindas que no venden. Cada decisión de diseño está orientada a la conversión.",
-                            },
-                            {
-                                n: "02",
-                                title: "Comunicación directa",
-                                desc: "Vas a hablar con quien hace el trabajo. Sin intermediarios, sin demoras, sin sorpresas en el presupuesto.",
-                            },
-                            {
-                                n: "03",
-                                title: "Tecnología de punta",
-                                desc: "Usamos las mismas herramientas que usan las startups más exitosas. Rápido, seguro y escalable.",
-                            },
-                        ].map(s => (
-                            <div key={s.n} className="relative pl-12 space-y-3">
-                                <div className="absolute left-0 top-0 w-8 h-8 rounded-lg bg-violet-600 text-white text-xs font-black flex items-center justify-center shadow-md">
-                                    {s.n}
-                                </div>
-                                <h3 className="font-bold text-slate-900">{s.title}</h3>
-                                <p className="text-sm text-slate-500 leading-relaxed">{s.desc}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* ── MATECITODB COMING SOON ────────────────────── */}
-            <section className="py-20 px-6 bg-gradient-to-br from-violet-600 to-violet-700">
-                <div className="max-w-3xl mx-auto text-center space-y-6">
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 border border-white/20 rounded-full text-white text-xs font-semibold">
-                        <Sparkles className="w-3 h-3" />
-                        Próximamente
-                    </div>
-                    <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-                        También estamos construyendo<br />
-                        <span className="text-violet-200">matecitodb</span>
-                    </h2>
-                    <p className="text-violet-200 text-lg max-w-xl mx-auto leading-relaxed">
-                        Un backend-as-a-service hecho en Argentina: base de datos, autenticación,
-                        storage y API REST listos en minutos. Para desarrolladores que quieren
-                        moverse rápido sin perder control.
-                    </p>
-                    <Link href="/#newsletter"
-                        className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-violet-700 font-bold text-sm rounded-xl hover:bg-violet-50 transition-all shadow-lg">
-                        Anotarme para la beta
+                    <Link href="/matecitodb"
+                        className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold border transition-colors hover:bg-white/5 whitespace-nowrap"
+                        style={{ borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(240,240,240,0.70)' }}>
+                        Saber más
                         <ArrowRight className="w-4 h-4" />
                     </Link>
                 </div>
             </section>
 
-            {/* ── CONTACTO ──────────────────────────────────── */}
-            <section id="contacto" className="py-24 px-6 bg-slate-50 border-t border-slate-200">
-                <div className="max-w-2xl mx-auto text-center space-y-6">
-                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-violet-600">Hablemos</p>
-                    <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">
-                        ¿Tenés un proyecto en mente?
-                    </h2>
-                    <p className="text-slate-500 text-lg">
-                        Contanos tu idea y te respondemos en menos de 24 horas con una propuesta a medida.
-                    </p>
-                    <a href="https://wa.me/541124025239?text=Hola%2C%20quiero%20consultarles%20sobre%20una%20p%C3%A1gina%20web"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-8 py-4 bg-violet-600 text-white font-bold text-sm rounded-xl hover:bg-violet-700 transition-all shadow-lg shadow-violet-200">
-                        Escribinos por WhatsApp
-                        <ArrowRight className="w-4 h-4" />
-                    </a>
-                </div>
-            </section>
-
-            {/* ── NEWSLETTER ────────────────────────────────── */}
-            <section id="newsletter" className="py-20 px-6 border-t border-slate-200">
-                <div className="max-w-xl mx-auto text-center space-y-5">
-                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-violet-600">Mantenete al día</p>
-                    <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                        Dejá tu email y te avisamos
-                    </h2>
-                    <p className="text-slate-500 leading-relaxed">
-                        Estamos desarrollando <span className="font-semibold text-slate-700">matecitodb</span> —
-                        nuestro backend-as-a-service para developers argentinos.
-                        Dejá tu email y te notificamos cuando abramos el acceso,
-                        además de tips de web y negocios digitales. Sin spam.
-                    </p>
-                    <NewsletterForm />
-                </div>
-            </section>
-
-        </div>
+        </main>
+        </>
     )
 }

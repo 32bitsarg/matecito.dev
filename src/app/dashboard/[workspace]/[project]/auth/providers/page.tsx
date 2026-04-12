@@ -12,8 +12,8 @@ const SUPPORTED_PROVIDERS = [
         name: 'Google',
         icon: Globe,
         color: 'text-red-500',
-        bg: 'bg-red-50',
-        border: 'border-red-200',
+        bg: 'bg-red-950/20',
+        border: 'border-red-800/40',
         docsUrl: 'https://console.cloud.google.com/apis/credentials',
     },
     {
@@ -135,7 +135,7 @@ export default function ProvidersPage() {
                 return (
                     <div key={meta.id}
                         className={cn(
-                            "bg-[var(--bg-primary)] rounded-xl border overflow-hidden transition-all",
+                            "bg-[var(--bg-tertiary)] rounded-xl border overflow-hidden transition-all",
                             p.enabled ? "border-[var(--border)]" : "border-[var(--border)]"
                         )}>
                         {/* Card header */}
@@ -148,7 +148,7 @@ export default function ProvidersPage() {
                                 <div>
                                     <p className="text-sm font-bold text-[var(--fg-primary)]">{meta.name}</p>
                                     {p.saved && (
-                                        <div className="flex items-center gap-1 text-[10px] text-emerald-600 font-semibold">
+                                        <div className="flex items-center gap-1 text-[10px] text-emerald-400 font-semibold">
                                             <CheckCircle2 className="w-3 h-3" /> Configurado
                                         </div>
                                     )}
@@ -157,7 +157,7 @@ export default function ProvidersPage() {
                             <div className="flex items-center gap-2">
                                 {p.saved && (
                                     <button onClick={() => handleDelete(meta.id)} disabled={isDeleting}
-                                        className="p-2 text-[var(--fg-tertiary)] hover:text-red-500 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50">
+                                        className="p-2 text-[var(--fg-tertiary)] hover:text-red-500 hover:bg-red-950/20 rounded-lg transition-all disabled:opacity-50">
                                         {isDeleting ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                                     </button>
                                 )}
@@ -197,15 +197,15 @@ export default function ProvidersPage() {
                             </div>
 
                             {/* Redirect URL */}
-                            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2">
+                            <div className="p-3 bg-amber-950/20 border border-amber-800/40 rounded-xl flex items-start gap-2">
                                 <AlertCircle className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
                                 <div className="text-xs text-amber-700 space-y-1">
                                     <p className="font-semibold">Callback URL para {meta.name}:</p>
-                                    <code className="block font-mono text-[11px] break-all text-amber-800 bg-amber-100 px-2 py-1 rounded">
+                                    <code className="block font-mono text-[11px] break-all text-amber-800 bg-amber-900/30 px-2 py-1 rounded">
                                         {callbackBase}/{meta.id}/callback
                                     </code>
                                     <a href={meta.docsUrl} target="_blank" rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-1 text-amber-600 underline hover:text-amber-800">
+                                        className="inline-flex items-center gap-1 text-amber-400 underline hover:text-amber-800">
                                         Configurar en {meta.name} →
                                     </a>
                                 </div>

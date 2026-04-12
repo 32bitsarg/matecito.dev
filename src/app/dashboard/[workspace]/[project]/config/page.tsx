@@ -105,7 +105,7 @@ export default function ConfigPage() {
 
       {/* Create form */}
       {showCreate && (
-        <div className="p-4 rounded-xl border space-y-3" style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
+        <div className="p-4 rounded-xl border space-y-3" style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)' }}>
           <div className="grid grid-cols-3 gap-3">
             <input value={newKey} onChange={e => setNewKey(e.target.value)} placeholder="Key (e.g. maintenance_mode)"
               className="rounded-lg border px-3 py-2 text-sm outline-none focus:ring-1"
@@ -136,7 +136,7 @@ export default function ConfigPage() {
           <p className="text-xs mt-1" style={{ color: 'var(--fg-tertiary)' }}>Creá feature flags, config de app, kill switches, etc.</p>
         </div>
       ) : (
-        <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
+        <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)' }}>
           <table className="w-full text-xs">
             <thead className="text-[10px] font-semibold uppercase tracking-wider" style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--fg-tertiary)' }}>
               <tr>
@@ -158,7 +158,7 @@ export default function ConfigPage() {
                         <input value={editValue} onChange={e => setEditValue(e.target.value)}
                           className="flex-1 rounded border px-2 py-1 text-xs font-mono outline-none focus:ring-1"
                           style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--fg-primary)' }} />
-                        <button onClick={() => handleSave(cfg.key)} className="p-1 text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 rounded">
+                        <button onClick={() => handleSave(cfg.key)} className="p-1 text-emerald-500 hover:bg-emerald-950/20 dark:hover:bg-emerald-950/20 rounded">
                           <Save className="w-3.5 h-3.5" />
                         </button>
                         <button onClick={() => setEditing(null)} className="p-1 hover:bg-[var(--bg-secondary)] rounded" style={{ color: 'var(--fg-tertiary)' }}>
@@ -192,7 +192,7 @@ export default function ConfigPage() {
                         </button>
                       )}
                       <button onClick={() => handleDelete(cfg.key)}
-                        className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors" style={{ color: 'var(--fg-tertiary)' }}>
+                        className="p-1 rounded hover:bg-red-950/20 dark:hover:bg-red-950/20 transition-colors" style={{ color: 'var(--fg-tertiary)' }}>
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>

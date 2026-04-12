@@ -2,7 +2,7 @@
 
 import { toast } from 'sonner'
 import { useState } from 'react'
-import { Copy, Calendar, ArrowRight, Trash2, Loader2, AlertTriangle, Database } from 'lucide-react'
+import { Copy, Calendar, ArrowRight, Trash2, Loader2, AlertTriangle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
@@ -66,19 +66,22 @@ export default function ProjectCard({ project, workspaceSlug, onDelete }: Projec
 
     return (
         <div className={cn(
-            "group relative flex flex-col bg-white border border-slate-200 rounded-2xl p-5 transition-all hover:shadow-md hover:border-violet-200",
+            "group relative flex flex-col bg-[var(--bg-tertiary)] border border-[var(--border)] rounded-2xl p-5 transition-all hover:shadow-md hover:border-[var(--accent)]",
             isDeleting && "opacity-50 pointer-events-none"
         )}>
             {/* Icon + name */}
             <div className="flex items-start gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center shrink-0">
-                    <Database className="w-5 h-5 text-violet-600" />
+                <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-base font-bold text-white select-none"
+                    style={{ backgroundColor: 'var(--accent)', boxShadow: 'var(--shadow-glow)' }}
+                >
+                    {project.name?.[0]?.toUpperCase() ?? '?'}
                 </div>
                 <div className="min-w-0 flex-1">
-                    <h3 className="font-bold text-slate-900 truncate">{project.name}</h3>
+                    <h3 className="font-bold text-[var(--fg-primary)] truncate">{project.name}</h3>
                     <button
                         onClick={copyUrl}
-                        className="flex items-center gap-1 text-xs text-slate-400 hover:text-violet-600 transition-colors mt-0.5 group/url"
+                        className="flex items-center gap-1 text-xs text-[var(--fg-tertiary)] hover:text-[var(--accent)] transition-colors mt-0.5 group/url"
                     >
                         <span className="truncate">{fullUrl}</span>
                         <Copy className="w-3 h-3 shrink-0 opacity-0 group-hover/url:opacity-100 transition-opacity" />
@@ -86,16 +89,16 @@ export default function ProjectCard({ project, workspaceSlug, onDelete }: Projec
                 </div>
 
                 {/* Live badge */}
-                <span className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-full shrink-0">
+                <span className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold bg-emerald-950/30 text-emerald-400 border border-emerald-800/40 rounded-full shrink-0">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                     Live
                 </span>
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between pt-4 border-t border-slate-100 mt-auto">
+            <div className="flex items-center justify-between pt-4 border-t border-[var(--border)] mt-auto">
                 <div className="flex flex-col gap-0.5">
-                    <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                    <div className="flex items-center gap-1.5 text-xs text-[var(--fg-tertiary)]">
                         <Calendar className="w-3.5 h-3.5" />
                         {dateStr}
                     </div>
@@ -115,7 +118,7 @@ export default function ProjectCard({ project, workspaceSlug, onDelete }: Projec
                                 "p-2 rounded-lg border text-sm transition-all",
                                 showConfirm
                                     ? "bg-red-500 border-red-500 text-white"
-                                    : "border-slate-200 text-slate-400 hover:border-red-300 hover:text-red-500 hover:bg-red-50"
+                                    : "border-[var(--border)] text-[var(--fg-tertiary)] hover:border-red-700 hover:text-red-500 hover:bg-red-950/20"
                             )}
                         >
                             {isDeleting ? (

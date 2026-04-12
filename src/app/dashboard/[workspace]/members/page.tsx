@@ -28,10 +28,10 @@ const ROLES = ['owner', 'admin', 'developer', 'viewer'] as const
 type Role = typeof ROLES[number]
 
 const ROLE_META: Record<Role, { label: string; icon: any; color: string }> = {
-    owner:     { label: 'Owner',     icon: Crown,  color: 'text-amber-600 bg-amber-50 border-amber-200' },
-    admin:     { label: 'Admin',     icon: Shield, color: 'text-violet-600 bg-violet-50 border-violet-200' },
-    developer: { label: 'Developer', icon: Code2,  color: 'text-blue-600 bg-blue-50 border-blue-200' },
-    viewer:    { label: 'Viewer',    icon: Eye,    color: 'text-slate-600 bg-slate-50 border-slate-200' },
+    owner:     { label: 'Owner',     icon: Crown,  color: 'text-amber-400 bg-amber-950/20 border-amber-800/40' },
+    admin:     { label: 'Admin',     icon: Shield, color: 'text-violet-400 bg-violet-900/20 border-violet-800/40' },
+    developer: { label: 'Developer', icon: Code2,  color: 'text-blue-400 bg-blue-950/20 border-blue-800/40' },
+    viewer:    { label: 'Viewer',    icon: Eye,    color: 'text-slate-300 bg-slate-900/40 border-slate-700/50' },
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -172,7 +172,7 @@ export default function MembersPage() {
                                     className="flex items-center gap-4 px-5 py-4 hover:bg-[var(--bg-secondary)] transition-colors">
 
                                     {/* Avatar */}
-                                    <div className="w-9 h-9 rounded-full bg-violet-100 flex items-center justify-center shrink-0 text-sm font-bold text-violet-700">
+                                    <div className="w-9 h-9 rounded-full bg-violet-900/30 flex items-center justify-center shrink-0 text-sm font-bold text-violet-700">
                                         {(member.name || member.email || '?')[0].toUpperCase()}
                                     </div>
 
@@ -225,8 +225,8 @@ export default function MembersPage() {
                                             className={cn(
                                                 "p-1.5 rounded-lg transition-all text-xs",
                                                 removingId === member.user_id
-                                                    ? "bg-red-500 text-white"
-                                                    : "text-[var(--fg-tertiary)] hover:text-red-500 hover:bg-red-50"
+                                                    ? "bg-red-950/200 text-white"
+                                                    : "text-[var(--fg-tertiary)] hover:text-red-500 hover:bg-red-950/20"
                                             )}>
                                             <Trash2 className="w-3.5 h-3.5" />
                                         </button>
@@ -241,9 +241,9 @@ export default function MembersPage() {
             {/* Pending Invites list */}
             {invites.length > 0 && (
                 <div className="bg-[var(--bg-primary)] border border-[var(--border)] rounded-xl overflow-hidden">
-                    <div className="px-5 py-3 border-b border-[var(--border)] bg-amber-50/30 flex items-center justify-between">
-                        <p className="text-[10px] font-bold text-amber-600 uppercase tracking-widest">Invitaciones Pendientes</p>
-                        <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold">
+                    <div className="px-5 py-3 border-b border-[var(--border)] bg-amber-950/20/30 flex items-center justify-between">
+                        <p className="text-[10px] font-bold text-amber-400 uppercase tracking-widest">Invitaciones Pendientes</p>
+                        <span className="px-1.5 py-0.5 rounded bg-amber-900/30 text-amber-700 text-[10px] font-bold">
                             {invites.length}
                         </span>
                     </div>
@@ -264,8 +264,8 @@ export default function MembersPage() {
                                         className={cn(
                                             "px-2 py-1 rounded-lg text-[10px] font-bold transition-all",
                                             cancelingEmail === invite.email
-                                                ? "bg-red-500 text-white"
-                                                : "text-slate-400 hover:text-red-500 hover:bg-red-50"
+                                                ? "bg-red-950/200 text-white"
+                                                : "text-slate-400 hover:text-red-500 hover:bg-red-950/20"
                                         )}
                                     >
                                         {cancelingEmail === invite.email ? 'Confirmar' : 'Cancelar'}

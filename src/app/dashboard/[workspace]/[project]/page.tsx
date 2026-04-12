@@ -119,7 +119,7 @@ export default function ProjectOverview() {
       </div>
 
       {/* Connection info */}
-      <div className="rounded-xl border p-4" style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
+      <div className="rounded-xl border p-4" style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)', boxShadow: '0 1px 3px rgba(0,0,0,0.4)' }}>
         <h3 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--fg-tertiary)' }}>Conexión</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
@@ -159,14 +159,15 @@ export default function ProjectOverview() {
             <button
               key={link.href}
               onClick={() => router.push(`/dashboard/${currentWorkspace?.slug}/${subdomain}${link.href}`)}
-              className="group flex items-center gap-3 p-3 rounded-xl border text-left transition-all hover:translate-y-[1px]"
+              className="group flex items-center gap-3 p-3 rounded-xl border text-left transition-all hover:border-[var(--border-hover)]"
               style={{
-                backgroundColor: 'var(--bg-primary)',
+                backgroundColor: 'var(--bg-tertiary)',
                 borderColor: 'var(--border)',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
               }}
             >
               <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                style={{ backgroundColor: 'var(--bg-elevated)' }}>
                 <span className="group-hover:text-[var(--accent)] transition-colors" style={{ color: 'var(--fg-tertiary)' }}>
                   {link.icon}
                 </span>
@@ -183,7 +184,7 @@ export default function ProjectOverview() {
       </div>
 
       {/* Recent activity */}
-      <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
+      <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)', boxShadow: '0 1px 3px rgba(0,0,0,0.4)' }}>
         <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
           <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--fg-tertiary)' }}>Actividad reciente</h3>
         </div>

@@ -7,16 +7,16 @@ import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
 const METHOD_COLORS: Record<string, string> = {
-    GET:    'bg-blue-50 text-blue-600 border-blue-200',
-    POST:   'bg-emerald-50 text-emerald-600 border-emerald-200',
-    PATCH:  'bg-amber-50 text-amber-600 border-amber-200',
-    DELETE: 'bg-red-50 text-red-600 border-red-200',
+    GET:    'bg-blue-950/20 text-blue-400 border-blue-800/40',
+    POST:   'bg-emerald-950/20 text-emerald-400 border-emerald-800/40',
+    PATCH:  'bg-amber-950/20 text-amber-400 border-amber-800/40',
+    DELETE: 'bg-red-950/20 text-red-400 border-red-800/40',
 }
 
 function StatusBadge({ code }: { code: number }) {
-    const color = code >= 500 ? 'bg-red-50 text-red-600 border-red-200'
-        : code >= 400 ? 'bg-amber-50 text-amber-600 border-amber-200'
-        : 'bg-emerald-50 text-emerald-600 border-emerald-200'
+    const color = code >= 500 ? 'bg-red-950/20 text-red-400 border-red-800/40'
+        : code >= 400 ? 'bg-amber-950/20 text-amber-400 border-amber-800/40'
+        : 'bg-emerald-950/20 text-emerald-400 border-emerald-800/40'
     return (
         <span className={cn("inline-flex text-[10px] font-bold px-1.5 py-0.5 rounded border", color)}>
             {code}
@@ -100,11 +100,11 @@ export default function LogsPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                     { label: "Total (cargados)", value: logs.length, icon: Activity, color: "text-[var(--accent)]", bg: "bg-[var(--accent-soft)]" },
-                    { label: "Latencia prom.", value: avgMs ? `${avgMs}ms` : "—", icon: Clock, color: "text-blue-600", bg: "bg-blue-50" },
-                    { label: "Errores", value: errors, icon: AlertCircle, color: "text-red-600", bg: "bg-red-50" },
-                    { label: "Tasa de éxito", value: `${success}%`, icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50" },
+                    { label: "Latencia prom.", value: avgMs ? `${avgMs}ms` : "—", icon: Clock, color: "text-blue-400", bg: "bg-blue-950/20" },
+                    { label: "Errores", value: errors, icon: AlertCircle, color: "text-red-400", bg: "bg-red-950/20" },
+                    { label: "Tasa de éxito", value: `${success}%`, icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-950/20" },
                 ].map(s => (
-                    <div key={s.label} className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] p-5 flex items-center justify-between">
+                    <div key={s.label} className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] p-5 flex items-center justify-between">
                         <div>
                             <p className="text-xs text-[var(--fg-tertiary)] font-medium mb-1">{s.label}</p>
                             <p className={cn("text-xl font-extrabold", s.color)}>{s.value}</p>
@@ -117,7 +117,7 @@ export default function LogsPage() {
             </div>
 
             {/* Table */}
-            <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] overflow-hidden">
+            <div className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] overflow-hidden">
                 {/* Toolbar */}
                 <div className="px-5 py-3 border-b border-[var(--border)] flex items-center gap-3 flex-wrap">
                     <div className="relative flex-1 min-w-[180px]">

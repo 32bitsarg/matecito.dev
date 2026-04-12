@@ -96,7 +96,7 @@ export default function WorkspaceSettingsPage() {
                             className="w-full px-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl text-sm font-medium outline-none focus:ring-4 focus:ring-violet-500/10 focus:border-violet-400 focus:bg-[var(--bg-primary)] transition-all disabled:opacity-50"
                         />
                         {!canRename && (
-                            <p className="text-[10px] text-amber-600 font-medium ml-1">
+                            <p className="text-[10px] text-amber-400 font-medium ml-1">
                                 Solo administradores pueden cambiar el nombre.
                             </p>
                         )}
@@ -117,15 +117,15 @@ export default function WorkspaceSettingsPage() {
 
             {/* Danger Zone */}
             {canDelete && (
-                <section className="bg-red-50/30 border border-red-100 rounded-xl p-6 space-y-6">
-                    <div className="flex items-center gap-3 text-red-600">
-                        <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
+                <section className="bg-red-950/20/30 border border-red-800/40 rounded-xl p-6 space-y-6">
+                    <div className="flex items-center gap-3 text-red-400">
+                        <div className="w-10 h-10 rounded-xl bg-red-900/30 flex items-center justify-center">
                             <AlertTriangle className="w-5 h-5" />
                         </div>
                         <h2 className="font-bold text-lg text-red-900">Zona de Peligro</h2>
                     </div>
 
-                    <div className="bg-[var(--bg-primary)] border border-red-200 rounded-xl p-5 space-y-4">
+                    <div className="bg-[var(--bg-primary)] border border-red-800/40 rounded-xl p-5 space-y-4">
                         <div>
                             <h3 className="font-bold text-[var(--fg-primary)]">Eliminar este Workspace</h3>
                             <p className="text-sm text-[var(--fg-secondary)] leading-relaxed">
@@ -134,13 +134,13 @@ export default function WorkspaceSettingsPage() {
                         </div>
 
                         <div className="space-y-3 pt-2">
-                            <p className="text-xs text-[var(--fg-tertiary)]">Para confirmar, escribí el slug del workspace: <span className="font-mono font-bold text-red-600 select-all">{currentWorkspace.slug}</span></p>
+                            <p className="text-xs text-[var(--fg-tertiary)]">Para confirmar, escribí el slug del workspace: <span className="font-mono font-bold text-red-400 select-all">{currentWorkspace.slug}</span></p>
                             <input
                                 type="text"
                                 value={deleteConfirm}
                                 onChange={e => setDeleteConfirm(e.target.value)}
                                 placeholder="Escribí el slug aquí..."
-                                className="w-full px-4 py-3 border-2 border-red-100 rounded-xl text-sm font-mono outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/5 transition-all"
+                                className="w-full px-4 py-3 border-2 border-red-800/40 rounded-xl text-sm font-mono outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/5 transition-all"
                             />
 
                             <button

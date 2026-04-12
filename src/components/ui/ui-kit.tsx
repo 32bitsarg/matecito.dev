@@ -96,7 +96,7 @@ export function ConfirmDialog({ open, title, description, confirmText = "Confirm
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 animate-fade-in"
       style={{ backgroundColor: 'var(--bg-overlay)', backdropFilter: 'blur(4px)' }}>
       <div className="absolute inset-0" onClick={onCancel} />
-      <div className="relative w-full max-w-sm bg-[var(--bg-primary)] border border-[var(--border)] rounded-xl shadow-[var(--shadow-modal)] animate-slide-up overflow-hidden">
+      <div className="relative w-full max-w-sm border border-[var(--border)] rounded-xl shadow-[var(--shadow-modal)] animate-slide-up overflow-hidden" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
         <div className="flex items-start gap-3 p-5">
           {variant === 'danger' && (
             <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/30 flex items-center justify-center shrink-0">
@@ -147,7 +147,7 @@ export function SkeletonRow({ cols = 4 }: { cols?: number }) {
 
 export function SkeletonCard() {
   return (
-    <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-primary)]">
+    <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-tertiary)]">
       <div className="flex items-center gap-3 mb-3">
         <Skeleton className="w-9 h-9 rounded-lg" />
         <div className="flex-1"><Skeleton className="h-4 w-24 mb-1.5" /><Skeleton className="h-3 w-16" /></div>
@@ -168,16 +168,17 @@ export function MetricCard({ label, value, icon, trend }: {
   trend?: { value: number; direction: 'up' | 'down' }
 }) {
   return (
-    <div className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-primary)] hover:border-[var(--border-hover)] transition-colors">
-      <div className="flex items-center justify-between mb-2">
+    <div className="p-4 rounded-xl border border-[var(--border)] hover:border-[var(--border-hover)] transition-all"
+      style={{ backgroundColor: 'var(--bg-tertiary)', boxShadow: '0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04)' }}>
+      <div className="flex items-center justify-between mb-3">
         <span className="text-[11px] font-medium text-[var(--fg-tertiary)] uppercase tracking-wider">{label}</span>
-        {icon && <div className="text-[var(--fg-tertiary)]">{icon}</div>}
+        {icon && <div className="p-1.5 rounded-md text-[var(--fg-tertiary)]" style={{ backgroundColor: 'var(--bg-elevated)' }}>{icon}</div>}
       </div>
       <div className="flex items-end gap-2">
         <span className="text-2xl font-bold text-[var(--fg-primary)] font-mono tracking-tight">{value}</span>
         {trend && (
           <span className={cn("text-[10px] font-medium mb-0.5",
-            trend.direction === 'up' ? 'text-emerald-600' : 'text-red-500')}>
+            trend.direction === 'up' ? 'text-emerald-400' : 'text-red-400')}>
             {trend.direction === 'up' ? '↑' : '↓'} {trend.value}%
           </span>
         )}
@@ -204,7 +205,7 @@ export function Dropdown({ trigger, children }: { trigger: ReactNode; children: 
     <div className="relative">
       <div onClick={() => setOpen(v => !v)}>{trigger}</div>
       {open && (
-        <div className="absolute right-0 top-full mt-1 min-w-[180px] bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg shadow-[var(--shadow-hover)] z-50 animate-slide-up overflow-hidden">
+        <div className="absolute right-0 top-full mt-1 min-w-[180px] border border-[var(--border)] rounded-lg shadow-[var(--shadow-hover)] z-50 animate-slide-up overflow-hidden" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
           {children}
         </div>
       )}
@@ -281,7 +282,7 @@ export function Button({ children, variant = 'secondary', size = 'md', loading =
 
   const variants: Record<ButtonVariant, string> = {
     primary:   'bg-[var(--accent)] text-[var(--accent-fg)] hover:bg-[var(--accent-hover)] font-semibold',
-    secondary: 'bg-[var(--bg-primary)] text-[var(--fg-secondary)] border border-[var(--border)] hover:border-[var(--border-hover)] hover:text-[var(--fg-primary)] hover:bg-[var(--bg-secondary)]',
+    secondary: 'bg-[var(--bg-tertiary)] text-[var(--fg-secondary)] border border-[var(--border)] hover:border-[var(--border-hover)] hover:text-[var(--fg-primary)] hover:bg-[var(--bg-elevated)]',
     ghost:     'text-[var(--fg-secondary)] hover:text-[var(--fg-primary)] hover:bg-[var(--bg-secondary)]',
     danger:    'bg-red-600 text-white hover:bg-red-700 font-semibold',
   }

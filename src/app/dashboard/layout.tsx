@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 import { isAuthenticated, clearToken } from '@/lib/api'
 import { ActivityBar } from '@/components/layout/activity-bar'
 import { TopBar } from '@/components/layout/top-bar'
@@ -28,9 +28,19 @@ function DashboardModals() {
   )
 }
 
+function isProjectPath(pathname: string) {
+  const parts = pathname.split('/').filter(Boolean)
+  if (parts[0] !== 'dashboard' || parts.length < 3) return false
+  const workspaceOnlyRoutes = new Set(['settings', 'members'])
+  if (parts.length === 3 && workspaceOnlyRoutes.has(parts[2])) return false
+  return true
+}
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
+  const pathname = usePathname()
   const [checking, setChecking] = useState(true)
+  const inProject = isProjectPath(pathname)
 
   useEffect(() => {
     ;(async () => {
@@ -59,11 +69,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <TopBar />
       <div className="flex flex-1 overflow-hidden">
         <ActivityBar />
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto flex flex-col">
           <ErrorBoundary>
-            <div className="max-w-6xl mx-auto p-5 lg:p-6 animate-fade-in">
-              {children}
-            </div>
+            {inProject ? (
+              // Project view: no outer padding — ProjectNav + page content handle their own spacing
+              children
+            ) : (
+              <div className="px-6 py-5 animate-fade-in">
+                {children}
+              </div>
+            )}
           </ErrorBoundary>
         </main>
       </div>

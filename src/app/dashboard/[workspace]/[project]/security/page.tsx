@@ -15,9 +15,9 @@ const OPERATIONS = [
 ]
 
 const ACCESS_OPTIONS = [
-    { value: 'public',  label: 'Público',     icon: Unlock, color: 'text-red-600',   bg: 'bg-red-50',   border: 'border-red-200',   desc: 'Sin autenticación' },
-    { value: 'auth',    label: 'Autenticado',  icon: Users,  color: 'text-blue-600',  bg: 'bg-blue-50',  border: 'border-blue-200',  desc: 'Usuarios logueados' },
-    { value: 'service', label: 'Service Key',  icon: Key,    color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-200', desc: 'Solo server-side' },
+    { value: 'public',  label: 'Público',     icon: Unlock, color: 'text-red-400',   bg: 'bg-red-950/20',   border: 'border-red-800/40',   desc: 'Sin autenticación' },
+    { value: 'auth',    label: 'Autenticado',  icon: Users,  color: 'text-blue-400',  bg: 'bg-blue-950/20',  border: 'border-blue-800/40',  desc: 'Usuarios logueados' },
+    { value: 'service', label: 'Service Key',  icon: Key,    color: 'text-amber-400', bg: 'bg-amber-950/20', border: 'border-amber-800/40', desc: 'Solo server-side' },
     { value: 'nobody',  label: 'Bloqueado',    icon: Lock,   color: 'text-[var(--fg-tertiary)]', bg: 'bg-[var(--bg-secondary)]', border: 'border-[var(--border)]', desc: 'Deshabilitado' },
 ]
 
@@ -123,7 +123,7 @@ export default function SecurityPage() {
                 {/* Collection list */}
                 <div className="w-56 shrink-0 space-y-2">
                     <p className="text-[10px] font-bold text-[var(--fg-tertiary)] uppercase tracking-widest px-1">Colecciones</p>
-                    <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] p-2 space-y-0.5">
+                    <div className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] p-2 space-y-0.5">
                         {loading ? (
                             <div className="p-4 text-center text-xs text-[var(--fg-tertiary)]">Cargando...</div>
                         ) : collections.length === 0 ? (
@@ -139,7 +139,7 @@ export default function SecurityPage() {
                                                 ? "bg-[var(--accent-soft)] text-[var(--accent)] font-semibold"
                                                 : "text-[var(--fg-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--fg-primary)]")}>
                                         <span className="truncate">{col.name}</span>
-                                        {hasWarning && <span className="w-2 h-2 rounded-full bg-red-500 shrink-0 ml-2" />}
+                                        {hasWarning && <span className="w-2 h-2 rounded-full bg-red-950/200 shrink-0 ml-2" />}
                                     </button>
                                 )
                             })
@@ -150,12 +150,12 @@ export default function SecurityPage() {
                 {/* Permissions editor */}
                 <div className="flex-1 min-w-0">
                     {!selectedCol ? (
-                        <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] p-16 text-center">
+                        <div className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] p-16 text-center">
                             <Shield className="w-10 h-10 text-slate-200 mx-auto mb-3" />
                             <p className="text-sm text-[var(--fg-tertiary)]">Seleccioná una colección</p>
                         </div>
                     ) : (
-                        <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] overflow-hidden">
+                        <div className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] overflow-hidden">
                             <div className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between">
                                 <div>
                                     <h2 className="font-bold text-[var(--fg-primary)]">
@@ -164,7 +164,7 @@ export default function SecurityPage() {
                                     <p className="text-xs text-[var(--fg-tertiary)] mt-0.5">Define acceso y filtros RLS por operación</p>
                                 </div>
                                 {hasPublic && (
-                                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg text-xs font-semibold text-red-600">
+                                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-950/20 border border-red-800/40 rounded-lg text-xs font-semibold text-red-400">
                                         <Unlock className="w-3.5 h-3.5" /> Tiene acceso público
                                     </div>
                                 )}
@@ -198,7 +198,7 @@ export default function SecurityPage() {
                                                                     "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all",
                                                                     current.access === opt.value
                                                                         ? `${opt.bg} ${opt.color} ${opt.border}`
-                                                                        : "bg-[var(--bg-primary)] text-[var(--fg-tertiary)] border-[var(--border)] hover:border-slate-300"
+                                                                        : "bg-[var(--bg-primary)] text-[var(--fg-tertiary)] border-[var(--border)] hover:border-slate-600/50"
                                                                 )}>
                                                                 <OptIcon className="w-3 h-3" />
                                                                 <span className="hidden sm:inline">{opt.label}</span>
@@ -217,7 +217,7 @@ export default function SecurityPage() {
                                                         value={current.filter_rule ?? ''}
                                                         onChange={e => setFilterRule(op.key, e.target.value)}
                                                         placeholder="Filtro RLS opcional: ej. owner_id:{{auth.id}}"
-                                                        className="flex-1 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2 text-xs font-mono text-blue-800 placeholder:text-blue-300 focus:border-blue-300 focus:bg-white outline-none transition-all"
+                                                        className="flex-1 bg-blue-950/20 border border-blue-800/40 rounded-lg px-3 py-2 text-xs font-mono text-blue-300 placeholder:text-blue-300 focus:border-blue-300 focus:bg-[var(--bg-elevated)] outline-none transition-all"
                                                     />
                                                 </div>
                                             )}

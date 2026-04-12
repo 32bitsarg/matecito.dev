@@ -144,7 +144,7 @@ export default function FunctionsPage() {
       </div>
 
       {tab === 'history' ? (
-        <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
+        <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)' }}>
           {executions.length === 0 ? (
             <div className="py-16 text-center">
               <Clock className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--fg-tertiary)' }} />
@@ -161,7 +161,7 @@ export default function FunctionsPage() {
                     <td className="px-4 py-2 font-mono" style={{ color: 'var(--fg-primary)' }}>{ex.function_name}</td>
                     <td className="px-4 py-2">
                       <span className={cn("text-[10px] font-medium px-2 py-0.5 rounded-full",
-                        ex.status === 'success' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400' : 'bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400')}>
+                        ex.status === 'success' ? 'bg-emerald-950/20 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400' : 'bg-red-950/20 text-red-700 dark:bg-red-950/30 dark:text-red-400')}>
                         {ex.status}
                       </span>
                     </td>
@@ -177,7 +177,7 @@ export default function FunctionsPage() {
         <>
           {/* Create form */}
           {showCreate && (
-            <div className="p-4 rounded-xl border space-y-3" style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
+            <div className="p-4 rounded-xl border space-y-3" style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)' }}>
               <div className="grid grid-cols-2 gap-3">
                 <input
                   value={editName || newFn.name}
@@ -231,7 +231,7 @@ export default function FunctionsPage() {
             <div className="space-y-2">
               {functions.map(fn => (
                 <div key={fn.id} className="flex items-center justify-between p-4 rounded-xl border hover:border-[var(--border-hover)] transition-colors"
-                  style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
+                  style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)' }}>
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: 'var(--accent-soft)' }}>
                       <Code2 className="w-4 h-4" style={{ color: 'var(--accent)' }} />
@@ -262,7 +262,7 @@ export default function FunctionsPage() {
                     </button>
                     <button
                       onClick={() => handleDelete(fn.name)}
-                      className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+                      className="p-1.5 rounded-lg hover:bg-red-950/20 dark:hover:bg-red-950/20 transition-colors"
                       style={{ color: 'var(--fg-tertiary)' }}
                     >
                       <Trash2 className="w-4 h-4" />

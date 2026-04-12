@@ -135,7 +135,7 @@ export default function FormsPage() {
 
       {/* Create form */}
       {showCreate && (
-        <div className="p-4 rounded-xl border space-y-3" style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
+        <div className="p-4 rounded-xl border space-y-3" style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)' }}>
           <div className="grid grid-cols-2 gap-3">
             <input value={newForm.name} onChange={e => setNewForm(p => ({ ...p, name: e.target.value }))} placeholder="Nombre (e.g. contacto)"
               className="rounded-lg border px-3 py-2 text-sm outline-none focus:ring-1"
@@ -159,7 +159,7 @@ export default function FormsPage() {
 
       {/* Submissions / Embed panel */}
       {viewingSubmissions && (
-        <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
+        <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)' }}>
           {/* Panel header */}
           <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
             <div className="flex items-center gap-2">
@@ -311,7 +311,7 @@ await db.forms.submitPublic('${viewingSubmissions}', {
         <div className="space-y-2">
           {forms.map(form => (
             <div key={form.id} className="flex items-center justify-between p-4 rounded-xl border hover:border-[var(--border-hover)] transition-colors"
-              style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
+              style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)' }}>
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: 'var(--accent-soft)' }}>
                   <FileText className="w-4 h-4" style={{ color: 'var(--accent)' }} />
@@ -335,7 +335,7 @@ await db.forms.submitPublic('${viewingSubmissions}', {
                   <Copy className="w-4 h-4" />
                 </button>
                 <button onClick={() => handleDelete(form.name)}
-                  className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors" style={{ color: 'var(--fg-tertiary)' }}>
+                  className="p-1.5 rounded-lg hover:bg-red-950/20 dark:hover:bg-red-950/20 transition-colors" style={{ color: 'var(--fg-tertiary)' }}>
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>

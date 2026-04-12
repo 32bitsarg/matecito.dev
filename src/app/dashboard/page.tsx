@@ -7,8 +7,8 @@ import { ProjectService } from '@/services/api.service'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
-  Plus, Search, Database, ExternalLink, Trash2, Copy,
-  Loader2, Clock, Filter
+  Plus, Search, ExternalLink, Trash2, Copy,
+  Loader2, Clock, Database,
 } from 'lucide-react'
 
 function timeAgo(date: string): string {
@@ -77,7 +77,7 @@ export default function DashboardPage() {
             value={search} onChange={e => setSearch(e.target.value)}
             className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border outline-none transition-colors focus:border-[var(--accent)]"
             style={{
-              backgroundColor: 'var(--bg-primary)',
+              backgroundColor: 'var(--bg-tertiary)',
               borderColor: 'var(--border)',
               color: 'var(--fg-primary)',
             }}
@@ -103,7 +103,7 @@ export default function DashboardPage() {
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="p-4 rounded-xl border animate-pulse" style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
+            <div key={i} className="p-4 rounded-xl border animate-pulse" style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)' }}>
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-9 h-9 rounded-lg animate-pulse" style={{ backgroundColor: 'var(--bg-tertiary)' }} />
                 <div className="flex-1">
@@ -147,16 +147,16 @@ export default function DashboardPage() {
               key={project.id}
               className="group p-4 rounded-xl border cursor-pointer transition-all hover:translate-y-[1px]"
               style={{
-                backgroundColor: 'var(--bg-primary)',
+                backgroundColor: 'var(--bg-tertiary)',
                 borderColor: 'var(--border)',
               }}
               onClick={() => router.push(`/dashboard/${currentWorkspace?.slug}/${project.subdomain}`)}
             >
               {/* Header */}
               <div className="flex items-start gap-3 mb-3">
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: 'var(--accent-soft)' }}>
-                  <Database className="w-4 h-4" style={{ color: 'var(--accent)' }} />
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-sm font-bold text-white select-none"
+                  style={{ backgroundColor: 'var(--accent)', boxShadow: 'var(--shadow-glow)' }}>
+                  {project.name?.[0]?.toUpperCase() ?? '?'}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
@@ -172,14 +172,14 @@ export default function DashboardPage() {
               <div className="flex items-center gap-1.5 mb-3">
                 <span className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium",
                   project.api_version === 'v2'
-                    ? "bg-violet-50 text-violet-700 dark:bg-violet-950/30 dark:text-violet-400"
-                    : "bg-slate-100 text-slate-600 dark:bg-slate-800/50 dark:text-slate-400"
+                    ? "bg-violet-900/20 text-violet-700 dark:bg-violet-950/30 dark:text-violet-400"
+                    : "bg-slate-800/40 text-slate-300 dark:bg-slate-800/50 dark:text-slate-400"
                 )}>
                   {project.api_version === 'v2' ? 'v2' : 'v1'}
-                  {project.api_version === 'v2' && <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse-dot" />}
+                  {project.api_version === 'v2' && <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />}
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse-dot" />
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-950/30 text-emerald-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   Live
                 </span>
               </div>
@@ -209,8 +209,8 @@ export default function DashboardPage() {
                   <button onClick={() => handleDelete(project.id, project.name)}
                     className={cn("p-1.5 rounded-md transition-colors",
                       deleting === project.id
-                        ? "bg-red-50 text-red-600 dark:bg-red-950/20"
-                        : "hover:bg-red-50 text-[var(--fg-tertiary)] hover:text-red-500"
+                        ? "bg-red-950/20 text-red-400 dark:bg-red-950/20"
+                        : "hover:bg-red-950/20 text-[var(--fg-tertiary)] hover:text-red-500"
                     )}
                     title={deleting === project.id ? 'Click para confirmar' : 'Eliminar'}>
                     {deleting === project.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}

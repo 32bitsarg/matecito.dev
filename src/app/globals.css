@@ -6,31 +6,50 @@
    ═══════════════════════════════════════════════════════════ */
 
 :root {
-  /* Light mode */
-  --bg-primary:    #ffffff;
-  --bg-secondary:  #f8f9fb;
-  --bg-tertiary:   #f1f3f5;
-  --bg-overlay:    rgba(15, 17, 23, 0.4);
+  /* ── Dark-first design system ──────────────────────────
+     Fondo base negro, superficies con jerarquía clara,
+     acento crimson #6D001A.
+  ──────────────────────────────────────────────────────── */
 
-  --fg-primary:    #0f172a;
-  --fg-secondary:  #475569;
-  --fg-tertiary:   #94a3b8;
-  --fg-inverse:    #ffffff;
+  /* Surfaces — 4 niveles para crear profundidad */
+  --bg-primary:    #000000;   /* fondo de página — base absoluta */
+  --bg-secondary:  #111111;   /* nav bars, sidebars */
+  --bg-tertiary:   #1c1c1c;   /* cards, paneles — claramente elevados */
+  --bg-elevated:   #282828;   /* inputs, hover dentro de cards */
+  --bg-overlay:    rgba(0, 0, 0, 0.75);
 
-  --accent:        #6d28d9;
-  --accent-hover:  #5b21b6;
-  --accent-soft:   #ede9fe;
+  /* Text */
+  --fg-primary:    #f0f0f0;
+  --fg-secondary:  rgba(240,240,240,0.60);
+  --fg-tertiary:   rgba(240,240,240,0.35);
+  --fg-inverse:    #000000;
+
+  /* Accent — crimson */
+  --accent:        #6d001a;
+  --accent-hover:  #8b0020;
+  --accent-muted:  #4a0012;
+  --accent-soft:   rgba(109, 0, 26, 0.20);
+  --accent-glow:   rgba(109, 0, 26, 0.35);
   --accent-fg:     #ffffff;
 
-  --border:        #e5e7eb;
-  --border-hover:  #d1d5db;
+  /* Borders */
+  --border:        rgba(255,255,255,0.12);
+  --border-hover:  rgba(255,255,255,0.22);
+  --border-accent: rgba(109,0,26,0.60);
 
-  --success:       #059669;
-  --success-soft:  #d1fae5;
-  --warning:       #d97706;
-  --warning-soft:  #fef3c7;
-  --error:         #dc2626;
-  --error-soft:    #fee2e2;
+  /* Semantic */
+  --success:       #4ade80;
+  --success-soft:  rgba(74,222,128,0.12);
+  --warning:       #fbbf24;
+  --warning-soft:  rgba(251,191,36,0.12);
+  --error:         #f87171;
+  --error-soft:    rgba(248,113,113,0.12);
+
+  /* Shadows con tinte crimson para dar profundidad */
+  --shadow-card:   0 1px 3px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);
+  --shadow-hover:  0 4px 16px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08);
+  --shadow-modal:  0 24px 64px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.08);
+  --shadow-glow:   0 0 20px rgba(109,0,26,0.3);
 
   --font-sans:  'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono:  'CommitMono', ui-monospace, 'SF Mono', Menlo, monospace;
@@ -50,76 +69,75 @@
   --duration-slow: 200ms;
 }
 
-/* Dark mode via .dark class (controlled by ThemeContext) */
+/* Dark class — idéntico al :root */
 html.dark {
-  --bg-primary:    #0f1117;
-  --bg-secondary:  #161822;
-  --bg-tertiary:   #1e2030;
-  --bg-overlay:    rgba(0, 0, 0, 0.6);
-
-  --fg-primary:    #e5e7eb;
-  --fg-secondary:  #9ca3af;
-  --fg-tertiary:   #6b7280;
-  --fg-inverse:    #0f172a;
-
-  --accent:        #8b5cf6;
-  --accent-hover:  #a78bfa;
-  --accent-soft:   #2e1065;
+  --bg-primary:    #000000;
+  --bg-secondary:  #111111;
+  --bg-tertiary:   #1c1c1c;
+  --bg-elevated:   #282828;
+  --bg-overlay:    rgba(0,0,0,0.75);
+  --fg-primary:    #f0f0f0;
+  --fg-secondary:  rgba(240,240,240,0.60);
+  --fg-tertiary:   rgba(240,240,240,0.35);
+  --fg-inverse:    #000000;
+  --accent:        #6d001a;
+  --accent-hover:  #8b0020;
+  --accent-muted:  #4a0012;
+  --accent-soft:   rgba(109,0,26,0.20);
+  --accent-glow:   rgba(109,0,26,0.35);
   --accent-fg:     #ffffff;
-
-  --border:        #2a2d3e;
-  --border-hover:  #3a3d4e;
-
-  --success:       #34d399;
-  --success-soft:  #064e3b;
+  --border:        rgba(255,255,255,0.12);
+  --border-hover:  rgba(255,255,255,0.22);
+  --border-accent: rgba(109,0,26,0.60);
+  --success:       #4ade80;
+  --success-soft:  rgba(74,222,128,0.12);
   --warning:       #fbbf24;
-  --warning-soft:  #78350f;
+  --warning-soft:  rgba(251,191,36,0.12);
   --error:         #f87171;
-  --error-soft:    #7f1d1d;
-
-  --shadow-card:  0 1px 2px 0 rgb(0 0 0 / 0.2);
-  --shadow-hover: 0 4px 12px 0 rgb(0 0 0 / 0.3);
-  --shadow-modal: 0 20px 60px -15px rgb(0 0 0 / 0.5);
+  --error-soft:    rgba(248,113,113,0.12);
+  --shadow-card:   0 1px 3px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);
+  --shadow-hover:  0 4px 16px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08);
+  --shadow-modal:  0 24px 64px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.08);
+  --shadow-glow:   0 0 20px rgba(109,0,26,0.3);
 }
 
-/* Fallback: OS preference */
-@media (prefers-color-scheme: dark) {
-  html:not(.light) {
-    --bg-primary:    #0f1117;
-    --bg-secondary:  #161822;
-    --bg-tertiary:   #1e2030;
-    --bg-overlay:    rgba(0, 0, 0, 0.6);
+/* Light mode (opt-in via .light class) */
+html.light {
+  --bg-primary:    #fafafa;
+  --bg-secondary:  #f4f4f5;
+  --bg-tertiary:   #e4e4e7;
+  --bg-overlay:    rgba(0, 0, 0, 0.4);
 
-    --fg-primary:    #e5e7eb;
-    --fg-secondary:  #9ca3af;
-    --fg-tertiary:   #6b7280;
-    --fg-inverse:    #0f172a;
+  --fg-primary:    #09090b;
+  --fg-secondary:  #52525b;
+  --fg-tertiary:   #a1a1aa;
+  --fg-inverse:    #ffffff;
 
-    --accent:        #8b5cf6;
-    --accent-hover:  #a78bfa;
-    --accent-soft:   #2e1065;
-    --accent-fg:     #ffffff;
+  --accent:        #6d001a;
+  --accent-hover:  #8a0020;
+  --accent-soft:   rgba(109, 0, 26, 0.08);
+  --accent-fg:     #ffffff;
 
-    --border:        #2a2d3e;
-    --border-hover:  #3a3d4e;
+  --border:        #e4e4e7;
+  --border-hover:  #d4d4d8;
 
-    --success:       #34d399;
-    --success-soft:  #064e3b;
-    --warning:       #fbbf24;
-    --warning-soft:  #78350f;
-    --error:         #f87171;
-    --error-soft:    #7f1d1d;
+  --success:       #16a34a;
+  --success-soft:  rgba(22,163,74,0.1);
+  --warning:       #d97706;
+  --warning-soft:  rgba(217,119,6,0.1);
+  --error:         #dc2626;
+  --error-soft:    rgba(220,38,38,0.1);
 
-    --shadow-card:  0 1px 2px 0 rgb(0 0 0 / 0.2);
-    --shadow-hover: 0 4px 12px 0 rgb(0 0 0 / 0.3);
-    --shadow-modal: 0 20px 60px -15px rgb(0 0 0 / 0.5);
-  }
+  --shadow-card:  0 1px 3px 0 rgb(0 0 0 / 0.08);
+  --shadow-hover: 0 4px 12px 0 rgb(0 0 0 / 0.1);
+  --shadow-modal: 0 20px 60px -15px rgb(0 0 0 / 0.2);
 }
 
 @theme inline {
   --color-bg-primary:    var(--bg-primary);
   --color-bg-secondary:  var(--bg-secondary);
   --color-bg-tertiary:   var(--bg-tertiary);
+  --color-bg-elevated:   var(--bg-elevated);
   --color-bg-overlay:    var(--bg-overlay);
   --color-fg-primary:    var(--fg-primary);
   --color-fg-secondary:  var(--fg-secondary);
@@ -127,10 +145,12 @@ html.dark {
   --color-fg-inverse:    var(--fg-inverse);
   --color-accent:        var(--accent);
   --color-accent-hover:  var(--accent-hover);
+  --color-accent-muted:  var(--accent-muted);
   --color-accent-soft:   var(--accent-soft);
   --color-accent-fg:     var(--accent-fg);
   --color-border:        var(--border);
   --color-border-hover:  var(--border-hover);
+  --color-border-accent: var(--border-accent);
   --color-success:       var(--success);
   --color-success-soft:  var(--success-soft);
   --color-warning:       var(--warning);
@@ -163,6 +183,28 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   Card utility — surface elevada sobre bg-primary
+   ═══════════════════════════════════════════════════════════ */
+
+.card {
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04);
+}
+
+.card:hover {
+  border-color: var(--border-hover);
+}
+
+.card-secondary {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* ═══════════════════════════════════════════════════════════
    Scrollbar
    ═══════════════════════════════════════════════════════════ */
 
@@ -173,6 +215,9 @@ body {
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover { background: var(--fg-tertiary); }
+
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 
 /* ═══════════════════════════════════════════════════════════
    Animations

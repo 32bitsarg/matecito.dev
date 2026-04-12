@@ -17,10 +17,10 @@ const EVENTS = [
 ]
 
 const EVENT_COLORS: Record<string, string> = {
-    '*':              'bg-violet-50 text-violet-700 border-violet-200',
-    'record.created': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    'record.updated': 'bg-amber-50 text-amber-700 border-amber-200',
-    'record.deleted': 'bg-red-50 text-red-700 border-red-200',
+    '*':              'bg-violet-900/20 text-violet-700 border-violet-800/40',
+    'record.created': 'bg-emerald-950/20 text-emerald-700 border-emerald-800/40',
+    'record.updated': 'bg-amber-950/20 text-amber-700 border-amber-800/40',
+    'record.deleted': 'bg-red-950/20 text-red-700 border-red-800/40',
 }
 
 type FormState = {
@@ -132,25 +132,25 @@ export default function WebhooksPage() {
 
             {/* Secret reveal banner (solo aparece una vez al crear) */}
             {newSecret && (
-                <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-                    <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-3 p-4 bg-amber-950/20 border border-amber-800/40 rounded-xl">
+                    <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-amber-800">Guardá este secret ahora — no se volverá a mostrar</p>
                         <div className="flex items-center gap-2 mt-2">
-                            <code className="flex-1 bg-[var(--bg-primary)] border border-amber-200 rounded-lg px-3 py-2 text-xs font-mono text-[var(--fg-primary)] truncate">
+                            <code className="flex-1 bg-[var(--bg-primary)] border border-amber-800/40 rounded-lg px-3 py-2 text-xs font-mono text-[var(--fg-primary)] truncate">
                                 {showSecret ? newSecret : '•'.repeat(newSecret.length)}
                             </code>
                             <button onClick={() => setShowSecret(v => !v)}
-                                className="p-2 border border-amber-200 bg-white rounded-lg text-amber-600 hover:bg-amber-50 transition-all">
+                                className="p-2 border border-amber-800/40 bg-[var(--bg-tertiary)] rounded-lg text-amber-400 hover:bg-amber-950/20 transition-all">
                                 {showSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                             </button>
                             <button onClick={() => copy(newSecret)}
-                                className="p-2 border border-amber-200 bg-white rounded-lg text-amber-600 hover:bg-amber-50 transition-all">
+                                className="p-2 border border-amber-800/40 bg-[var(--bg-tertiary)] rounded-lg text-amber-400 hover:bg-amber-950/20 transition-all">
                                 <Copy className="w-4 h-4" />
                             </button>
                         </div>
                     </div>
-                    <button onClick={() => setNewSecret(null)} className="text-amber-400 hover:text-amber-600 transition-colors">
+                    <button onClick={() => setNewSecret(null)} className="text-amber-400 hover:text-amber-400 transition-colors">
                         <X className="w-4 h-4" />
                     </button>
                 </div>
@@ -158,7 +158,7 @@ export default function WebhooksPage() {
 
             {/* Create form */}
             {showForm && (
-                <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] p-6 space-y-5">
+                <div className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] p-6 space-y-5">
                     <div className="flex items-center justify-between">
                         <h3 className="font-bold text-[var(--fg-primary)]">Nuevo webhook</h3>
                         <button onClick={() => setShowForm(false)} className="p-1.5 hover:bg-[var(--bg-secondary)] rounded-lg transition-all">
@@ -221,13 +221,13 @@ export default function WebhooksPage() {
                     <RefreshCw className="w-6 h-6 animate-spin text-violet-400" />
                 </div>
             ) : webhooks.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 bg-[var(--bg-primary)] rounded-xl border border-dashed border-[var(--border)]">
+                <div className="flex flex-col items-center justify-center py-20 bg-[var(--bg-tertiary)] rounded-xl border border-dashed border-[var(--border)]">
                     <Webhook className="w-10 h-10 text-[var(--fg-tertiary)] mb-3" />
                     <p className="text-sm text-[var(--fg-tertiary)] font-medium">Sin webhooks configurados</p>
                     <p className="text-xs text-[var(--fg-tertiary)] mt-1">Creá uno para recibir notificaciones cuando cambian tus datos</p>
                 </div>
             ) : (
-                <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] overflow-hidden divide-y divide-[var(--border)]">
+                <div className="bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] overflow-hidden divide-y divide-[var(--border)]">
                     {webhooks.map(wh => (
                         <div key={wh.id} className="group flex items-center gap-4 px-5 py-4 hover:bg-[var(--bg-secondary)] transition-colors">
                             {/* Toggle */}
@@ -259,13 +259,13 @@ export default function WebhooksPage() {
                             <div className="flex items-center gap-3 shrink-0">
                                 <span className={cn("text-[9px] font-bold uppercase px-2 py-1 rounded-lg border",
                                     wh.enabled
-                                        ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+                                        ? "bg-emerald-950/20 text-emerald-400 border-emerald-800/40"
                                         : "bg-[var(--bg-secondary)] text-[var(--fg-tertiary)] border-[var(--border)]")}>
                                     {wh.enabled ? 'Activo' : 'Inactivo'}
                                 </span>
                                 <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button onClick={() => handleDelete(wh)}
-                                        className="p-2 rounded-xl hover:bg-red-50 text-[var(--fg-tertiary)] hover:text-red-500 transition-all">
+                                        className="p-2 rounded-xl hover:bg-red-950/20 text-[var(--fg-tertiary)] hover:text-red-500 transition-all">
                                         <Trash2 className="w-4 h-4" />
                                     </button>
                                 </div>

@@ -381,12 +381,12 @@ export function ProjectProvider({
     }, [pApi])
 
     const fetchProjectSettings = useCallback(async () => {
-        return await pApi.get('/settings')
-    }, [pApi])
+        return await api.get(`/api/v2/project/${projectId}/settings`)
+    }, [projectId])
 
     const updateProjectSettings = useCallback(async (data: any) => {
-        return await pApi.patch('/settings', data)
-    }, [pApi])
+        return await api.patch(`/api/v2/project/${projectId}/settings`, data)
+    }, [projectId])
 
     const fetchOAuthProviders = useCallback(async () => {
         const res = await pApi.get('/auth/oauth-providers')

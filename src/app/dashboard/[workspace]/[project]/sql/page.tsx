@@ -67,7 +67,7 @@ export default function SqlEditorPage() {
     }
 
     return (
-        <div className="flex flex-col h-[calc(100vh-4rem)] animate-in fade-in duration-500">
+        <div className="flex flex-col h-[calc(100vh-13rem)] animate-in fade-in duration-500">
 
             {/* Header */}
             <div className="flex items-center justify-between pb-4 mb-4 border-b border-[var(--border)] shrink-0">
@@ -90,7 +90,7 @@ export default function SqlEditorPage() {
                         : <Play className="w-4 h-4" />
                     }
                     Ejecutar
-                    <span className="text-[9px] font-mono bg-violet-500/60 px-1.5 py-0.5 rounded">⌘↵</span>
+                    <span className="text-[9px] font-mono bg-violet-500/50 px-1.5 py-0.5 rounded">⌘↵</span>
                 </button>
             </div>
 
@@ -136,11 +136,11 @@ export default function SqlEditorPage() {
                 )}
 
                 {error && !loading && (
-                    <div className="bg-red-50 border border-red-200 rounded-xl p-5 flex items-start gap-3">
+                    <div className="bg-red-950/20 border border-red-800/40 rounded-xl p-5 flex items-start gap-3">
                         <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
                         <div>
                             <p className="text-sm font-bold text-red-700 mb-1">Error en la consulta</p>
-                            <pre className="text-xs font-mono text-red-600 whitespace-pre-wrap">{error}</pre>
+                            <pre className="text-xs font-mono text-red-400 whitespace-pre-wrap">{error}</pre>
                         </div>
                     </div>
                 )}
@@ -156,7 +156,7 @@ export default function SqlEditorPage() {
                                         {result.row_count ?? result.rows?.length ?? 0} fila{(result.row_count ?? result.rows?.length ?? 0) !== 1 ? 's' : ''}
                                     </span>
                                     {result.truncated && (
-                                        <span className="text-[10px] text-amber-600 font-semibold bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md">
+                                        <span className="text-[10px] text-amber-400 font-semibold bg-amber-950/20 border border-amber-800/40 px-2 py-0.5 rounded-md">
                                             truncado a 500 filas
                                         </span>
                                     )}
@@ -180,7 +180,7 @@ export default function SqlEditorPage() {
 
                         {/* Table */}
                         {['CREATE', 'DROP', 'ALTER', 'INSERT', 'UPDATE', 'DELETE'].includes(result.command) && result.rows?.length === 0 ? (
-                            <div className="flex items-center justify-center flex-1 text-emerald-600 text-sm font-semibold gap-2">
+                            <div className="flex items-center justify-center flex-1 text-emerald-400 text-sm font-semibold gap-2">
                                 <Check className="w-4 h-4" />
                                 {result.command === 'CREATE' && 'Tabla creada correctamente'}
                                 {result.command === 'DROP' && 'Tabla eliminada correctamente'}
