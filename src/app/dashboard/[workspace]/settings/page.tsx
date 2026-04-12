@@ -62,38 +62,38 @@ export default function WorkspaceSettingsPage() {
     return (
         <div className="max-w-2xl space-y-8 pb-20">
             {/* Header */}
-            <div className="flex items-center gap-4 pb-6 border-b border-slate-100">
-                <Link href="/dashboard" className="p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-400">
+            <div className="flex items-center gap-4 pb-6 border-b border-[var(--border)]">
+                <Link href="/dashboard" className="p-2 hover:bg-[var(--bg-secondary)] rounded-xl transition-colors text-[var(--fg-tertiary)]">
                     <ArrowLeft className="w-5 h-5" />
                 </Link>
                 <div>
-                    <h1 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
-                        <Settings className="w-6 h-6 text-violet-600" />
+                    <h1 className="text-2xl font-extrabold text-[var(--fg-primary)] flex items-center gap-2">
+                        <Settings className="w-6 h-6 text-[var(--accent)]" />
                         Ajustes del Workspace
                     </h1>
-                    <p className="text-sm text-slate-400">Gestiona la identidad y seguridad de este espacio.</p>
+                    <p className="text-sm text-[var(--fg-tertiary)]">Gestiona la identidad y seguridad de este espacio.</p>
                 </div>
             </div>
 
             {/* General Settings */}
-            <section className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-6">
+            <section className="bg-[var(--bg-primary)] border border-[var(--border)] rounded-xl p-6 space-y-6">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-violet-50 flex items-center justify-center">
-                        <Save className="w-5 h-5 text-violet-600" />
+                    <div className="w-10 h-10 rounded-xl bg-[var(--accent-soft)] flex items-center justify-center">
+                        <Save className="w-5 h-5 text-[var(--accent)]" />
                     </div>
-                    <h2 className="font-bold text-slate-800 text-lg">General</h2>
+                    <h2 className="font-bold text-[var(--fg-primary)] text-lg">General</h2>
                 </div>
 
                 <form onSubmit={handleSave} className="space-y-4">
                     <div className="space-y-2">
-                        <label className="text-xs font-bold text-slate-500 ml-1 uppercase tracking-wider">Nombre del Workspace</label>
+                        <label className="text-xs font-bold text-[var(--fg-secondary)] ml-1 uppercase tracking-wider">Nombre del Workspace</label>
                         <input
                             type="text"
                             disabled={!canRename}
                             value={name}
                             onChange={e => setName(e.target.value)}
                             placeholder="Mi Gran Equipo"
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium outline-none focus:ring-4 focus:ring-violet-500/10 focus:border-violet-400 focus:bg-white transition-all disabled:opacity-50"
+                            className="w-full px-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl text-sm font-medium outline-none focus:ring-4 focus:ring-violet-500/10 focus:border-violet-400 focus:bg-[var(--bg-primary)] transition-all disabled:opacity-50"
                         />
                         {!canRename && (
                             <p className="text-[10px] text-amber-600 font-medium ml-1">
@@ -106,7 +106,7 @@ export default function WorkspaceSettingsPage() {
                         <button
                             type="submit"
                             disabled={isSaving || name === currentWorkspace.name}
-                            className="flex items-center gap-2 px-6 py-3 bg-violet-600 text-white text-sm font-bold rounded-2xl hover:bg-violet-700 disabled:opacity-50 transition-all shadow-lg shadow-violet-100"
+                            className="flex items-center gap-2 px-6 py-3 bg-[var(--accent)] text-white text-sm font-bold rounded-xl hover:bg-violet-700 disabled:opacity-50 transition-all"
                         >
                             {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                             Guardar Cambios
@@ -117,24 +117,24 @@ export default function WorkspaceSettingsPage() {
 
             {/* Danger Zone */}
             {canDelete && (
-                <section className="bg-red-50/30 border border-red-100 rounded-3xl p-6 space-y-6">
+                <section className="bg-red-50/30 border border-red-100 rounded-xl p-6 space-y-6">
                     <div className="flex items-center gap-3 text-red-600">
-                        <div className="w-10 h-10 rounded-2xl bg-red-100 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center">
                             <AlertTriangle className="w-5 h-5" />
                         </div>
                         <h2 className="font-bold text-lg text-red-900">Zona de Peligro</h2>
                     </div>
 
-                    <div className="bg-white border border-red-200 rounded-2xl p-5 space-y-4">
+                    <div className="bg-[var(--bg-primary)] border border-red-200 rounded-xl p-5 space-y-4">
                         <div>
-                            <h3 className="font-bold text-slate-900">Eliminar este Workspace</h3>
-                            <p className="text-sm text-slate-500 leading-relaxed">
-                                Esta acción es permanente. Se eliminarán todos los proyectos, bases de datos, registros y configuraciones asociadas a <span className="font-bold text-slate-900">"{currentWorkspace.name}"</span>. 
+                            <h3 className="font-bold text-[var(--fg-primary)]">Eliminar este Workspace</h3>
+                            <p className="text-sm text-[var(--fg-secondary)] leading-relaxed">
+                                Esta acción es permanente. Se eliminarán todos los proyectos, bases de datos, registros y configuraciones asociadas a <span className="font-bold text-[var(--fg-primary)]">"{currentWorkspace.name}"</span>.
                             </p>
                         </div>
 
                         <div className="space-y-3 pt-2">
-                            <p className="text-xs text-slate-400">Para confirmar, escribí el slug del workspace: <span className="font-mono font-bold text-red-600 select-all">{currentWorkspace.slug}</span></p>
+                            <p className="text-xs text-[var(--fg-tertiary)]">Para confirmar, escribí el slug del workspace: <span className="font-mono font-bold text-red-600 select-all">{currentWorkspace.slug}</span></p>
                             <input
                                 type="text"
                                 value={deleteConfirm}
@@ -142,11 +142,11 @@ export default function WorkspaceSettingsPage() {
                                 placeholder="Escribí el slug aquí..."
                                 className="w-full px-4 py-3 border-2 border-red-100 rounded-xl text-sm font-mono outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/5 transition-all"
                             />
-                            
+
                             <button
                                 onClick={handleDelete}
                                 disabled={deleteConfirm !== currentWorkspace.slug || isDeleting}
-                                className="w-full flex items-center justify-center gap-2 py-4 bg-red-600 text-white font-bold rounded-2xl hover:bg-red-700 disabled:bg-slate-200 disabled:text-slate-400 transition-all active:scale-[0.98] shadow-xl shadow-red-100"
+                                className="w-full flex items-center justify-center gap-2 py-4 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 disabled:bg-[var(--border)] disabled:text-[var(--fg-tertiary)] transition-all active:scale-[0.98]"
                             >
                                 {isDeleting ? (
                                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -163,7 +163,7 @@ export default function WorkspaceSettingsPage() {
             )}
 
             {!canDelete && (
-                <div className="p-4 bg-slate-100 rounded-2xl flex items-center gap-3 text-slate-500 opacity-60">
+                <div className="p-4 bg-[var(--bg-secondary)] rounded-xl flex items-center gap-3 text-[var(--fg-secondary)] opacity-60">
                     <AlertTriangle className="w-5 h-5 shrink-0" />
                     <p className="text-xs font-medium">Solo el dueño (Owner) tiene permisos para eliminar o realizar ajustes críticos en el workspace.</p>
                 </div>

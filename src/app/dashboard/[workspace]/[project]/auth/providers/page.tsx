@@ -20,9 +20,9 @@ const SUPPORTED_PROVIDERS = [
         id: 'github',
         name: 'GitHub',
         icon: Github,
-        color: 'text-slate-800',
-        bg: 'bg-slate-100',
-        border: 'border-slate-200',
+        color: 'text-[var(--fg-primary)]',
+        bg: 'bg-[var(--bg-secondary)]',
+        border: 'border-[var(--border)]',
         docsUrl: 'https://github.com/settings/developers',
     },
 ]
@@ -116,13 +116,13 @@ export default function ProvidersPage() {
     return (
         <div className="max-w-2xl space-y-6 animate-in fade-in duration-500 pb-16">
             {/* Header */}
-            <div className="flex items-center gap-3 pb-4 border-b border-slate-200">
-                <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center">
-                    <Key className="w-5 h-5 text-violet-600" />
+            <div className="flex items-center gap-3 pb-4 border-b border-[var(--border)]">
+                <div className="w-10 h-10 rounded-xl bg-[var(--accent-soft)] flex items-center justify-center">
+                    <Key className="w-5 h-5 text-[var(--accent)]" />
                 </div>
                 <div>
-                    <h1 className="text-2xl font-extrabold text-slate-900">OAuth Providers</h1>
-                    <p className="text-xs text-slate-400">Login social para los usuarios de tu proyecto</p>
+                    <h1 className="text-2xl font-extrabold text-[var(--fg-primary)]">OAuth Providers</h1>
+                    <p className="text-xs text-[var(--fg-tertiary)]">Login social para los usuarios de tu proyecto</p>
                 </div>
             </div>
 
@@ -135,18 +135,18 @@ export default function ProvidersPage() {
                 return (
                     <div key={meta.id}
                         className={cn(
-                            "bg-white rounded-2xl border shadow-sm overflow-hidden transition-all",
-                            p.enabled ? "border-violet-200" : "border-slate-200"
+                            "bg-[var(--bg-primary)] rounded-xl border overflow-hidden transition-all",
+                            p.enabled ? "border-[var(--border)]" : "border-[var(--border)]"
                         )}>
                         {/* Card header */}
                         <div className={cn("flex items-center justify-between px-6 py-4 border-b",
-                            p.enabled ? "border-violet-100 bg-violet-50/40" : "border-slate-100 bg-slate-50/40")}>
+                            p.enabled ? "border-[var(--border)] bg-[var(--accent-soft)]" : "border-[var(--border)] bg-[var(--bg-secondary)]")}>
                             <div className="flex items-center gap-3">
                                 <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center border", meta.bg, meta.border)}>
                                     <Icon className={cn("w-4 h-4", meta.color)} />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-bold text-slate-900">{meta.name}</p>
+                                    <p className="text-sm font-bold text-[var(--fg-primary)]">{meta.name}</p>
                                     {p.saved && (
                                         <div className="flex items-center gap-1 text-[10px] text-emerald-600 font-semibold">
                                             <CheckCircle2 className="w-3 h-3" /> Configurado
@@ -157,7 +157,7 @@ export default function ProvidersPage() {
                             <div className="flex items-center gap-2">
                                 {p.saved && (
                                     <button onClick={() => handleDelete(meta.id)} disabled={isDeleting}
-                                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50">
+                                        className="p-2 text-[var(--fg-tertiary)] hover:text-red-500 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50">
                                         {isDeleting ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                                     </button>
                                 )}
@@ -165,7 +165,7 @@ export default function ProvidersPage() {
                                     <input type="checkbox" checked={p.enabled}
                                         onChange={e => update(meta.id, { enabled: e.target.checked })}
                                         className="sr-only peer" />
-                                    <div className="w-10 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-violet-600" />
+                                    <div className="w-10 h-5 bg-[var(--border)] rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[var(--bg-primary)] after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--accent)]" />
                                 </label>
                             </div>
                         </div>
@@ -173,26 +173,26 @@ export default function ProvidersPage() {
                         {/* Form */}
                         <div className="px-6 py-5 space-y-4">
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Client ID</label>
+                                <label className="text-[10px] font-bold text-[var(--fg-secondary)] uppercase tracking-widest">Client ID</label>
                                 <input
                                     type="text" value={p.client_id}
                                     onChange={e => update(meta.id, { client_id: e.target.value })}
                                     placeholder={`Client ID de ${meta.name}`}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-mono text-slate-800 focus:border-violet-400 focus:bg-white outline-none transition-all"
+                                    className="w-full bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-xs font-mono text-[var(--fg-primary)] focus:border-violet-400 focus:bg-[var(--bg-primary)] outline-none transition-all"
                                 />
                             </div>
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                                    Client Secret {p.saved && <span className="normal-case text-slate-400">(dejar vacío para mantener el actual)</span>}
+                                <label className="text-[10px] font-bold text-[var(--fg-secondary)] uppercase tracking-widest">
+                                    Client Secret {p.saved && <span className="normal-case text-[var(--fg-tertiary)]">(dejar vacío para mantener el actual)</span>}
                                 </label>
                                 <div className="relative">
                                     <input
                                         type="password" value={p.client_secret}
                                         onChange={e => update(meta.id, { client_secret: e.target.value })}
                                         placeholder={p.saved ? '••••••••••••••••' : `Client Secret de ${meta.name}`}
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 pr-10 text-xs text-slate-800 focus:border-violet-400 focus:bg-white outline-none transition-all"
+                                        className="w-full bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 pr-10 text-xs text-[var(--fg-primary)] focus:border-violet-400 focus:bg-[var(--bg-primary)] outline-none transition-all"
                                     />
-                                    <Lock className="absolute right-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-300" />
+                                    <Lock className="absolute right-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--fg-tertiary)]" />
                                 </div>
                             </div>
 
@@ -213,7 +213,7 @@ export default function ProvidersPage() {
 
                             <div className="flex justify-end pt-1">
                                 <button onClick={() => handleSave(meta.id)} disabled={isSaving}
-                                    className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 text-white text-xs font-bold rounded-xl hover:bg-violet-700 transition-all disabled:opacity-50">
+                                    className="flex items-center gap-2 px-5 py-2.5 bg-[var(--accent)] text-white text-xs font-bold rounded-xl hover:bg-violet-700 transition-all disabled:opacity-50">
                                     {isSaving ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                                     Guardar {meta.name}
                                 </button>
@@ -224,9 +224,9 @@ export default function ProvidersPage() {
             })}
 
             {/* Uso en el SDK */}
-            <div className="bg-slate-900 rounded-2xl p-5 space-y-2">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Uso en el SDK</p>
-                <pre className="text-xs font-mono text-slate-300 leading-relaxed">{`// Iniciar OAuth (redirige al provider)
+            <div className="bg-[var(--bg-tertiary)] rounded-xl p-5 space-y-2">
+                <p className="text-xs font-bold text-[var(--fg-tertiary)] uppercase tracking-widest">Uso en el SDK</p>
+                <pre className="text-xs font-mono text-[var(--fg-tertiary)] leading-relaxed">{`// Iniciar OAuth (redirige al provider)
 const url = db.auth.getOAuthUrl('google', 'https://miapp.com/callback')
 window.location.href = url
 

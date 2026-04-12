@@ -18,7 +18,7 @@ const ACCESS_OPTIONS = [
     { value: 'public',  label: 'Público',     icon: Unlock, color: 'text-red-600',   bg: 'bg-red-50',   border: 'border-red-200',   desc: 'Sin autenticación' },
     { value: 'auth',    label: 'Autenticado',  icon: Users,  color: 'text-blue-600',  bg: 'bg-blue-50',  border: 'border-blue-200',  desc: 'Usuarios logueados' },
     { value: 'service', label: 'Service Key',  icon: Key,    color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-200', desc: 'Solo server-side' },
-    { value: 'nobody',  label: 'Bloqueado',    icon: Lock,   color: 'text-slate-400', bg: 'bg-slate-50', border: 'border-slate-200', desc: 'Deshabilitado' },
+    { value: 'nobody',  label: 'Bloqueado',    icon: Lock,   color: 'text-[var(--fg-tertiary)]', bg: 'bg-[var(--bg-secondary)]', border: 'border-[var(--border)]', desc: 'Deshabilitado' },
 ]
 
 // localPerms: Record<opKey, { access, filter_rule }>
@@ -102,18 +102,18 @@ export default function SecurityPage() {
     return (
         <div className="space-y-6 animate-in fade-in duration-500 pb-16">
             {/* Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+            <div className="flex items-center justify-between pb-4 border-b border-[var(--border)]">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center">
-                        <Shield className="w-5 h-5 text-violet-600" />
+                    <div className="w-10 h-10 rounded-xl bg-[var(--accent-soft)] flex items-center justify-center">
+                        <Shield className="w-5 h-5 text-[var(--accent)]" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-extrabold text-slate-900">Permisos de API</h1>
-                        <p className="text-xs text-slate-400">Controla quién puede acceder a cada colección y aplica filtros por usuario</p>
+                        <h1 className="text-2xl font-extrabold text-[var(--fg-primary)]">Permisos de API</h1>
+                        <p className="text-xs text-[var(--fg-tertiary)]">Controla quién puede acceder a cada colección y aplica filtros por usuario</p>
                     </div>
                 </div>
                 <button onClick={handleSave} disabled={saving || !selectedCol}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 text-white text-sm font-bold rounded-xl hover:bg-violet-700 transition-all disabled:opacity-50 shadow-sm shadow-violet-200">
+                    className="flex items-center gap-2 px-5 py-2.5 bg-[var(--accent)] text-white text-sm font-bold rounded-xl hover:bg-violet-700 transition-all disabled:opacity-50">
                     {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                     Guardar
                 </button>
@@ -122,12 +122,12 @@ export default function SecurityPage() {
             <div className="flex gap-6">
                 {/* Collection list */}
                 <div className="w-56 shrink-0 space-y-2">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Colecciones</p>
-                    <div className="bg-white rounded-2xl border border-slate-200 p-2 space-y-0.5">
+                    <p className="text-[10px] font-bold text-[var(--fg-tertiary)] uppercase tracking-widest px-1">Colecciones</p>
+                    <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] p-2 space-y-0.5">
                         {loading ? (
-                            <div className="p-4 text-center text-xs text-slate-400">Cargando...</div>
+                            <div className="p-4 text-center text-xs text-[var(--fg-tertiary)]">Cargando...</div>
                         ) : collections.length === 0 ? (
-                            <div className="p-4 text-center text-xs text-slate-400">Sin colecciones</div>
+                            <div className="p-4 text-center text-xs text-[var(--fg-tertiary)]">Sin colecciones</div>
                         ) : (
                             collections.map(col => {
                                 const colPerms = perms[col.name] ?? defaultPerms()
@@ -136,8 +136,8 @@ export default function SecurityPage() {
                                     <button key={col.name} onClick={() => selectCollection(col.name)}
                                         className={cn("w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
                                             selectedCol === col.name
-                                                ? "bg-violet-50 text-violet-700 font-semibold"
-                                                : "text-slate-600 hover:bg-slate-50 hover:text-slate-900")}>
+                                                ? "bg-[var(--accent-soft)] text-[var(--accent)] font-semibold"
+                                                : "text-[var(--fg-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--fg-primary)]")}>
                                         <span className="truncate">{col.name}</span>
                                         {hasWarning && <span className="w-2 h-2 rounded-full bg-red-500 shrink-0 ml-2" />}
                                     </button>
@@ -150,18 +150,18 @@ export default function SecurityPage() {
                 {/* Permissions editor */}
                 <div className="flex-1 min-w-0">
                     {!selectedCol ? (
-                        <div className="bg-white rounded-2xl border border-slate-200 p-16 text-center">
+                        <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] p-16 text-center">
                             <Shield className="w-10 h-10 text-slate-200 mx-auto mb-3" />
-                            <p className="text-sm text-slate-400">Seleccioná una colección</p>
+                            <p className="text-sm text-[var(--fg-tertiary)]">Seleccioná una colección</p>
                         </div>
                     ) : (
-                        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                        <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] overflow-hidden">
+                            <div className="px-6 py-4 border-b border-[var(--border)] flex items-center justify-between">
                                 <div>
-                                    <h2 className="font-bold text-slate-900">
-                                        Permisos: <span className="text-violet-600 font-mono">{selectedCol}</span>
+                                    <h2 className="font-bold text-[var(--fg-primary)]">
+                                        Permisos: <span className="text-[var(--accent)] font-mono">{selectedCol}</span>
                                     </h2>
-                                    <p className="text-xs text-slate-400 mt-0.5">Define acceso y filtros RLS por operación</p>
+                                    <p className="text-xs text-[var(--fg-tertiary)] mt-0.5">Define acceso y filtros RLS por operación</p>
                                 </div>
                                 {hasPublic && (
                                     <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg text-xs font-semibold text-red-600">
@@ -177,14 +177,14 @@ export default function SecurityPage() {
                                     const MetaIcon = meta.icon
                                     return (
                                         <div key={op.key} className="space-y-2">
-                                            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                            <div className="flex items-center justify-between p-4 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border)]">
                                                 <div className="flex items-center gap-3">
                                                     <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", meta.bg)}>
                                                         <MetaIcon className={cn("w-4 h-4", meta.color)} />
                                                     </div>
                                                     <div>
-                                                        <p className="text-sm font-semibold text-slate-800">{op.label}</p>
-                                                        <p className="text-[10px] font-mono text-slate-400">{op.desc}</p>
+                                                        <p className="text-sm font-semibold text-[var(--fg-primary)]">{op.label}</p>
+                                                        <p className="text-[10px] font-mono text-[var(--fg-tertiary)]">{op.desc}</p>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-1.5">
@@ -198,7 +198,7 @@ export default function SecurityPage() {
                                                                     "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all",
                                                                     current.access === opt.value
                                                                         ? `${opt.bg} ${opt.color} ${opt.border}`
-                                                                        : "bg-white text-slate-400 border-slate-200 hover:border-slate-300"
+                                                                        : "bg-[var(--bg-primary)] text-[var(--fg-tertiary)] border-[var(--border)] hover:border-slate-300"
                                                                 )}>
                                                                 <OptIcon className="w-3 h-3" />
                                                                 <span className="hidden sm:inline">{opt.label}</span>
@@ -226,8 +226,8 @@ export default function SecurityPage() {
                                 })}
 
                                 {/* RLS docs hint */}
-                                <div className="mt-2 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-500 space-y-1">
-                                    <p className="font-semibold text-slate-600">Variables disponibles en filtros RLS:</p>
+                                <div className="mt-2 p-3 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border)] text-xs text-[var(--fg-secondary)] space-y-1">
+                                    <p className="font-semibold text-[var(--fg-secondary)]">Variables disponibles en filtros RLS:</p>
                                     <p><code className="font-mono bg-slate-200 px-1 rounded">{'{{auth.id}}'}</code> — ID del usuario logueado</p>
                                     <p><code className="font-mono bg-slate-200 px-1 rounded">{'{{auth.email}}'}</code> — Email del usuario</p>
                                     <p><code className="font-mono bg-slate-200 px-1 rounded">{'{{auth.username}}'}</code> — Username del usuario</p>

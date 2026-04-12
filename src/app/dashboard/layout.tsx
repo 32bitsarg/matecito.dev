@@ -1,68 +1,74 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { isAuthenticated, clearToken } from '@/lib/api'
-import Sidebar from '@/components/sidebar'
+import { ActivityBar } from '@/components/layout/activity-bar'
+import { TopBar } from '@/components/layout/top-bar'
+import { CommandPalette } from '@/components/layout/command-palette'
+import { ErrorBoundary } from '@/components/ui/error-boundary'
+import NewProjectModal from '@/components/new-project-modal'
+import CreateWorkspaceModal from '@/components/create-workspace-modal'
+import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { Loader2 } from 'lucide-react'
 
-export default function DashboardLayout({
-    children,
-}: {
-    children: React.ReactNode
-}) {
-    const router = useRouter()
-    const [authorized, setAuthorized] = useState(false)
+function DashboardModals() {
+  const { currentWorkspace, refreshWorkspaces } = useWorkspace()
 
-    useEffect(() => {
-        const checkAuth = () => {
-            const isAuth = isAuthenticated()
-            
-            if (!isAuth) {
-                console.warn("[Layout Debug] Unauthorized session. Redirecting...");
-                
-                clearToken()
-                router.push('/login')
-                
-                // Si estamos en un estado atascado despues de un segundo, forzamos hard redirect
-                const backupTimer = setTimeout(() => {
-                    if (window.location.pathname.startsWith('/dashboard')) {
-                        console.log("[Layout Debug] Redirect stuck. Forcing hard redirect.");
-                        window.location.href = '/login';
-                    }
-                }, 1000);
+  return (
+    <>
+      <NewProjectModal
+        currentWorkspaceId={currentWorkspace?.id}
+        onCreated={() => {
+          if (currentWorkspace?.id) refreshWorkspaces()
+        }}
+      />
+      <CreateWorkspaceModal />
+    </>
+  )
+}
 
-                return () => clearTimeout(backupTimer);
-            } else {
-                setAuthorized(true)
-            }
-        };
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter()
+  const [checking, setChecking] = useState(true)
 
-        checkAuth();
-        
-        // El api helper no tiene un "onChange" como PB, así que simplemente verificamos en el montaje
-        // o podríamos agregar un listener a localStorage si fuera necesario.
-    }, [router])
+  useEffect(() => {
+    ;(async () => {
+      if (!isAuthenticated()) {
+        clearToken()
+        router.replace('/login')
+        return
+      }
+      setChecking(false)
+    })()
+  }, [router])
 
-    if (!authorized) {
-        return (
-            <div className="flex min-h-screen items-center justify-center bg-slate-50">
-                <div className="flex flex-col items-center gap-3">
-                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-500 border-t-transparent" />
-                    <span className="text-xs font-medium text-slate-400">Verificando sesión...</span>
-                </div>
-            </div>
-        )
-    }
-
-
+  if (checking) {
     return (
-        <div className="flex h-screen bg-slate-50 text-slate-900">
-            <Sidebar />
-            <main className="flex-1 overflow-y-auto">
-                <div className="mx-auto max-w-7xl p-8">
-                    {children}
-                </div>
-            </main>
+      <div className="h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)' }}>
+        <div className="text-center">
+          <Loader2 className="w-6 h-6 animate-spin mx-auto mb-3" style={{ color: 'var(--accent)' }} />
+          <p className="text-xs" style={{ color: 'var(--fg-tertiary)' }}>Verificando sesión...</p>
         </div>
+      </div>
     )
+  }
+
+  return (
+    <div className="h-screen flex flex-col" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--fg-primary)' }}>
+      <TopBar />
+      <div className="flex flex-1 overflow-hidden">
+        <ActivityBar />
+        <main className="flex-1 overflow-y-auto">
+          <ErrorBoundary>
+            <div className="max-w-6xl mx-auto p-5 lg:p-6 animate-fade-in">
+              {children}
+            </div>
+          </ErrorBoundary>
+        </main>
+      </div>
+      <CommandPalette />
+      <DashboardModals />
+    </div>
+  )
 }

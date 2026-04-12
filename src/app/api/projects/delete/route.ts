@@ -1,60 +1,41 @@
 import { NextResponse } from 'next/server'
 
+/**
+ * Proxy para eliminar proyectos.
+ * El servicio real usa ProjectService.delete() → /api/v1/platform/delete-p/:id
+ * El backend orquesta internamente la limpieza de infraestructura.
+ */
 export async function DELETE(req: Request) {
     try {
-        const { subdomain, projectId, token } = await req.json()
+        const { projectId, token } = await req.json()
 
-        // 1. Validaciones básicas
-        if (!subdomain || !projectId || !token) {
+        if (!projectId || !token) {
             return NextResponse.json({ error: 'Faltan campos obligatorios' }, { status: 400 })
         }
 
-        // 2. Intentar llamar al VPS para limpiar la infraestructura
-        // Nota: En una arquitectura final con backend propio, el backend debería orquestar esto.
-        // Por ahora mantenemos la lógica de Next.js como orquestador si el backend no lo hace.
-        try {
-            const vpsRes = await fetch(`${process.env.INTERNAL_API_URL}/delete`, {
+        const backendRes = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/platform/delete-p/${projectId}`,
+            {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-internal-token': process.env.INTERNAL_API_TOKEN!
+                    'Authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify({ subdomain })
-            })
-
-            const vpsData = await vpsRes.json()
-            
-            if (!vpsRes.ok || !vpsData.success) {
-                return NextResponse.json({ 
-                    error: vpsData.error || 'Fallo al eliminar en el VPS' 
-                }, { status: 500 })
             }
-        } catch (vpsErr: any) {
-            console.error('[Delete API] Error connecting to VPS:', vpsErr)
-            return NextResponse.json({ 
-                error: 'Error de conexión con el servidor de despliegue' 
-            }, { status: 500 })
-        }
-
-        // 3. Si el VPS limpió OK, procedemos a borrar el registro en el nuevo Backend
-        const backendRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/projects/${projectId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        })
+        )
 
         if (!backendRes.ok) {
-            const error = await backendRes.json()
-            throw new Error(error.message || 'Error al eliminar en el backend')
+            const error = await backendRes.json().catch(() => ({}))
+            return NextResponse.json(
+                { error: error.error || error.message || 'Error al eliminar proyecto' },
+                { status: backendRes.status }
+            )
         }
 
         return NextResponse.json({ success: true })
 
     } catch (err: any) {
-        console.error('[Delete API] Error general:', err)
+        console.error('[delete project proxy]', err)
         return NextResponse.json({ error: err.message }, { status: 500 })
     }
 }
-

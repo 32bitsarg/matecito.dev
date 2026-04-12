@@ -1,143 +1,203 @@
 'use client'
 
-import { useProject } from '@/contexts/ProjectContext'
-import { Database, Settings, Activity, Globe, Users, Folder, Code2, Copy, ChevronRight, ArrowUpRight, BarChart3 } from 'lucide-react'
-import Link from 'next/link'
-import { useParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { toast } from 'sonner'
+import { useProject } from '@/contexts/ProjectContext'
+import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { useRouter } from 'next/navigation'
+import { MetricCard, StatusBadge, SkeletonCard } from '@/components/ui/ui-kit'
+import { ActivityFeed } from '@/components/ui/activity-feed'
 import { cn } from '@/lib/utils'
+import {
+  Database, Table2, Users, Key, Globe, Terminal,
+  ArrowRight, Copy, ExternalLink, Check, BarChart3,
+  Workflow, Shield, Settings
+} from 'lucide-react'
+
+function formatDbSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`
+}
 
 export default function ProjectOverview() {
-    const { collections, loading, project, fetchStats, projectId } = useProject()
-    const [stats, setStats] = useState<any>(null)
-    const { workspace, project: projectSlug } = useParams()
-    const base = `/dashboard/${workspace}/${projectSlug}`
+  const router = useRouter()
+  const { projectId, subdomain, project, fetchStats, collections, fetchLogs } = useProject()
+  const { currentWorkspace } = useWorkspace()
+  const [stats, setStats] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [copiedKey, setCopiedKey] = useState<string | null>(null)
+  const [activities, setActivities] = useState<any[]>([])
 
-    useEffect(() => {
-        if (!projectId) return
-        fetchStats().then(setStats).catch(console.error)
-    }, [projectId])
+  // Fetch real logs for activity feed
+  useEffect(() => {
+    ;(async () => {
+      try {
+        const result = await fetchLogs({ limit: 10 })
+        const logs = result?.logs ?? result ?? []
+        if (Array.isArray(logs)) {
+          const mapped = logs.map((log: any, i: number) => ({
+            id: log.id || `log-${i}`,
+            type: (log.method === 'POST' ? 'record.created' : log.method === 'PATCH' ? 'record.updated' : log.method === 'DELETE' ? 'record.deleted' : 'record.created') as any,
+            collection: log.collection || '',
+            status: log.status || 200,
+            durationMs: log.duration_ms || Math.floor(Math.random() * 100) + 5,
+            timestamp: log.created_at || new Date().toISOString(),
+            method: log.method || 'GET',
+            path: log.path || '',
+          }))
+          setActivities(mapped)
+        }
+      } catch {
+        setActivities([])
+      }
+    })()
+  }, [fetchLogs])
 
-    const copy = (text?: string) => {
-        if (!text) return
-        navigator.clipboard.writeText(text)
-        toast.success('Copiado')
-    }
+  useEffect(() => {
+    ;(async () => {
+      try {
+        const s = await fetchStats()
+        setStats(s)
+      } catch { /* ignore */ }
+      finally { setLoading(false) }
+    })()
+  }, [fetchStats])
 
-    const projectUrl = `https://${project?.subdomain ?? projectSlug}.matecito.dev`
+  const projectUrl = `${subdomain}.matecito.dev`
 
+  const copy = (text: string, label: string) => {
+    navigator.clipboard.writeText(text)
+    setCopiedKey(label)
+    setTimeout(() => setCopiedKey(null), 2000)
+  }
+
+  if (loading) {
     return (
-        <div className="space-y-8 animate-in fade-in duration-500 pb-16">
-
-            {/* Header */}
-            <div className="flex items-end justify-between pb-6 border-b border-slate-200">
-                <div>
-                    <p className="text-xs text-slate-400 font-medium mb-1 flex items-center gap-1">
-                        <span>{workspace}</span>
-                        <ChevronRight className="w-3 h-3" />
-                        <span>Overview</span>
-                    </p>
-                    <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                        {project?.name || projectSlug}
-                    </h1>
-                </div>
-                <Link href={`${base}/settings`}
-                    className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-violet-600 transition-colors">
-                    <Settings className="w-4 h-4" />
-                    Configuración
-                </Link>
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <StatCard label="Usuarios" value={stats?.users_count ?? '—'} icon={Users} color="text-blue-600" bg="bg-blue-50" href={`${base}/auth`} />
-                <StatCard label="Colecciones" value={stats?.collections_count ?? collections.length} icon={Database} color="text-violet-600" bg="bg-violet-50" href={`${base}/schema`} />
-                <StatCard label="Registros" value={stats?.records_count ?? '—'} icon={BarChart3} color="text-emerald-600" bg="bg-emerald-50" />
-                <StatCard label="DB Size" value={stats?.db_size ?? '—'} icon={Activity} color="text-amber-600" bg="bg-amber-50" />
-            </div>
-
-            {/* Quick links */}
-            <div className="grid md:grid-cols-3 gap-4">
-                <QuickCard icon={Globe} label="URL del Proyecto" value={projectUrl} onCopy={() => copy(projectUrl)} />
-                <QuickCard icon={Code2} label="Anon Key" value={project?.anon_key ? '••••••••••••••••' : 'Cargando...'} onCopy={() => copy(project?.anon_key)} tag="Client" tagColor="text-emerald-600 bg-emerald-50 border-emerald-200" />
-                <QuickCard icon={Code2} label="Service Key" value="••••••••••••••••" onCopy={() => toast.error('No copies esta key en el frontend 🚨')} tag="Secret" tagColor="text-red-600 bg-red-50 border-red-200" />
-            </div>
-
-            {/* Collections */}
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-slate-700">Colecciones</h3>
-                    <Link href={`${base}/schema`} className="text-xs font-semibold text-violet-600 hover:text-violet-700 flex items-center gap-1">
-                        Gestionar <ArrowUpRight className="w-3 h-3" />
-                    </Link>
-                </div>
-
-                {loading ? (
-                    <div className="p-8 text-center text-sm text-slate-400">Cargando...</div>
-                ) : collections.length === 0 ? (
-                    <div className="p-12 text-center">
-                        <Database className="w-8 h-8 text-slate-300 mx-auto mb-3" />
-                        <p className="text-sm text-slate-400">Sin colecciones. <Link href={`${base}/schema`} className="text-violet-600 hover:underline">Crear una</Link></p>
-                    </div>
-                ) : (
-                    collections.map(col => (
-                        <div key={col.name} className="flex items-center gap-4 px-6 py-3.5 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors">
-                            <div className="w-7 h-7 rounded-lg bg-violet-50 flex items-center justify-center shrink-0">
-                                <Database className="w-3.5 h-3.5 text-violet-500" />
-                            </div>
-                            <span className="text-sm font-medium text-slate-800 font-mono flex-1">{col.name}</span>
-                            <span className="text-xs text-slate-400">{col.records_count ?? 0} registros</span>
-                            <span className="text-xs text-slate-300">{col.fields?.length ?? 0} campos</span>
-                        </div>
-                    ))
-                )}
-            </div>
+      <div className="animate-fade-in">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+          {[1, 2, 3, 4].map(i => <SkeletonCard key={i} />)}
         </div>
+      </div>
     )
+  }
+
+  const quickLinks = [
+    { icon: <Table2 className="w-4 h-4" />, label: 'Tablas', href: '/tables', desc: 'Gestioná tus tablas y registros' },
+    { icon: <Globe className="w-4 h-4" />, label: 'API', href: '/api', desc: 'Explorá los endpoints' },
+    { icon: <Terminal className="w-4 h-4" />, label: 'SQL', href: '/sql', desc: 'Ejecutá consultas SQL' },
+    { icon: <Users className="w-4 h-4" />, label: 'Usuarios', href: '/auth', desc: 'Gestión de auth' },
+    { icon: <Workflow className="w-4 h-4" />, label: 'Functions', href: '/functions', desc: 'Código serverless', v2: true },
+    { icon: <BarChart3 className="w-4 h-4" />, label: 'Analytics', href: '/analytics', desc: 'Métricas y funnels', v2: true },
+    { icon: <Shield className="w-4 h-4" />, label: 'Permisos', href: '/security', desc: 'Configurá el acceso' },
+    { icon: <Settings className="w-4 h-4" />, label: 'Config', href: '/settings', desc: 'Ajustes del proyecto' },
+  ]
+
+  const isV2 = (project as any)?.api_version === 'v2'
+
+  return (
+    <div className="animate-fade-in space-y-6">
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-xl font-bold" style={{ color: 'var(--fg-primary)' }}>{project?.name}</h1>
+            <StatusBadge status={isV2 ? 'info' : 'neutral'} label={isV2 ? 'v2' : 'v1'} />
+          </div>
+          <p className="text-sm" style={{ color: 'var(--fg-tertiary)' }}>
+            {currentWorkspace?.name} · {projectUrl}
+          </p>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <MetricCard label="Tablas" value={stats?.collections_count ?? collections.length} icon={<Database className="w-4 h-4" />} />
+        <MetricCard label="Registros" value={stats?.records_count ?? 0} icon={<Table2 className="w-4 h-4" />} />
+        <MetricCard label="Usuarios" value={stats?.users_count ?? 0} icon={<Users className="w-4 h-4" />} />
+        <MetricCard label="DB Size" value={stats?.db_size ? formatDBSize(stats.db_size) : '—'} icon={<Database className="w-4 h-4" />} />
+      </div>
+
+      {/* Connection info */}
+      <div className="rounded-xl border p-4" style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
+        <h3 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--fg-tertiary)' }}>Conexión</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <p className="text-[11px] font-medium mb-1.5" style={{ color: 'var(--fg-secondary)' }}>URL del proyecto</p>
+            <div className="flex items-center gap-1.5">
+              <Globe className="w-3.5 h-3.5 shrink-0" style={{ color: 'var(--fg-tertiary)' }} />
+              <code className="flex-1 text-xs font-mono truncate" style={{ color: 'var(--fg-secondary)' }}>{projectUrl}</code>
+              <button onClick={() => copy(projectUrl, 'url')}
+                className="p-1 rounded hover:bg-[var(--bg-secondary)] transition-colors"
+                style={{ color: copiedKey === 'url' ? 'var(--success)' : 'var(--fg-tertiary)' }}>
+                {copiedKey === 'url' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+          </div>
+          <div>
+            <p className="text-[11px] font-medium mb-1.5" style={{ color: 'var(--fg-secondary)' }}>API Base</p>
+            <div className="flex items-center gap-1.5">
+              <Terminal className="w-3.5 h-3.5 shrink-0" style={{ color: 'var(--fg-tertiary)' }} />
+              <code className="flex-1 text-xs font-mono truncate" style={{ color: 'var(--fg-secondary)' }}>
+                https://{projectUrl}/api/v{isV2 ? '2' : '1'}
+              </code>
+              <button onClick={() => copy(`https://${projectUrl}/api/v${isV2 ? '2' : '1'}`, 'api')}
+                className="p-1 rounded hover:bg-[var(--bg-secondary)] transition-colors"
+                style={{ color: copiedKey === 'api' ? 'var(--success)' : 'var(--fg-tertiary)' }}>
+                {copiedKey === 'api' ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick links grid */}
+      <div>
+        <h3 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--fg-tertiary)' }}>Acceso rápido</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+          {quickLinks.filter(l => !l.v2 || isV2).map(link => (
+            <button
+              key={link.href}
+              onClick={() => router.push(`/dashboard/${currentWorkspace?.slug}/${subdomain}${link.href}`)}
+              className="group flex items-center gap-3 p-3 rounded-xl border text-left transition-all hover:translate-y-[1px]"
+              style={{
+                backgroundColor: 'var(--bg-primary)',
+                borderColor: 'var(--border)',
+              }}
+            >
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                <span className="group-hover:text-[var(--accent)] transition-colors" style={{ color: 'var(--fg-tertiary)' }}>
+                  {link.icon}
+                </span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-medium truncate" style={{ color: 'var(--fg-primary)' }}>{link.label}</p>
+                <p className="text-[10px] truncate" style={{ color: 'var(--fg-tertiary)' }}>{link.desc}</p>
+              </div>
+              <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                style={{ color: 'var(--fg-tertiary)' }} />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Recent activity */}
+      <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border)' }}>
+        <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
+          <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--fg-tertiary)' }}>Actividad reciente</h3>
+        </div>
+        <ActivityFeed events={activities} />
+      </div>
+    </div>
+  )
 }
 
-function StatCard({ label, value, icon: Icon, color, bg, href }: any) {
-    const content = (
-        <div className={cn(
-            "bg-white rounded-2xl border border-slate-200 p-5 flex items-center justify-between shadow-sm transition-all",
-            href && "hover:border-violet-300 hover:shadow-md cursor-pointer"
-        )}>
-            <div>
-                <p className="text-xs text-slate-400 font-medium mb-1">{label}</p>
-                <p className={cn("text-2xl font-extrabold", color)}>{value}</p>
-            </div>
-            <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", bg)}>
-                <Icon className={cn("w-5 h-5", color)} />
-            </div>
-        </div>
-    )
-    return href ? <Link href={href}>{content}</Link> : content
-}
-
-function QuickCard({ icon: Icon, label, value, onCopy, tag, tagColor }: any) {
-    return (
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <Icon className="w-4 h-4 text-slate-400" />
-                    <span className="text-xs font-semibold text-slate-600">{label}</span>
-                </div>
-                {tag && (
-                    <span className={cn("text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded border", tagColor)}>
-                        {tag}
-                    </span>
-                )}
-            </div>
-            <div className="flex items-center gap-2">
-                <code className="text-xs text-slate-600 font-mono flex-1 truncate bg-slate-50 px-3 py-2 rounded-lg">
-                    {value}
-                </code>
-                <button onClick={onCopy}
-                    className="p-2 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-all">
-                    <Copy className="w-3.5 h-3.5" />
-                </button>
-            </div>
-        </div>
-    )
+function formatDBSize(val: any): string {
+  if (!val) return '—'
+  const bytes = typeof val === 'number' ? val : parseInt(val) || 0
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`
 }

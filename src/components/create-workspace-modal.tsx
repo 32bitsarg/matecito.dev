@@ -52,55 +52,61 @@ export default function CreateWorkspaceModal() {
     if (!isOpen) return null
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--accent)]/10 backdrop-blur-md animate-in fade-in duration-300">
-            <div className="w-full max-w-md bg-[var(--background)] border border-[var(--accent)]/10 rounded-3xl shadow-[0_32px_64px_-12px_rgba(1,57,26,0.15)] overflow-hidden animate-in zoom-in duration-500">
-                <div className="flex items-center justify-between p-8 border-b border-[var(--accent)]/5">
-                    <h2 className="text-2xl font-bold text-[var(--accent)]">Nuevo Workspace</h2>
-                    <button onClick={() => setIsOpen(false)} className="text-[var(--foreground)] opacity-40 hover:opacity-100 transition-all p-2 rounded-full hover:bg-[var(--accent)]/5">
-                        <X className="w-5 h-5" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in"
+            style={{ backgroundColor: 'var(--bg-overlay)', backdropFilter: 'blur(4px)' }}>
+            <div className="w-full max-w-md bg-[var(--bg-primary)] border rounded-2xl shadow-[var(--shadow-modal)] overflow-hidden animate-slide-up"
+                style={{ borderColor: 'var(--border)' }}>
+                <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: 'var(--border)' }}>
+                    <h2 className="text-xl font-bold" style={{ color: 'var(--accent)' }}>Nuevo Workspace</h2>
+                    <button onClick={() => setIsOpen(false)} className="opacity-40 hover:opacity-100 transition-all p-2 rounded-full hover:bg-[var(--bg-secondary)]">
+                        <X className="w-5 h-5" style={{ color: 'var(--fg-primary)' }} />
                     </button>
                 </div>
 
-                <form onSubmit={handleCreate} className="p-8 space-y-8">
-                    <div className="space-y-6">
-                        <div>
-                            <label className="block text-[10px] font-bold text-[var(--foreground)] opacity-40 uppercase tracking-[0.2em] mb-3 ml-1">
-                                Nombre del Workspace
-                            </label>
-                            <input
-                                type="text"
-                                required
-                                className="w-full rounded-full border border-[var(--accent)]/10 bg-[var(--accent)]/5 px-6 py-4 text-sm text-[var(--accent)] placeholder-[var(--foreground)]/30 outline-none transition-all focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]"
-                                placeholder="Mi Empresa"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                            />
-                        </div>
+                <form onSubmit={handleCreate} className="p-6 space-y-4">
+                    <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--fg-tertiary)' }}>
+                            Nombre
+                        </label>
+                        <input
+                            type="text"
+                            required
+                            className="w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition-all focus:border-[var(--accent)]"
+                            style={{
+                                backgroundColor: 'var(--bg-secondary)',
+                                borderColor: 'var(--border)',
+                                color: 'var(--fg-primary)',
+                            }}
+                            placeholder="Mi Empresa"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
+                    </div>
 
-                        <div>
-                            <label className="block text-[10px] font-bold text-[var(--foreground)] opacity-40 uppercase tracking-[0.2em] mb-3 ml-1">
-                                URL del Workspace (Slug)
-                            </label>
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    required
-                                    className="w-full rounded-full border border-[var(--accent)]/10 bg-[var(--accent)]/5 px-6 py-4 text-sm text-[var(--accent)] placeholder-[var(--foreground)]/30 outline-none transition-all focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)]"
-                                    placeholder="mi-empresa"
-                                    value={slug}
-                                    onChange={(e) => setSlug(slugify(e.target.value))}
-                                />
-                            </div>
-                            <p className="mt-3 text-[10px] font-mono text-[var(--foreground)] opacity-40 ml-1">
-                                Tu workspace será: <span className="text-[var(--accent)] font-bold">{slug || '...'}</span>
-                            </p>
-                        </div>
+                    <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--fg-tertiary)' }}>
+                            Slug
+                        </label>
+                        <input
+                            type="text"
+                            required
+                            className="w-full rounded-lg border px-4 py-2.5 text-sm font-mono outline-none transition-all focus:border-[var(--accent)]"
+                            style={{
+                                backgroundColor: 'var(--bg-secondary)',
+                                borderColor: 'var(--border)',
+                                color: 'var(--accent)',
+                            }}
+                            placeholder="mi-empresa"
+                            value={slug}
+                            onChange={(e) => setSlug(slugify(e.target.value))}
+                        />
                     </div>
 
                     <button
                         type="submit"
                         disabled={loading || !name}
-                        className="flex w-full items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-6 py-4 text-sm font-bold text-[var(--background)] transition-all hover:opacity-90 disabled:opacity-50 uppercase tracking-widest shadow-lg shadow-[var(--accent)]/20"
+                        className="flex w-full items-center justify-center gap-2 rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-50"
+                        style={{ backgroundColor: 'var(--accent)' }}
                     >
                         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Crear Workspace'}
                     </button>

@@ -110,14 +110,14 @@ export default function MembersPage() {
         <div className="max-w-3xl space-y-6 pb-16">
 
             {/* Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+            <div className="flex items-center justify-between pb-4 border-b border-[var(--border)]">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center">
-                        <Users className="w-5 h-5 text-violet-600" />
+                    <div className="w-10 h-10 rounded-xl bg-[var(--accent-soft)] flex items-center justify-center">
+                        <Users className="w-5 h-5 text-[var(--accent)]" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-extrabold text-slate-900">Equipo</h1>
-                        <p className="text-xs text-slate-400">
+                        <h1 className="text-2xl font-extrabold text-[var(--fg-primary)]">Equipo</h1>
+                        <p className="text-xs text-[var(--fg-tertiary)]">
                             {currentWorkspace?.name} · {members.length} miembro{members.length !== 1 ? 's' : ''}
                         </p>
                     </div>
@@ -125,7 +125,7 @@ export default function MembersPage() {
 
                 {canManage && (
                     <button onClick={() => setShowInvite(v => !v)}
-                        className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white text-sm font-semibold rounded-xl hover:bg-violet-700 transition-colors shadow-sm">
+                        className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white text-sm font-semibold rounded-xl hover:bg-violet-700 transition-colors">
                         <Plus className="w-4 h-4" />
                         Invitar
                     </button>
@@ -143,9 +143,9 @@ export default function MembersPage() {
 
 
             {/* Members list */}
-            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                <div className="px-5 py-3 border-b border-slate-100 bg-slate-50">
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Miembros</p>
+            <div className="bg-[var(--bg-primary)] border border-[var(--border)] rounded-xl overflow-hidden">
+                <div className="px-5 py-3 border-b border-[var(--border)] bg-[var(--bg-secondary)]">
+                    <p className="text-xs font-bold text-[var(--fg-tertiary)] uppercase tracking-widest">Miembros</p>
                 </div>
 
                 {loading ? (
@@ -154,11 +154,11 @@ export default function MembersPage() {
                     </div>
                 ) : members.length === 0 ? (
                     <div className="py-12 text-center">
-                        <Users className="w-8 h-8 text-slate-300 mx-auto mb-3" />
-                        <p className="text-sm text-slate-400">Sin miembros todavía</p>
+                        <Users className="w-8 h-8 text-[var(--fg-tertiary)] mx-auto mb-3" />
+                        <p className="text-sm text-[var(--fg-tertiary)]">Sin miembros todavía</p>
                     </div>
                 ) : (
-                    <ul className="divide-y divide-slate-50">
+                    <ul className="divide-y divide-[var(--border)]">
                         {members.map((member: any) => {
                             const role = member.role as Role
                             const meta = ROLE_META[role] ?? ROLE_META.viewer
@@ -169,7 +169,7 @@ export default function MembersPage() {
 
                             return (
                                 <li key={member.user_id}
-                                    className="flex items-center gap-4 px-5 py-4 hover:bg-slate-50 transition-colors">
+                                    className="flex items-center gap-4 px-5 py-4 hover:bg-[var(--bg-secondary)] transition-colors">
 
                                     {/* Avatar */}
                                     <div className="w-9 h-9 rounded-full bg-violet-100 flex items-center justify-center shrink-0 text-sm font-bold text-violet-700">
@@ -179,16 +179,16 @@ export default function MembersPage() {
                                     {/* Info */}
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
-                                            <p className="text-sm font-semibold text-slate-800 truncate">
+                                            <p className="text-sm font-semibold text-[var(--fg-primary)] truncate">
                                                 {member.name || member.username || 'Sin nombre'}
                                             </p>
                                             {isMe && (
-                                                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 font-semibold shrink-0">
+                                                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--bg-secondary)] text-[var(--fg-secondary)] font-semibold shrink-0">
                                                     Vos
                                                 </span>
                                             )}
                                         </div>
-                                        <p className="text-xs text-slate-400 truncate">{member.email}</p>
+                                        <p className="text-xs text-[var(--fg-tertiary)] truncate">{member.email}</p>
                                     </div>
 
                                     {/* Role selector or badge */}
@@ -226,7 +226,7 @@ export default function MembersPage() {
                                                 "p-1.5 rounded-lg transition-all text-xs",
                                                 removingId === member.user_id
                                                     ? "bg-red-500 text-white"
-                                                    : "text-slate-300 hover:text-red-500 hover:bg-red-50"
+                                                    : "text-[var(--fg-tertiary)] hover:text-red-500 hover:bg-red-50"
                                             )}>
                                             <Trash2 className="w-3.5 h-3.5" />
                                         </button>
@@ -240,23 +240,23 @@ export default function MembersPage() {
 
             {/* Pending Invites list */}
             {invites.length > 0 && (
-                <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                    <div className="px-5 py-3 border-b border-slate-100 bg-amber-50/30 flex items-center justify-between">
+                <div className="bg-[var(--bg-primary)] border border-[var(--border)] rounded-xl overflow-hidden">
+                    <div className="px-5 py-3 border-b border-[var(--border)] bg-amber-50/30 flex items-center justify-between">
                         <p className="text-[10px] font-bold text-amber-600 uppercase tracking-widest">Invitaciones Pendientes</p>
                         <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold">
                             {invites.length}
                         </span>
                     </div>
 
-                    <ul className="divide-y divide-slate-50">
+                    <ul className="divide-y divide-[var(--border)]">
                         {invites.map((invite: any) => (
-                            <li key={invite.email} className="flex items-center gap-4 px-5 py-3 hover:bg-slate-50 transition-colors opacity-80">
-                                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0 border border-slate-200">
-                                    <Mail className="w-4 h-4 text-slate-400" />
+                            <li key={invite.email} className="flex items-center gap-4 px-5 py-3 hover:bg-[var(--bg-secondary)] transition-colors opacity-80">
+                                <div className="w-8 h-8 rounded-full bg-[var(--bg-secondary)] flex items-center justify-center shrink-0 border border-[var(--border)]">
+                                    <Mail className="w-4 h-4 text-[var(--fg-tertiary)]" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-slate-700 truncate">{invite.email}</p>
-                                    <p className="text-[10px] text-slate-400">Rol: {invite.role}</p>
+                                    <p className="text-sm font-medium text-[var(--fg-secondary)] truncate">{invite.email}</p>
+                                    <p className="text-[10px] text-[var(--fg-tertiary)]">Rol: {invite.role}</p>
                                 </div>
                                 {canManage && (
                                     <button 
@@ -278,8 +278,8 @@ export default function MembersPage() {
             )}
 
             {/* Roles explanation */}
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-3">
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Roles</p>
+            <div className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+                <p className="text-xs font-bold text-[var(--fg-secondary)] uppercase tracking-widest">Roles</p>
                 <div className="grid grid-cols-2 gap-3">
                     {ROLES.map(role => {
                         const meta = ROLE_META[role]
@@ -296,7 +296,7 @@ export default function MembersPage() {
                                     <Icon className="w-2.5 h-2.5" />
                                     {meta.label}
                                 </span>
-                                <p className="text-xs text-slate-400">{descriptions[role]}</p>
+                                <p className="text-xs text-[var(--fg-tertiary)]">{descriptions[role]}</p>
                             </div>
                         )
                     })}

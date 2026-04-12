@@ -51,6 +51,7 @@ export const metadata: Metadata = {
 };
 
 import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 export default function RootLayout({
   children,
@@ -80,12 +81,14 @@ export default function RootLayout({
       <body
         className={`${clashDisplay.variable} ${commitMono.variable} flex min-h-screen flex-col font-sans antialiased`}
       >
-        <WorkspaceProvider>
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <ConditionalFooter />
-          <Toaster position="top-right" richColors theme="light" />
-        </WorkspaceProvider>
+        <ThemeProvider>
+          <WorkspaceProvider>
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <ConditionalFooter />
+            <Toaster position="top-right" richColors />
+          </WorkspaceProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

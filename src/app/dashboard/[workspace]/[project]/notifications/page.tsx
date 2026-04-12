@@ -65,26 +65,26 @@ function FirebaseConfigSection() {
     }
 
     if (loading) return (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-            <RefreshCw className="w-4 h-4 animate-spin text-slate-400" />
+        <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] p-5">
+            <RefreshCw className="w-4 h-4 animate-spin text-[var(--fg-tertiary)]" />
         </div>
     )
 
     return (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] overflow-hidden">
             <button
                 onClick={() => setExpanded(v => !v)}
-                className="w-full flex items-center justify-between px-5 py-4 hover:bg-slate-50 transition-colors">
+                className="w-full flex items-center justify-between px-5 py-4 hover:bg-[var(--bg-secondary)] transition-colors">
                 <div className="flex items-center gap-3">
                     <div className={cn(
                         "w-8 h-8 rounded-lg flex items-center justify-center",
-                        configured ? "bg-orange-100" : "bg-slate-100"
+                        configured ? "bg-orange-100" : "bg-[var(--bg-secondary)]"
                     )}>
-                        <Flame className={cn("w-4 h-4", configured ? "text-orange-500" : "text-slate-400")} />
+                        <Flame className={cn("w-4 h-4", configured ? "text-orange-500" : "text-[var(--fg-tertiary)]")} />
                     </div>
                     <div className="text-left">
-                        <p className="text-sm font-bold text-slate-800">Firebase / FCM</p>
-                        <p className="text-xs text-slate-400">
+                        <p className="text-sm font-bold text-[var(--fg-primary)]">Firebase / FCM</p>
+                        <p className="text-xs text-[var(--fg-tertiary)]">
                             {configured
                                 ? `Proyecto: ${projectId} · actualizado ${updatedAt ? new Date(updatedAt).toLocaleDateString('es-AR') : '—'}`
                                 : 'Sin configurar — las notificaciones no funcionarán'}
@@ -97,12 +97,12 @@ function FirebaseConfigSection() {
                             Activo
                         </span>
                     )}
-                    {expanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                    {expanded ? <ChevronUp className="w-4 h-4 text-[var(--fg-tertiary)]" /> : <ChevronDown className="w-4 h-4 text-[var(--fg-tertiary)]" />}
                 </div>
             </button>
 
             {expanded && (
-                <div className="border-t border-slate-100 p-5 space-y-4">
+                <div className="border-t border-[var(--border)] p-5 space-y-4">
                     {/* Instrucciones */}
                     <div className="flex items-start gap-3 p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-700">
                         <Info className="w-4 h-4 shrink-0 mt-0.5" />
@@ -118,15 +118,15 @@ function FirebaseConfigSection() {
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-600">
-                            Service Account JSON {configured && <span className="text-slate-400 font-normal">(pegá uno nuevo para reemplazar)</span>}
+                        <label className="text-xs font-semibold text-[var(--fg-secondary)]">
+                            Service Account JSON {configured && <span className="text-[var(--fg-tertiary)] font-normal">(pegá uno nuevo para reemplazar)</span>}
                         </label>
                         <textarea
                             value={jsonText}
                             onChange={e => setJsonText(e.target.value)}
                             rows={6}
                             placeholder={'{\n  "type": "service_account",\n  "project_id": "mi-proyecto",\n  "private_key": "-----BEGIN RSA PRIVATE KEY-----\\n..."\n}'}
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-700 outline-none focus:border-violet-400 focus:bg-white transition-all resize-none"
+                            className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl text-xs font-mono text-[var(--fg-secondary)] outline-none focus:border-violet-400 focus:bg-[var(--bg-primary)] transition-all resize-none"
                         />
                     </div>
 
@@ -142,7 +142,7 @@ function FirebaseConfigSection() {
                             <button
                                 onClick={handleDelete}
                                 disabled={deleting}
-                                className="flex items-center gap-2 px-4 py-2 bg-white border border-red-200 text-red-500 text-xs font-bold rounded-xl hover:bg-red-50 transition-all disabled:opacity-50">
+                                className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-primary)] border border-red-200 text-red-500 text-xs font-bold rounded-xl hover:bg-red-50 transition-all disabled:opacity-50">
                                 {deleting ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                                 Eliminar
                             </button>
@@ -202,19 +202,19 @@ export default function NotificationsPage() {
     return (
         <div className="max-w-2xl space-y-6 animate-in fade-in duration-500 pb-16">
             {/* Header */}
-            <div className="pb-4 border-b border-slate-200">
-                <h1 className="text-2xl font-extrabold text-slate-900">Notificaciones Push</h1>
-                <p className="text-xs text-slate-400 mt-1">Enviá notificaciones a tus usuarios vía Firebase Cloud Messaging.</p>
+            <div className="pb-4 border-b border-[var(--border)]">
+                <h1 className="text-2xl font-extrabold text-[var(--fg-primary)]">Notificaciones Push</h1>
+                <p className="text-xs text-[var(--fg-tertiary)] mt-1">Enviá notificaciones a tus usuarios vía Firebase Cloud Messaging.</p>
             </div>
 
             {/* Firebase config */}
             <FirebaseConfigSection />
 
             {/* Send form */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm divide-y divide-slate-100">
+            <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] divide-y divide-[var(--border)]">
                 {/* Target */}
                 <div className="p-5 space-y-3">
-                    <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">Destinatarios</p>
+                    <p className="text-xs font-bold text-[var(--fg-secondary)] uppercase tracking-wider">Destinatarios</p>
                     <div className="flex gap-2">
                         {([
                             { value: 'all',      label: 'Todos los usuarios', icon: Users },
@@ -224,8 +224,8 @@ export default function NotificationsPage() {
                                 className={cn(
                                     "flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold border transition-all",
                                     targetMode === opt.value
-                                        ? "bg-violet-600 text-white border-violet-600"
-                                        : "bg-white text-slate-500 border-slate-200 hover:border-violet-300"
+                                        ? "bg-[var(--accent)] text-white border-[var(--accent)]"
+                                        : "bg-[var(--bg-primary)] text-[var(--fg-secondary)] border-[var(--border)] hover:border-violet-300"
                                 )}>
                                 <opt.icon className="w-3.5 h-3.5" />
                                 {opt.label}
@@ -234,13 +234,13 @@ export default function NotificationsPage() {
                     </div>
                     {targetMode === 'specific' && (
                         <div className="space-y-1">
-                            <label className="text-xs text-slate-500">User IDs (uno por línea o separados por coma)</label>
+                            <label className="text-xs text-[var(--fg-secondary)]">User IDs (uno por línea o separados por coma)</label>
                             <textarea
                                 value={userIds}
                                 onChange={e => setUserIds(e.target.value)}
                                 rows={3}
                                 placeholder={"uuid-1\nuuid-2\nuuid-3"}
-                                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-700 outline-none focus:border-violet-400 focus:bg-white transition-all resize-none"
+                                className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl text-xs font-mono text-[var(--fg-secondary)] outline-none focus:border-violet-400 focus:bg-[var(--bg-primary)] transition-all resize-none"
                             />
                         </div>
                     )}
@@ -248,38 +248,38 @@ export default function NotificationsPage() {
 
                 {/* Message */}
                 <div className="p-5 space-y-4">
-                    <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">Mensaje</p>
+                    <p className="text-xs font-bold text-[var(--fg-secondary)] uppercase tracking-wider">Mensaje</p>
                     <div className="space-y-1">
-                        <label className="text-xs text-slate-500">Título <span className="text-red-400">*</span></label>
+                        <label className="text-xs text-[var(--fg-secondary)]">Título <span className="text-red-400">*</span></label>
                         <input value={title} onChange={e => setTitle(e.target.value)}
                             placeholder="Ej: ¡Nueva función disponible!"
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 outline-none focus:border-violet-400 focus:bg-white transition-all" />
+                            className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl text-sm text-[var(--fg-secondary)] outline-none focus:border-violet-400 focus:bg-[var(--bg-primary)] transition-all" />
                     </div>
                     <div className="space-y-1">
-                        <label className="text-xs text-slate-500">Cuerpo <span className="text-red-400">*</span></label>
+                        <label className="text-xs text-[var(--fg-secondary)]">Cuerpo <span className="text-red-400">*</span></label>
                         <textarea value={body} onChange={e => setBody(e.target.value)} rows={3}
                             placeholder="Ej: Revisá las novedades en la app"
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 outline-none focus:border-violet-400 focus:bg-white transition-all resize-none" />
+                            className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl text-sm text-[var(--fg-secondary)] outline-none focus:border-violet-400 focus:bg-[var(--bg-primary)] transition-all resize-none" />
                     </div>
                     <div className="space-y-1">
-                        <label className="text-xs text-slate-500">Data extra (JSON opcional)</label>
+                        <label className="text-xs text-[var(--fg-secondary)]">Data extra (JSON opcional)</label>
                         <textarea value={extraData} onChange={e => setExtraData(e.target.value)} rows={2}
                             placeholder='{"type": "promo", "url": "/ofertas"}'
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-700 outline-none focus:border-violet-400 focus:bg-white transition-all resize-none" />
+                            className="w-full px-3 py-2 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl text-xs font-mono text-[var(--fg-secondary)] outline-none focus:border-violet-400 focus:bg-[var(--bg-primary)] transition-all resize-none" />
                     </div>
                 </div>
 
                 {/* Preview */}
                 {(title || body) && (
                     <div className="p-5 space-y-2">
-                        <p className="text-xs font-bold text-slate-600 uppercase tracking-wider">Preview</p>
-                        <div className="flex items-start gap-3 p-3 bg-slate-900 rounded-xl">
-                            <div className="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center shrink-0">
+                        <p className="text-xs font-bold text-[var(--fg-secondary)] uppercase tracking-wider">Preview</p>
+                        <div className="flex items-start gap-3 p-3 bg-[var(--bg-tertiary)] rounded-xl">
+                            <div className="w-8 h-8 rounded-lg bg-[var(--accent)] flex items-center justify-center shrink-0">
                                 <Bell className="w-4 h-4 text-white" />
                             </div>
                             <div>
                                 <p className="text-xs font-bold text-white">{title || '—'}</p>
-                                <p className="text-xs text-slate-400 mt-0.5">{body || '—'}</p>
+                                <p className="text-xs text-[var(--fg-tertiary)] mt-0.5">{body || '—'}</p>
                             </div>
                         </div>
                     </div>
@@ -288,7 +288,7 @@ export default function NotificationsPage() {
                 {/* Send */}
                 <div className="p-5">
                     <button onClick={handleSend} disabled={sending || !title.trim() || !body.trim()}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 text-white text-sm font-bold rounded-xl hover:bg-violet-700 transition-all disabled:opacity-50">
+                        className="flex items-center gap-2 px-5 py-2.5 bg-[var(--accent)] text-white text-sm font-bold rounded-xl hover:bg-violet-700 transition-all disabled:opacity-50">
                         {sending ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                         {sending ? 'Enviando...' : 'Enviar notificación'}
                     </button>
@@ -298,7 +298,7 @@ export default function NotificationsPage() {
             {/* Result */}
             {result && (
                 <div className={cn(
-                    "flex items-start gap-3 p-4 rounded-2xl border animate-in slide-in-from-bottom-2 duration-300",
+                    "flex items-start gap-3 p-4 rounded-xl border animate-in slide-in-from-bottom-2 duration-300",
                     result.reason ? "bg-amber-50 border-amber-200"
                         : result.failureCount > 0 && result.successCount === 0 ? "bg-red-50 border-red-200"
                         : result.failureCount > 0 ? "bg-orange-50 border-orange-200"

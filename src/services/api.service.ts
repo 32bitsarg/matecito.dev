@@ -36,6 +36,7 @@ export interface Project {
   url?: string | null
   schema_name: string
   workspace_id: string
+  api_version?: 'v1' | 'v2'
   created_at: string
 }
 
@@ -186,9 +187,10 @@ export const ProjectService = {
   // La respuesta incluye { project: { ...url, subdomain }, api_keys: { anon, service } }
   async create(
     workspaceId: string,
-    name: string
+    name: string,
+    apiVersion: 'v1' | 'v2' = 'v2'
   ): Promise<{ project: Project; api_keys: { anon: string } }> {
-    const data = await api.post('/api/v1/platform/create-p', { workspaceId, name })
+    const data = await api.post('/api/v1/platform/create-p', { workspaceId, name, api_version: apiVersion })
 
     return {
       project: data.project,

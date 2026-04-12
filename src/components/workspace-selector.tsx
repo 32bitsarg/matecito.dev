@@ -18,13 +18,20 @@ export default function WorkspaceSelector({ workspaces, current, onSelect, onRef
         <div className="relative">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex w-full items-center gap-2 rounded-lg bg-sidebar border border-border px-3 py-2 text-xs font-bold text-white transition-all hover:border-accent/40 focus:outline-none group shadow-sm"
+                className="flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-xs font-bold transition-all hover:border-[var(--border-hover)] focus:outline-none group"
+                style={{
+                    backgroundColor: 'var(--bg-secondary)',
+                    borderColor: 'var(--border)',
+                    color: 'var(--fg-primary)',
+                }}
             >
-                <div className="w-5 h-5 rounded bg-accent/20 flex items-center justify-center shrink-0">
-                    <LayoutGrid className="w-3 h-3 text-accent" />
+                <div className="w-5 h-5 rounded flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: 'var(--accent-soft)' }}>
+                    <LayoutGrid className="w-3 h-3" style={{ color: 'var(--accent)' }} />
                 </div>
                 <span className="truncate flex-1 text-left">{current?.name || 'Workspace'}</span>
-                <ChevronDown className={cn("w-3.5 h-3.5 transition-transform text-muted opacity-60 group-hover:opacity-100", isOpen && "rotate-180")} />
+                <ChevronDown className={cn("w-3.5 h-3.5 transition-transform opacity-60 group-hover:opacity-100", isOpen && "rotate-180")}
+                    style={{ color: 'var(--fg-tertiary)' }} />
             </button>
 
             {isOpen && (
@@ -33,8 +40,12 @@ export default function WorkspaceSelector({ workspaces, current, onSelect, onRef
                         className="fixed inset-0 z-30"
                         onClick={() => setIsOpen(false)}
                     />
-                    <div className="absolute left-0 right-0 top-full mt-2 z-40 rounded-xl border border-border bg-sidebar p-1 shadow-2xl animate-in fade-in zoom-in duration-150 ring-1 ring-black/50">
-                        <div className="max-h-60 overflow-y-auto custom-scrollbar">
+                    <div className="absolute left-0 right-0 top-full mt-2 z-40 rounded-xl border p-1 shadow-lg animate-slide-up"
+                        style={{
+                            backgroundColor: 'var(--bg-primary)',
+                            borderColor: 'var(--border)',
+                        }}>
+                        <div className="max-h-60 overflow-y-auto">
                             {workspaces.map((ws) => (
                                 <button
                                     key={ws.id}
@@ -44,24 +55,27 @@ export default function WorkspaceSelector({ workspaces, current, onSelect, onRef
                                     }}
                                     className={cn(
                                         "flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-xs transition-colors",
-                                        current?.id === ws.id ? "bg-accent/10 border border-accent/20" : "hover:bg-white/5 border border-transparent"
+                                        current?.id === ws.id ? "font-medium" : "hover:bg-[var(--bg-secondary)]"
                                     )}
+                                    style={current?.id === ws.id ? {
+                                        backgroundColor: 'var(--accent-soft)',
+                                        color: 'var(--accent)',
+                                    } : { color: 'var(--fg-secondary)' }}
                                 >
-                                    <span className={cn(current?.id === ws.id ? "text-accent font-bold" : "text-muted hover:text-white")}>
-                                        {ws.name}
-                                    </span>
-                                    {current?.id === ws.id && <Check className="w-3.5 h-3.5 text-accent" />}
+                                    <span className="truncate">{ws.name}</span>
+                                    {current?.id === ws.id && <Check className="w-3.5 h-3.5" style={{ color: 'var(--accent)' }} />}
                                 </button>
                             ))}
                         </div>
 
-                        <div className="mt-1 border-t border-border pt-1">
+                        <div className="mt-1 border-t pt-1" style={{ borderColor: 'var(--border)' }}>
                             <button
                                 onClick={() => {
                                     setIsOpen(false)
                                     window.dispatchEvent(new CustomEvent('open-create-workspace-modal'))
                                 }}
-                                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-accent font-bold hover:bg-accent/5 transition-colors"
+                                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-bold transition-colors hover:bg-[var(--bg-secondary)]"
+                                style={{ color: 'var(--accent)' }}
                             >
                                 <Plus className="w-3.5 h-3.5" />
                                 Nuevo Workspace

@@ -147,7 +147,8 @@ export function ProjectProvider({
     // ── API ───────────────────────────────────────────────
 
     const pApi = useMemo(() => {
-        const base = `/api/v1/project/${projectId}`
+        const apiVersion = project?.api_version ?? 'v1'
+        const base = `/api/${apiVersion}/project/${projectId}`
         return {
             get: (path: string, params?: Record<string, string>) =>
                 api.get(`${base}${path}`, params),
@@ -170,7 +171,7 @@ export function ProjectProvider({
             delete: (path: string) =>
                 api.delete(`${base}${path}`),
         }
-    }, [projectId])
+    }, [projectId, project?.api_version])
 
     const [records, setRecords] = useState<RecordModel[]>([])
     const [loading, setLoading] = useState(false)
@@ -316,8 +317,13 @@ export function ProjectProvider({
         const token = getToken()
         if (!token) return () => { }
 
-        const BASE = (process.env.NEXT_PUBLIC_API_URL ?? '').replace('https', 'wss')
-        const ws = new WebSocket(`${BASE}/api/v1/project/${projectId}/ws?token=${token}`)
+        const apiVersion = project?.api_version ?? 'v1'
+        const wsPath = apiVersion === 'v2'
+            ? `/api/v2/project/${projectId}/realtime`
+            : `/api/v1/project/${projectId}/ws`
+
+        const BASE = (process.env.NEXT_PUBLIC_API_URL ?? '').replace('https', 'wss').replace('http', 'ws')
+        const ws = new WebSocket(`${BASE}${wsPath}?token=${token}`)
 
         ws.onopen = () => {
             ws.send(JSON.stringify({ type: 'subscribe', collection }))
@@ -331,14 +337,15 @@ export function ProjectProvider({
         }
 
         return () => ws.close()
-    }, [projectId])
+    }, [projectId, project?.api_version])
 
     // ── Utils ─────────────────────────────────────────────
 
     const getFileUrl = useCallback((record: any, filename: string) => {
         const BASE = process.env.NEXT_PUBLIC_API_URL ?? ''
-        return `${BASE}/api/v1/project/${projectId}/storage/${record?.id}/${filename}`
-    }, [projectId])
+        const apiVersion = project?.api_version ?? 'v1'
+        return `${BASE}/api/${apiVersion}/project/${projectId}/storage/${record?.id}/${filename}`
+    }, [projectId, project?.api_version])
 
     // ── Settings ──────────────────────────────────────────
 

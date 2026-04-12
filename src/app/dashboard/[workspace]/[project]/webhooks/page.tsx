@@ -108,23 +108,23 @@ export default function WebhooksPage() {
     return (
         <div className="space-y-6 animate-in fade-in duration-500 pb-16">
             {/* Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+            <div className="flex items-center justify-between pb-4 border-b border-[var(--border)]">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center">
-                        <Webhook className="w-5 h-5 text-violet-600" />
+                    <div className="w-10 h-10 rounded-xl bg-[var(--accent-soft)] flex items-center justify-center">
+                        <Webhook className="w-5 h-5 text-[var(--accent)]" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-extrabold text-slate-900">Webhooks</h1>
-                        <p className="text-xs text-slate-400">Notificaciones HTTP en tiempo real cuando cambian tus datos</p>
+                        <h1 className="text-2xl font-extrabold text-[var(--fg-primary)]">Webhooks</h1>
+                        <p className="text-xs text-[var(--fg-tertiary)]">Notificaciones HTTP en tiempo real cuando cambian tus datos</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
                     <button onClick={load} disabled={loading}
-                        className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 transition-all">
+                        className="p-2.5 bg-[var(--bg-primary)] border border-[var(--border)] rounded-xl text-[var(--fg-tertiary)] hover:text-[var(--fg-secondary)] transition-all">
                         <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
                     </button>
                     <button onClick={() => { setShowForm(true); setNewSecret(null) }}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 text-white text-sm font-semibold rounded-xl hover:bg-violet-700 transition-all">
+                        className="flex items-center gap-2 px-5 py-2.5 bg-[var(--accent)] text-white text-sm font-semibold rounded-xl hover:bg-[var(--bg-tertiary)] transition-all">
                         <Plus className="w-4 h-4" /> Nuevo webhook
                     </button>
                 </div>
@@ -137,7 +137,7 @@ export default function WebhooksPage() {
                     <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-amber-800">Guardá este secret ahora — no se volverá a mostrar</p>
                         <div className="flex items-center gap-2 mt-2">
-                            <code className="flex-1 bg-white border border-amber-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-700 truncate">
+                            <code className="flex-1 bg-[var(--bg-primary)] border border-amber-200 rounded-lg px-3 py-2 text-xs font-mono text-[var(--fg-primary)] truncate">
                                 {showSecret ? newSecret : '•'.repeat(newSecret.length)}
                             </code>
                             <button onClick={() => setShowSecret(v => !v)}
@@ -158,56 +158,56 @@ export default function WebhooksPage() {
 
             {/* Create form */}
             {showForm && (
-                <div className="bg-white rounded-2xl border border-violet-200 p-6 space-y-5 shadow-sm">
+                <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] p-6 space-y-5">
                     <div className="flex items-center justify-between">
-                        <h3 className="font-bold text-slate-900">Nuevo webhook</h3>
-                        <button onClick={() => setShowForm(false)} className="p-1.5 hover:bg-slate-100 rounded-lg transition-all">
-                            <X className="w-4 h-4 text-slate-400" />
+                        <h3 className="font-bold text-[var(--fg-primary)]">Nuevo webhook</h3>
+                        <button onClick={() => setShowForm(false)} className="p-1.5 hover:bg-[var(--bg-secondary)] rounded-lg transition-all">
+                            <X className="w-4 h-4 text-[var(--fg-tertiary)]" />
                         </button>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="col-span-2 space-y-1.5">
-                            <label className="text-xs font-semibold text-slate-600">URL de destino <span className="text-red-400">*</span></label>
+                            <label className="text-xs font-semibold text-[var(--fg-secondary)]">URL de destino <span className="text-red-400">*</span></label>
                             <input type="url" value={form.url} onChange={e => set('url', e.target.value)}
                                 placeholder="https://miapp.com/webhooks/matebase"
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-mono text-slate-900 focus:border-violet-400 focus:bg-white outline-none transition-all" />
+                                className="w-full bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm font-mono text-[var(--fg-primary)] focus:border-[var(--accent)] focus:bg-[var(--bg-primary)] outline-none transition-all" />
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-xs font-semibold text-slate-600">Colección</label>
+                            <label className="text-xs font-semibold text-[var(--fg-secondary)]">Colección</label>
                             <select value={form.collection} onChange={e => set('collection', e.target.value)}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:border-violet-400 outline-none transition-all">
+                                className="w-full bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--fg-primary)] focus:border-[var(--accent)] outline-none transition-all">
                                 <option value="*">* (todas)</option>
                                 {collections.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
                             </select>
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-xs font-semibold text-slate-600">Evento</label>
+                            <label className="text-xs font-semibold text-[var(--fg-secondary)]">Evento</label>
                             <select value={form.event} onChange={e => set('event', e.target.value)}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:border-violet-400 outline-none transition-all">
+                                className="w-full bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--fg-primary)] focus:border-[var(--accent)] outline-none transition-all">
                                 {EVENTS.map(ev => <option key={ev.value} value={ev.value}>{ev.label}</option>)}
                             </select>
                         </div>
 
                         <div className="col-span-2 space-y-1.5">
-                            <label className="text-xs font-semibold text-slate-600">
-                                Secret <span className="font-normal text-slate-400">(opcional — para verificar la firma HMAC-SHA256)</span>
+                            <label className="text-xs font-semibold text-[var(--fg-secondary)]">
+                                Secret <span className="font-normal text-[var(--fg-tertiary)]">(opcional — para verificar la firma HMAC-SHA256)</span>
                             </label>
                             <input type="text" value={form.secret} onChange={e => set('secret', e.target.value)}
                                 placeholder="mi-secret-seguro"
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-mono text-slate-900 focus:border-violet-400 focus:bg-white outline-none transition-all" />
+                                className="w-full bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm font-mono text-[var(--fg-primary)] focus:border-[var(--accent)] focus:bg-[var(--bg-primary)] outline-none transition-all" />
                         </div>
                     </div>
 
                     <div className="flex justify-end gap-3">
                         <button onClick={() => setShowForm(false)}
-                            className="px-4 py-2.5 border border-slate-200 text-slate-600 text-sm font-semibold rounded-xl hover:bg-slate-50 transition-all">
+                            className="px-4 py-2.5 border border-[var(--border)] text-[var(--fg-secondary)] text-sm font-semibold rounded-xl hover:bg-[var(--bg-secondary)] transition-all">
                             Cancelar
                         </button>
                         <button onClick={handleCreate} disabled={saving}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 text-white text-sm font-semibold rounded-xl hover:bg-violet-700 transition-all disabled:opacity-50">
+                            className="flex items-center gap-2 px-5 py-2.5 bg-[var(--accent)] text-white text-sm font-semibold rounded-xl hover:bg-[var(--bg-tertiary)] transition-all disabled:opacity-50">
                             {saving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                             Crear webhook
                         </button>
@@ -221,15 +221,15 @@ export default function WebhooksPage() {
                     <RefreshCw className="w-6 h-6 animate-spin text-violet-400" />
                 </div>
             ) : webhooks.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-dashed border-slate-200">
-                    <Webhook className="w-10 h-10 text-slate-200 mb-3" />
-                    <p className="text-sm text-slate-400 font-medium">Sin webhooks configurados</p>
-                    <p className="text-xs text-slate-300 mt-1">Creá uno para recibir notificaciones cuando cambian tus datos</p>
+                <div className="flex flex-col items-center justify-center py-20 bg-[var(--bg-primary)] rounded-xl border border-dashed border-[var(--border)]">
+                    <Webhook className="w-10 h-10 text-[var(--fg-tertiary)] mb-3" />
+                    <p className="text-sm text-[var(--fg-tertiary)] font-medium">Sin webhooks configurados</p>
+                    <p className="text-xs text-[var(--fg-tertiary)] mt-1">Creá uno para recibir notificaciones cuando cambian tus datos</p>
                 </div>
             ) : (
-                <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm divide-y divide-slate-50">
+                <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] overflow-hidden divide-y divide-[var(--border)]">
                     {webhooks.map(wh => (
-                        <div key={wh.id} className="group flex items-center gap-4 px-5 py-4 hover:bg-slate-50 transition-colors">
+                        <div key={wh.id} className="group flex items-center gap-4 px-5 py-4 hover:bg-[var(--bg-secondary)] transition-colors">
                             {/* Toggle */}
                             <button onClick={() => handleToggle(wh)}
                                 className={cn("w-2 h-2 rounded-full shrink-0 transition-colors",
@@ -239,16 +239,16 @@ export default function WebhooksPage() {
 
                             {/* Info */}
                             <div className="flex-1 min-w-0 space-y-1">
-                                <p className="text-sm font-mono text-slate-800 truncate">{wh.url}</p>
+                                <p className="text-sm font-mono text-[var(--fg-primary)] truncate">{wh.url}</p>
                                 <div className="flex items-center gap-2">
                                     <span className={cn("text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border", EVENT_COLORS[wh.event] ?? EVENT_COLORS['*'])}>
                                         {wh.event}
                                     </span>
-                                    <span className="text-[9px] font-mono text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                                    <span className="text-[9px] font-mono text-[var(--fg-tertiary)] bg-[var(--bg-secondary)] px-1.5 py-0.5 rounded border border-[var(--border)]">
                                         {wh.collection === '*' ? 'todas las colecciones' : wh.collection}
                                     </span>
                                     {wh.secret && (
-                                        <span className="text-[9px] text-slate-400 flex items-center gap-1">
+                                        <span className="text-[9px] text-[var(--fg-tertiary)] flex items-center gap-1">
                                             🔒 con secret
                                         </span>
                                     )}
@@ -260,12 +260,12 @@ export default function WebhooksPage() {
                                 <span className={cn("text-[9px] font-bold uppercase px-2 py-1 rounded-lg border",
                                     wh.enabled
                                         ? "bg-emerald-50 text-emerald-600 border-emerald-200"
-                                        : "bg-slate-50 text-slate-400 border-slate-200")}>
+                                        : "bg-[var(--bg-secondary)] text-[var(--fg-tertiary)] border-[var(--border)]")}>
                                     {wh.enabled ? 'Activo' : 'Inactivo'}
                                 </span>
                                 <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button onClick={() => handleDelete(wh)}
-                                        className="p-2 rounded-xl hover:bg-red-50 text-slate-300 hover:text-red-500 transition-all">
+                                        className="p-2 rounded-xl hover:bg-red-50 text-[var(--fg-tertiary)] hover:text-red-500 transition-all">
                                         <Trash2 className="w-4 h-4" />
                                     </button>
                                 </div>
@@ -276,15 +276,15 @@ export default function WebhooksPage() {
             )}
 
             {/* Docs hint */}
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-500 space-y-2">
-                <p className="font-semibold text-slate-600">Formato del payload enviado a tu endpoint:</p>
-                <pre className="bg-slate-900 text-emerald-400 rounded-lg p-3 text-[10px] overflow-x-auto">{`{
+            <div className="p-4 bg-[var(--bg-secondary)] rounded-xl border border-[var(--border)] text-xs text-[var(--fg-secondary)] space-y-2">
+                <p className="font-semibold text-[var(--fg-secondary)]">Formato del payload enviado a tu endpoint:</p>
+                <pre className="bg-[var(--bg-tertiary)] text-emerald-400 rounded-lg p-3 text-[10px] overflow-x-auto">{`{
   "event": "record.created",
   "collection": "posts",
   "record": { "id": "...", "data": { ... }, "created_at": "..." },
   "timestamp": "2024-01-01T00:00:00Z"
 }`}</pre>
-                <p>Si configuraste un secret, el header <code className="bg-slate-200 px-1 rounded font-mono">X-Matecito-Signature</code> contiene <code className="bg-slate-200 px-1 rounded font-mono">sha256=HMAC(secret, body)</code></p>
+                <p>Si configuraste un secret, el header <code className="bg-[var(--bg-secondary)] px-1 rounded font-mono">X-Matecito-Signature</code> contiene <code className="bg-[var(--bg-secondary)] px-1 rounded font-mono">sha256=HMAC(secret, body)</code></p>
             </div>
         </div>
     )

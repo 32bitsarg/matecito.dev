@@ -63,25 +63,25 @@ export default function UsersPage() {
     return (
         <div className="space-y-6 animate-in fade-in duration-500 pb-16">
             {/* Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+            <div className="flex items-center justify-between pb-4 border-b border-[var(--border)]">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
                         <Users className="w-5 h-5 text-blue-600" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-extrabold text-slate-900">Usuarios</h1>
-                        <p className="text-xs text-slate-400">{users.length} registrados</p>
+                        <h1 className="text-2xl font-extrabold text-[var(--fg-primary)]">Usuarios</h1>
+                        <p className="text-xs text-[var(--fg-tertiary)]">{users.length} registrados</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
                     <Link href={`${base}/auth/providers`}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:border-violet-300 hover:text-violet-600 hover:bg-violet-50 transition-all">
+                        className="flex items-center gap-2 px-4 py-2.5 bg-[var(--bg-primary)] border border-[var(--border)] rounded-xl text-sm font-semibold text-[var(--fg-secondary)] hover:border-[var(--border)] hover:text-[var(--accent)] hover:bg-[var(--accent-soft)] transition-all">
                         <Puzzle className="w-4 h-4" />
                         Providers OAuth
                         <ChevronRight className="w-3.5 h-3.5" />
                     </Link>
                     <button onClick={loadUsers} disabled={loading}
-                        className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 transition-all">
+                        className="p-2.5 bg-[var(--bg-primary)] border border-[var(--border)] rounded-xl text-[var(--fg-tertiary)] hover:text-[var(--fg-secondary)] transition-all">
                         <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
                     </button>
                 </div>
@@ -91,13 +91,13 @@ export default function UsersPage() {
             <div className="grid grid-cols-4 gap-4">
                 {[
                     { label: "Total", value: users.length, icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
-                    { label: "Con nombre", value: users.filter(u => u.name).length, icon: UserCheck, color: "text-violet-600", bg: "bg-violet-50" },
+                    { label: "Con nombre", value: users.filter(u => u.name).length, icon: UserCheck, color: "text-[var(--accent)]", bg: "bg-[var(--accent-soft)]" },
                     { label: "Hoy", value: users.filter(u => new Date(u.created_at).toDateString() === new Date().toDateString()).length, icon: Mail, color: "text-emerald-600", bg: "bg-emerald-50" },
                     { label: "OAuth", value: users.filter(u => u.oauth_provider).length, icon: Globe, color: "text-amber-600", bg: "bg-amber-50" },
                 ].map(s => (
-                    <div key={s.label} className="bg-white rounded-2xl border border-slate-200 p-5 flex items-center justify-between shadow-sm">
+                    <div key={s.label} className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] p-5 flex items-center justify-between">
                         <div>
-                            <p className="text-xs text-slate-400 font-medium mb-1">{s.label}</p>
+                            <p className="text-xs text-[var(--fg-tertiary)] font-medium mb-1">{s.label}</p>
                             <p className={cn("text-2xl font-extrabold", s.color)}>{s.value}</p>
                         </div>
                         <div className={cn("w-9 h-9 rounded-xl flex items-center justify-center", s.bg)}>
@@ -108,49 +108,49 @@ export default function UsersPage() {
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                <div className="px-5 py-3 border-b border-slate-100 flex items-center gap-3">
+            <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] overflow-hidden">
+                <div className="px-5 py-3 border-b border-[var(--border)] flex items-center gap-3">
                     <div className="relative flex-1 max-w-sm">
-                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--fg-tertiary)]" />
                         <input type="text" placeholder="Buscar por email o username..."
                             value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-violet-400 transition-colors" />
+                            className="w-full pl-10 pr-4 py-2 text-sm bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl outline-none focus:border-[var(--accent)] transition-colors" />
                     </div>
                 </div>
 
                 {loading ? (
                     <div className="flex items-center justify-center h-40">
-                        <RefreshCw className="w-6 h-6 animate-spin text-violet-400" />
+                        <RefreshCw className="w-6 h-6 animate-spin text-[var(--accent)]" />
                     </div>
                 ) : filtered.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16">
-                        <Users className="w-10 h-10 text-slate-200 mb-3" />
-                        <p className="text-sm text-slate-400">Sin usuarios registrados</p>
+                        <Users className="w-10 h-10 text-[var(--fg-tertiary)] mb-3" />
+                        <p className="text-sm text-[var(--fg-tertiary)]">Sin usuarios registrados</p>
                     </div>
                 ) : (
                     <table className="w-full text-sm border-collapse">
                         <thead>
-                            <tr className="border-b border-slate-100 bg-slate-50/60">
-                                <th className="px-6 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">Usuario</th>
-                                <th className="px-4 py-3 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">Método</th>
-                                <th className="px-4 py-3 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">Verificado</th>
-                                <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">Creado</th>
-                                <th className="px-6 py-3 text-right text-[10px] font-bold text-slate-400 uppercase tracking-wider">Acciones</th>
+                            <tr className="border-b border-[var(--border)] bg-[var(--bg-secondary)]/60">
+                                <th className="px-6 py-3 text-left text-[10px] font-bold text-[var(--fg-tertiary)] uppercase tracking-wider">Usuario</th>
+                                <th className="px-4 py-3 text-center text-[10px] font-bold text-[var(--fg-tertiary)] uppercase tracking-wider">Método</th>
+                                <th className="px-4 py-3 text-center text-[10px] font-bold text-[var(--fg-tertiary)] uppercase tracking-wider">Verificado</th>
+                                <th className="px-4 py-3 text-left text-[10px] font-bold text-[var(--fg-tertiary)] uppercase tracking-wider">Creado</th>
+                                <th className="px-6 py-3 text-right text-[10px] font-bold text-[var(--fg-tertiary)] uppercase tracking-wider">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-50">
+                        <tbody className="divide-y divide-[var(--border)]">
                             {filtered.map(user => (
-                                <tr key={user.id} className="group hover:bg-slate-50 transition-colors">
+                                <tr key={user.id} className="group hover:bg-[var(--bg-secondary)] transition-colors">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-100 to-violet-50 flex items-center justify-center border border-violet-100 shrink-0">
-                                                <span className="text-violet-600 font-bold text-sm uppercase">
+                                                <span className="text-[var(--accent)] font-bold text-sm uppercase">
                                                     {(user.email || user.username || '?')[0]}
                                                 </span>
                                             </div>
                                             <div>
-                                                <p className="font-semibold text-slate-800 text-sm">{user.email || 'Sin email'}</p>
-                                                <p className="text-[10px] text-slate-400 font-mono mt-0.5">{user.username || '—'}</p>
+                                                <p className="font-semibold text-[var(--fg-primary)] text-sm">{user.email || 'Sin email'}</p>
+                                                <p className="text-[10px] text-[var(--fg-tertiary)] font-mono mt-0.5">{user.username || '—'}</p>
                                             </div>
                                         </div>
                                     </td>
@@ -161,7 +161,7 @@ export default function UsersPage() {
                                                     <Globe className="w-2.5 h-2.5" /> Google
                                                 </span>
                                             ) : user.oauth_provider === 'github' ? (
-                                                <span className="flex items-center gap-1 text-[9px] font-bold uppercase px-2 py-1 bg-slate-100 text-slate-700 border border-slate-300 rounded-lg">
+                                                <span className="flex items-center gap-1 text-[9px] font-bold uppercase px-2 py-1 bg-[var(--bg-secondary)] text-[var(--fg-primary)] border border-slate-300 rounded-lg">
                                                     <Github className="w-2.5 h-2.5" /> GitHub
                                                 </span>
                                             ) : (
@@ -189,7 +189,7 @@ export default function UsersPage() {
                                         </div>
                                     </td>
                                     <td className="px-4 py-4">
-                                        <span className="text-[10px] text-slate-400 font-mono bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
+                                        <span className="text-[10px] text-[var(--fg-tertiary)] font-mono bg-[var(--bg-secondary)] px-2.5 py-1 rounded-lg border border-[var(--border)]">
                                             {new Date(user.created_at).toLocaleDateString()}
                                         </span>
                                     </td>
@@ -198,7 +198,7 @@ export default function UsersPage() {
                                             {!user.email_verified && !user.oauth_provider && (
                                                 <button onClick={() => handleResendVerification(user)}
                                                     disabled={resending === user.id}
-                                                    className="p-2 rounded-xl hover:bg-blue-50 text-slate-400 hover:text-blue-500 transition-all disabled:opacity-50"
+                                                    className="p-2 rounded-xl hover:bg-blue-50 text-[var(--fg-tertiary)] hover:text-blue-500 transition-all disabled:opacity-50"
                                                     title="Reenviar email de verificación">
                                                     {resending === user.id
                                                         ? <RefreshCw className="w-4 h-4 animate-spin" />
@@ -206,7 +206,7 @@ export default function UsersPage() {
                                                 </button>
                                             )}
                                             <button onClick={() => handleDelete(user)}
-                                                className="p-2 rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-500 transition-all"
+                                                className="p-2 rounded-xl hover:bg-red-50 text-[var(--fg-tertiary)] hover:text-red-500 transition-all"
                                                 title="Eliminar usuario">
                                                 <Trash2 className="w-4 h-4" />
                                             </button>

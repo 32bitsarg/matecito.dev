@@ -243,6 +243,16 @@ export const api = {
     return request(path, { method: 'HEAD', params })
   },
 
+  /**
+   * Build a project-scoped API path with version awareness.
+   * @param projectId - The project ID
+   * @param path - The endpoint path (e.g., '/records', '/functions')
+   * @param version - API version, defaults to 'v1'
+   */
+  projectPath(projectId: string, path: string, version: 'v1' | 'v2' = 'v1'): string {
+    return `/api/${version}/project/${projectId}${path.startsWith('/') ? path : '/' + path}`
+  },
+
   public: {
     post<T = any>(path: string, body?: any) {
       return request<T>(path, {

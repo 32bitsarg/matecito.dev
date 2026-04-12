@@ -28,23 +28,23 @@ function StorageBar({ usedMb, quotaMb }: { usedMb: number; quotaMb: number }) {
     const estimatedImgs = Math.floor((remainingMb * 1024) / avgKb)
 
     return (
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3">
+        <div className="bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] p-5 space-y-3">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <HardDrive className="w-4 h-4 text-slate-500" />
-                    <span className="text-sm font-bold text-slate-800">Almacenamiento</span>
+                    <HardDrive className="w-4 h-4 text-[var(--fg-secondary)]" />
+                    <span className="text-sm font-bold text-[var(--fg-primary)]">Almacenamiento</span>
                 </div>
-                <span className={cn("text-xs font-semibold", isFull ? "text-red-500" : "text-slate-500")}>
+                <span className={cn("text-xs font-semibold", isFull ? "text-red-500" : "text-[var(--fg-secondary)]")}>
                     {usedMb.toFixed(1)} MB / {quotaMb} MB
                 </span>
             </div>
 
             {/* Bar */}
-            <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+            <div className="h-2.5 bg-[var(--bg-secondary)] rounded-full overflow-hidden">
                 <div
                     className={cn(
                         "h-full rounded-full transition-all duration-700",
-                        pct < 70  ? "bg-violet-500" :
+                        pct < 70  ? "bg-[var(--accent)]" :
                         pct < 90  ? "bg-amber-400"  :
                                     "bg-red-500"
                     )}
@@ -52,12 +52,12 @@ function StorageBar({ usedMb, quotaMb }: { usedMb: number; quotaMb: number }) {
                 />
             </div>
 
-            <div className="flex items-center justify-between text-xs text-slate-400">
+            <div className="flex items-center justify-between text-xs text-[var(--fg-tertiary)]">
                 <span>{pct.toFixed(1)}% usado</span>
                 <span className="flex items-center gap-1">
                     <ImageIcon className="w-3 h-3" />
                     ~{estimatedImgs.toLocaleString()} imágenes más disponibles
-                    <span className="text-slate-300">(estimado a 400 KB/img optimizada)</span>
+                    <span className="text-[var(--fg-tertiary)]">(estimado a 400 KB/img optimizada)</span>
                 </span>
             </div>
 
@@ -140,24 +140,24 @@ export default function StoragePage() {
     return (
         <div className="space-y-6 animate-in fade-in duration-500 pb-16">
             {/* Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+            <div className="flex items-center justify-between pb-4 border-b border-[var(--border)]">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center">
-                        <HardDrive className="w-5 h-5 text-violet-600" />
+                    <div className="w-10 h-10 rounded-xl bg-[var(--accent-soft)] flex items-center justify-center">
+                        <HardDrive className="w-5 h-5 text-[var(--accent)]" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-extrabold text-slate-900">Storage</h1>
-                        <p className="text-xs text-slate-400">{files.length} archivo{files.length !== 1 ? 's' : ''}</p>
+                        <h1 className="text-2xl font-extrabold text-[var(--fg-primary)]">Storage</h1>
+                        <p className="text-xs text-[var(--fg-tertiary)]">{files.length} archivo{files.length !== 1 ? 's' : ''}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
                     <button onClick={loadFiles} disabled={loading}
-                        className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 transition-all">
+                        className="p-2.5 bg-[var(--bg-primary)] border border-[var(--border)] rounded-xl text-[var(--fg-tertiary)] hover:text-[var(--fg-secondary)] transition-all">
                         <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
                     </button>
                     <input ref={fileInputRef} type="file" className="hidden" onChange={handleUpload} />
                     <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 text-white text-sm font-semibold rounded-xl hover:bg-violet-700 transition-all disabled:opacity-50">
+                        className="flex items-center gap-2 px-5 py-2.5 bg-[var(--accent)] text-white text-sm font-semibold rounded-xl hover:bg-[var(--bg-tertiary)] transition-all disabled:opacity-50">
                         {uploading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
                         Subir
                     </button>
@@ -169,10 +169,10 @@ export default function StoragePage() {
 
             {/* Search */}
             <div className="relative w-full max-w-sm">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--fg-tertiary)]" />
                 <input type="text" placeholder="Buscar archivos..." value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-violet-400 transition-colors" />
+                    className="w-full pl-10 pr-4 py-2.5 bg-[var(--bg-primary)] border border-[var(--border)] rounded-xl text-sm outline-none focus:border-[var(--accent)] transition-colors" />
             </div>
 
             {/* Grid */}
@@ -181,10 +181,10 @@ export default function StoragePage() {
                     <RefreshCw className="w-7 h-7 animate-spin text-violet-400" />
                 </div>
             ) : filtered.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 border-dashed">
-                    <Folder className="w-10 h-10 text-slate-200 mb-3" />
-                    <p className="text-sm text-slate-400 font-medium">Sin archivos</p>
-                    <p className="text-xs text-slate-300 mt-1">Subí tu primer archivo con el botón de arriba</p>
+                <div className="flex flex-col items-center justify-center py-20 bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] border-dashed">
+                    <Folder className="w-10 h-10 text-[var(--fg-tertiary)] mb-3" />
+                    <p className="text-sm text-[var(--fg-tertiary)] font-medium">Sin archivos</p>
+                    <p className="text-xs text-[var(--fg-tertiary)] mt-1">Subí tu primer archivo con el botón de arriba</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
@@ -194,17 +194,17 @@ export default function StoragePage() {
                         const sizeStr  = file.size ? formatBytes(file.size) : null
                         return (
                             <div key={file.id}
-                                className="group relative bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden aspect-square hover:border-violet-300 hover:shadow-md transition-all">
+                                className="group relative bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl overflow-hidden aspect-square hover:border-[var(--accent)] hover:shadow-md transition-all">
                                 {isImg ? (
                                     <img src={file.url} alt={filename}
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                 ) : (
                                     <div className="w-full h-full flex flex-col items-center justify-center gap-2 p-3">
-                                        <FileText className="w-8 h-8 text-slate-300" />
-                                        <span className="text-[9px] font-mono text-slate-400 text-center break-all leading-tight line-clamp-2">{filename}</span>
+                                        <FileText className="w-8 h-8 text-[var(--fg-tertiary)]" />
+                                        <span className="text-[9px] font-mono text-[var(--fg-tertiary)] text-center break-all leading-tight line-clamp-2">{filename}</span>
                                     </div>
                                 )}
-                                <div className="absolute inset-0 bg-slate-900/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                <div className="absolute inset-0 bg-[var(--bg-tertiary)]/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                     <a href={file.url} target="_blank"
                                         className="p-2 bg-white/20 rounded-xl hover:bg-white/30 text-white transition-all">
                                         <Eye className="w-4 h-4" />
@@ -218,7 +218,7 @@ export default function StoragePage() {
                                         <Trash2 className="w-4 h-4" />
                                     </button>
                                 </div>
-                                <div className="absolute bottom-0 inset-x-0 p-2 bg-gradient-to-t from-slate-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-all">
+                                <div className="absolute bottom-0 inset-x-0 p-2 bg-gradient-to-t from-[var(--bg-tertiary)]/80 to-transparent opacity-0 group-hover:opacity-100 transition-all">
                                     <p className="text-[9px] text-white/70 font-mono truncate">{filename}</p>
                                     {sizeStr && <p className="text-[9px] text-white/50 font-mono">{sizeStr}</p>}
                                 </div>

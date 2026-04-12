@@ -1,581 +1,2303 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import Link from "next/link"
+import { useState, useEffect, useRef } from 'react'
+import { cn } from '@/lib/utils'
 import {
-    Database, Users, HardDrive, Shield, Terminal,
-    Radio, Package, Code2, Layers, GitMerge, Search,
-    ChevronRight, Webhook, Mail, KeyRound,
-} from "lucide-react"
+  Copy, Check, ChevronDown, ChevronRight, Search, Code2, Globe,
+  Database, Shield, Zap, Mail, Key, BarChart3, Workflow, Sparkles,
+  FileText, Settings, Terminal, ArrowRight, Menu, X, Smartphone, Bell
+} from 'lucide-react'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+type Tab = 'sdk' | 'rest-v1' | 'rest-v2' | 'flutter'
 
-interface Endpoint {
-    method: string
-    path: string
-    auth: string
-    desc: string
-    query?: string
-    body?: string
-    response: string
-    notes?: string
+// ═══════════════════════════════════════════════════════════
+// Code snippets
+// ═══════════════════════════════════════════════════════════
+
+const CODE = {
+  install: `npm install matecitodb`,
+
+  clientV1: `// API v1 (default) — Compatibilidad con proyectos existentes
+export const db = createClient<Database>({
+  url:        process.env.MATECITODB_URL!,
+  apiKey:     process.env.MATECITODB_API_KEY!,
+  apiVersion: 'v1',  // default, no hace falta especificarlo
+})`,
+
+  clientV2: `// API v2 (recomendada) — Features avanzadas + security fixes
+export const db = createClient<Database>({
+  url:        process.env.MATECITODB_URL!,
+  apiKey:     process.env.MATECITODB_API_KEY!,
+  apiVersion: 'v2',
+})
+
+// Con serviceKey (server-side / admin)
+export const dbAdmin = createClient<Database>({
+  url:        process.env.MATECITODB_URL!,
+  serviceKey: process.env.MATECITODB_SERVICE_KEY!,
+  apiVersion: 'v2',
+})`,
+
+  client: `import { createClient } from 'matecitodb'
+import type { Database } from '@/matecito/database'
+
+export const db = createClient<Database>({
+  url:    process.env.MATECITODB_URL!,
+  apiKey: process.env.NEXT_PUBLIC_MATECITODB_API_KEY!,
+  // serviceKey: process.env.MATECITODB_SERVICE_KEY!,  // server-side
+  // apiVersion: 'v2',  // descomentá para v2
+})`,
+
+  auth: `// Registro
+const { user } = await db.auth.signUp({
+  email:    'user@example.com',
+  password: 'secure-password',
+  name:     'Juan Pérez',
+})
+
+// Login
+const { token, user } = await db.auth.signIn({
+  email:    'user@example.com',
+  password: 'secure-password',
+})
+
+// Logout
+await db.auth.signOut()
+
+// Usuario actual
+const me = await db.auth.getMe()`,
+
+  authOAuth: `// Obtener URL OAuth (v2)
+const { url } = await db.auth.getOAuthUrl('google')
+window.location.href = url
+
+// Manejar callback en /auth/callback
+const { token, user } = await db.auth.handleOAuthCallback(window.location.href)`,
+
+  authSession: `// Persistir sesión manualmente
+await db.auth.setSession(token)
+
+// Refresh de token expirado
+const { token: newToken } = await db.auth.refreshSession()
+
+// Escuchar cambios de sesión
+const unsub = db.auth.onAuthChange((event, session) => {
+  // event: 'SIGNED_IN' | 'SIGNED_OUT' | 'TOKEN_REFRESHED'
+  if (event === 'SIGNED_IN') console.log('User:', session?.user)
+  if (event === 'SIGNED_OUT') router.push('/login')
+})
+// unsub() para dejar de escuchar`,
+
+  authPassword: `// Solicitar reset de contraseña
+await db.auth.requestPasswordReset('user@example.com')
+
+// Confirmar reset (con token del email)
+await db.auth.resetPassword({ token: 'reset-token', newPassword: 'new-pass' })
+
+// Verificar email
+await db.auth.verifyEmail(token)
+await db.auth.resendVerification('user@example.com')
+
+// Actualizar perfil
+await db.auth.updateProfile({ name: 'New Name', avatar_url: 'https://...' })`,
+
+  authMagicLink: `// Magic link (v2 only)
+await db.auth.magicLink('user@example.com')
+// El usuario recibe email → link → autenticado automáticamente`,
+
+  authTOTP: `// TOTP / 2FA (v2 only)
+// 1. Setup — devuelve secret + QR URL
+const { secret, qr_url } = await db.auth.totpSetup()
+
+// 2. Confirmar con código del authenticator
+await db.auth.totpConfirm({ code: '123456' })
+
+// 3. Verificar en cada login
+await db.auth.totpVerify({ code: '123456' })
+
+// 4. Desactivar 2FA
+await db.auth.totpDisable({ password: 'current-password' })`,
+
+  authAdmin: `// Auth Admin (serviceKey requerida)
+// Listar usuarios
+const { users } = await db.auth.admin.listUsers({ page: 1, limit: 50 })
+
+// Crear usuario como admin
+const { user } = await db.auth.admin.createUser({
+  email: 'user@example.com', password: 'pass', name: 'Juan',
+})
+
+// Banear / desbanear
+await db.auth.admin.banUser(userId)
+await db.auth.admin.unbanUser(userId)
+
+// Eliminar usuario
+await db.auth.admin.deleteUser(userId)
+
+// Roles
+await db.auth.roles.assign(userId, 'moderator')
+await db.auth.roles.revoke(userId, 'moderator')`,
+
+  authInvitations: `// Invitaciones
+const { link } = await db.auth.invitations.create({
+  email: 'nuevo@example.com',
+  role:  'editor',
+  expiresInHours: 48,
+})
+
+// Listar invitaciones pendientes
+const { invitations } = await db.auth.invitations.list()
+
+// Revocar
+await db.auth.invitations.revoke(invitationId)`,
+
+  queryBuilder: `// QueryBuilder — API fluida y tipada
+const posts = await db
+  .from('posts')
+  .eq('status', 'published')
+  .order('created_at', 'desc')
+  .limit(20)
+  .get()
+
+// Múltiples filtros
+const results = await db
+  .from('products')
+  .gte('price', 100)
+  .lte('price', 500)
+  .like('name', '%laptop%')
+  .in('category', ['tech', 'gaming'])
+  .notIn('status', ['draft', 'archived'])
+  .limit(10)
+  .get()
+
+// Búsqueda por campo nullable
+const noPhone = await db.from('users').isNull('phone').get()
+
+// Contiene en array (v2)
+const tagged = await db.from('posts').has('tags', 'javascript').get()`,
+
+  queryBuilderAdvanced: `// Full-text search (v2)
+const articles = await db
+  .from('articles')
+  .search('base de datos')
+  .order('relevance', 'desc')
+  .get()
+
+// Vector / semántico (v2)
+const similar = await db
+  .from('documents')
+  .searchFullText('machine learning')
+  .limit(5)
+  .get()
+
+// Between
+const recent = await db
+  .from('orders')
+  .between('created_at', '2024-01-01', '2024-12-31')
+  .get()
+
+// OR conditions
+const active = await db
+  .from('users')
+  .or([{ field: 'status', op: 'eq', value: 'active' }, { field: 'role', op: 'eq', value: 'admin' }])
+  .get()
+
+// Relaciones (populate)
+const withAuthor = await db
+  .from('posts')
+  .populate('author_id', 'users')
+  .limit(10)
+  .get()
+
+// Soft-deleted + expirados
+const all = await db.from('items').includeDeleted().includeExpired().get()`,
+
+  queryBuilderMutations: `// Crear
+const post = await db.from('posts').insert({ title: 'Hola', status: 'draft' })
+
+// Crear múltiples
+const posts = await db.from('posts').insertMany([
+  { title: 'Post 1' }, { title: 'Post 2' },
+])
+
+// Upsert (insert o update por clave única)
+await db.from('users').upsert({ email: 'j@ex.com', name: 'Juan' }, 'email')
+
+// Actualizar filtrado
+await db.from('posts').eq('status', 'draft').update({ status: 'published' })
+
+// Merge (actualización parcial con ID)
+await db.from('products').merge(productId, { price: 299 })
+
+// Soft delete
+await db.from('posts').eq('id', postId).delete()
+
+// Hard delete (permanente)
+await db.from('posts').eq('id', postId).hardDelete()
+
+// Restaurar soft-deleted
+await db.from('posts').eq('id', postId).restore()`,
+
+  queryBuilderPaginate: `// Paginación fluida
+const page = await db
+  .from('products')
+  .eq('category', 'tech')
+  .order('price', 'asc')
+  .paginate(1, 20) // página 1, 20 por página
+
+// Devuelve:
+// { data: [...], total: 150, page: 1, limit: 20, pages: 8 }
+
+// findOne
+const user = await db.from('users').eq('email', 'j@ex.com').findOne()
+
+// count
+const total = await db.from('posts').eq('status', 'published').count()
+
+// Seleccionar campos
+const names = await db
+  .from('users')
+  .select(['id', 'name', 'email'])
+  .limit(100)
+  .get()
+
+// Exportar (v2)
+const csv = await db.from('orders').export('csv')
+const json = await db.from('orders').export('json')`,
+
+  queryBuilderRealtime: `// Realtime desde QueryBuilder
+const unsubscribe = await db
+  .from('messages')
+  .eq('room_id', 'room-123')
+  .subscribe((event) => {
+    // event.action: 'create' | 'update' | 'delete'
+    console.log('Nuevo evento:', event.action, event.record)
+  })
+
+// watch — escucha todos los eventos de una colección
+const stop = db.from('notifications').watch((event) => {
+  if (event.action === 'create') showToast(event.record.message)
+})
+
+unsubscribe() // o stop()`,
+
+  records: `// API clásica (db.records)
+const record = await db.records.create('users', {
+  name: 'Juan', email: 'juan@example.com',
+})
+
+const { records, pagination } = await db.records.list('users', {
+  page: 1, limit: 50, sort: '-created_at',
+})
+
+await db.records.update(record.id, { name: 'Juan Updated' })
+await db.records.delete(record.id)
+await db.records.hardDelete(record.id)`,
+
+  realtime: `// Suscripción básica
+const unsubscribe = db.realtime.subscribe('users', (event) => {
+  console.log('Acción:', event.action) // create | update | delete
+  console.log('Registro:', event.record)
+})
+
+// Con filtro
+db.realtime.subscribe('posts', (event) => {
+  setFeed(prev => [event.record, ...prev])
+}, { status: 'published' })
+
+unsubscribe()`,
+
+  storage: `// Subir archivo
+const file = await db.storage.upload('avatar.png', fileData, {
+  collection: 'users',
+  recordId:   'user-id-123',
+  public:     true,
+})
+
+// Obtener URL pública
+const url = db.storage.getUrl(file.path)
+
+// Listar archivos
+const { files } = await db.storage.list({ collection: 'users', recordId: 'user-id-123' })
+
+// Eliminar
+await db.storage.delete(file.id)`,
+
+  emails: `// Configurar SMTP
+await db.emails.saveSmtp({
+  host:     'smtp.gmail.com',
+  port:     587,
+  username: 'noreply@myapp.com',
+  password: 'app-password',
+  secure:   false,
+})
+
+// Enviar
+await db.emails.send({
+  to:      ['user@example.com'],
+  subject: 'Bienvenido a mi app',
+  html:    '<h1>¡Hola!</h1><p>Gracias por registrarte.</p>',
+})`,
+
+  functions: `// Invocar una function (v2)
+const { result, duration_ms } = await db.functions.invoke('send-welcome', {
+  args: { email: 'user@example.com', name: 'Juan' },
+})
+
+// Crear function
+await db.functions.create({
+  name:       'process-order',
+  code:       \`const { args, db } = context; return { ok: true }\`,
+  timeout_ms: 5000,
+  is_public:  false,
+})
+
+// Listar
+const { functions } = await db.functions.list()
+
+// Historial de ejecuciones
+const { executions } = await db.functions.history('send-welcome')`,
+
+  analytics: `// Trackear evento (v2)
+await db.analytics.track('page_view', {
+  user_id:    currentUser.id,
+  properties: { page: '/pricing', source: 'google' },
+})
+
+// Obtener eventos agrupados
+const { results } = await db.analytics.events({
+  group_by: 'event',
+  days:     30,
+})
+
+// Funnel de conversión
+const { funnel } = await db.analytics.funnel({
+  steps: ['page_view', 'signup', 'checkout', 'purchase'],
+})`,
+
+  aiGateway: `// Configurar AI (v2)
+await db.ai.setConfig({
+  provider: 'openai', // 'anthropic' | 'groq'
+  model:    'gpt-4o-mini',
+  api_key:  'sk-...',
+})
+
+// Chat completion
+const { content } = await db.ai.chat([
+  { role: 'user', content: '¿Cómo implemento auth con matecitodb?' },
+])
+
+// Con system prompt
+const { content } = await db.ai.chat(messages, {
+  system:     'Sos un asistente técnico de MatecitoDB.',
+  max_tokens: 500,
+})`,
+
+  remoteConfig: `// Remote Config (v2)
+// Obtener todos los valores
+const { configs } = await db.config.getAll()
+
+// Obtener uno
+const mode = await db.config.get('maintenance_mode')
+
+// Crear / actualizar
+await db.config.set('maintenance_mode', false, {
+  description: 'Desactiva el acceso público',
+})
+
+// Eliminar
+await db.config.delete('old_flag')`,
+
+  notifications: `// Notificaciones push (v2)
+// Registrar dispositivo
+await db.notifications.registerDevice({
+  token:    fcmToken,
+  platform: 'android', // 'ios' | 'web'
+})
+
+// Enviar notificación
+await db.notifications.send({
+  user_ids: [userId],
+  title:    '¡Nueva actualización!',
+  body:     'Revisá las novedades de la app.',
+  data:     { screen: 'updates' },
+})
+
+// Enviar a todos
+await db.notifications.broadcast({
+  title: 'Mantenimiento programado',
+  body:  'El servicio estará caído el sábado 02:00-04:00 AM.',
+})`,
+
+  // V1 REST
+  v1Login: `POST /api/v1/auth/login
+Content-Type: application/json
+
+{ "email": "user@example.com", "password": "secure-password" }
+
+# Response: 200
+{ "token": "eyJhbGci...", "refresh_token": "eyJhbGc..." }`,
+
+  v1Register: `POST /api/v1/auth/register
+Content-Type: application/json
+
+{ "email": "user@example.com", "password": "secure-password", "name": "Juan Pérez" }
+
+# Response: 201
+{ "user": { "id": "uuid", "email": "user@example.com", "name": "Juan Pérez" } }`,
+
+  v1Refresh: `POST /api/v1/auth/refresh
+Content-Type: application/json
+
+{ "refresh_token": "eyJhbGc..." }
+
+# Response: 200
+{ "token": "eyJhbGci...", "refresh_token": "eyJhbGc..." }`,
+
+  v1PasswordReset: `# Solicitar reset
+POST /api/v1/auth/password-reset
+{ "email": "user@example.com" }
+
+# Confirmar con token del email
+POST /api/v1/auth/password-reset/confirm
+{ "token": "reset-token", "password": "new-secure-pass" }`,
+
+  v1ListRecords: `GET /api/v1/project/:id/records?collection=users&page=1&limit=50&sort=-created_at
+Authorization: Bearer <token>
+
+# Response: 200
+{
+  "records": [{
+    "id": "uuid",
+    "collection": "users",
+    "data": { "name": "Juan", "email": "juan@example.com" },
+    "created_at": "2024-01-15T10:30:00Z"
+  }],
+  "pagination": { "total": 150, "page": 1, "limit": 50 }
+}`,
+
+  v1CreateRecord: `POST /api/v1/project/:id/records
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "collection": "users",
+  "data": { "name": "María", "email": "maria@example.com" }
 }
 
-interface RestSection {
-    id: string
-    icon: React.ElementType
-    color: string
-    label: string
-    desc?: string
-    endpoints: Endpoint[]
+# Response: 201
+{ "id": "uuid", "collection": "users", "data": { ... } }`,
+
+  v1UpdateRecord: `PATCH /api/v1/project/:id/records/:recordId
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{ "name": "María Updated" }`,
+
+  v1DeleteRecord: `DELETE /api/v1/project/:id/records/:recordId
+Authorization: Bearer <token>
+
+# Soft delete por defecto. Hard delete:
+DELETE /api/v1/project/:id/records/:recordId?hard=true`,
+
+  v1ListCollections: `GET /api/v1/project/:id/collections
+Authorization: Bearer <token>`,
+
+  v1CreateCollection: `POST /api/v1/project/:id/collections
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{ "name": "posts" }`,
+
+  v1AddField: `POST /api/v1/project/:id/collections/:name/fields
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{ "name": "title", "type": "text", "required": true }
+
+# Tipos: text, number, bool, email, date, file, json, relation, select`,
+
+  v1Storage: `# Subir archivo
+POST /api/v1/project/:id/storage
+Authorization: Bearer <token>
+Content-Type: multipart/form-data
+
+file=<binary>
+collection=users
+record_id=<uuid>
+public=true
+
+# Response: 201
+{ "id": "uuid", "path": "users/<uuid>/avatar.png", "url": "https://..." }
+
+# Listar archivos
+GET /api/v1/project/:id/storage?collection=users&record_id=<uuid>
+
+# Eliminar
+DELETE /api/v1/project/:id/storage/:fileId`,
+
+  v1Realtime: `# Conectar WebSocket (v1)
+ws://tu-proyecto.matecito.dev/api/v1/ws
+
+# Autenticar
+→ { "type": "auth", "token": "Bearer <jwt>" }
+
+# Suscribirse a colección
+→ { "type": "subscribe", "collection": "messages" }
+
+# Con filtro
+→ { "type": "subscribe", "collection": "posts", "filter": { "status": "published" } }
+
+# Recibir eventos
+← { "type": "event", "action": "create", "collection": "messages", "record": { ... } }
+← { "type": "event", "action": "update", "collection": "messages", "record": { ... } }
+← { "type": "event", "action": "delete", "collection": "messages", "id": "uuid" }`,
+
+  v1Permissions: `# Listar reglas de acceso
+GET /api/v1/project/:id/permissions
+Authorization: Bearer <token>
+
+# Crear regla
+POST /api/v1/project/:id/permissions
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "collection": "posts",
+  "action":     "read",    // create | read | update | delete
+  "allow":      "public",  // public | authenticated | owner | role
+  "role":       "editor"   // si allow = role
+}`,
+
+  v1Webhook: `POST /api/v1/project/:id/webhooks
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "url":         "https://myserver.com/webhook",
+  "collections": ["users", "posts"],
+  "events":      ["create", "update", "delete"],
+  "secret":      "optional-hmac-secret"
 }
 
-interface SdkBlock {
-    title?: string
-    code: string
-    note?: string
+# Payload recibido
+{
+  "event":      "record.created",
+  "collection": "users",
+  "record":     { "id": "uuid", "data": { ... } },
+  "timestamp":  "2024-01-15T10:30:00Z",
+  "signature":  "sha256=abc..."
+}`,
+
+  v1Stats: `GET /api/v1/project/:id/stats
+Authorization: Bearer <token>
+
+# Response
+{
+  "records":     15420,
+  "collections": 12,
+  "storage_mb":  234,
+  "users":       3800
+}`,
+
+  // V2 REST
+  v2Track: `POST /api/v2/project/:id/analytics/track
+Content-Type: application/json
+
+{
+  "event":   "page_view",
+  "user_id": "user-123",
+  "properties": { "page": "/pricing", "source": "google" }
+}`,
+
+  v2Events: `GET /api/v2/project/:id/analytics/events?group_by=event&days=30
+
+# Response
+{
+  "results": [
+    { "event": "page_view",    "count": 15000, "unique_users": 3200 },
+    { "event": "button_click", "count": 4500,  "unique_users": 1800 }
+  ]
+}`,
+
+  v2Funnel: `GET /api/v2/project/:id/analytics/funnel?steps=page_view,signup,checkout,purchase
+
+# Response
+{
+  "funnel": [
+    { "step": "page_view", "users": 10000 },
+    { "step": "signup",    "users": 3500  },
+    { "step": "checkout",  "users": 1200  },
+    { "step": "purchase",  "users": 450   }
+  ]
+}`,
+
+  v2Function: `POST /api/v2/project/:id/functions
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name":       "send-welcome",
+  "code":       "const { args, db } = context; await db.emails.send(...); return { ok: true }",
+  "timeout_ms": 5000,
+  "is_public":  false
+}`,
+
+  v2Invoke: `POST /api/v2/project/:id/functions/:name/invoke
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{ "args": { "email": "user@example.com", "name": "Juan" } }
+
+# Response
+{ "result": { "ok": true }, "duration_ms": 45 }`,
+
+  v2FunctionHistory: `GET /api/v2/project/:id/functions/history
+GET /api/v2/project/:id/functions/history?name=send-welcome
+
+# Response
+{
+  "executions": [{
+    "id":            "uuid",
+    "function_name": "send-welcome",
+    "status":        "success",
+    "duration_ms":   45,
+    "created_at":    "2024-01-15T10:30:00Z"
+  }]
+}`,
+
+  v2AIConfig: `PUT /api/v2/project/:id/project/ai-config
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "provider": "openai",     // "anthropic" | "groq"
+  "model":    "gpt-4o-mini",
+  "api_key":  "sk-..."
+}
+# API keys encriptadas con AES-256 en la DB`,
+
+  v2AIChat: `POST /api/v2/project/:id/ai/chat
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "messages": [{ "role": "user", "content": "¿Cómo implemento auth?" }],
+  "system":   "Sos un asistente técnico especializado en MatecitoDB.",
+  "max_tokens": 500
 }
 
-interface SdkSection {
-    id: string
-    icon: React.ElementType
-    color: string
-    label: string
-    blocks: SdkBlock[]
+# Response
+{ "content": "Para implementar auth con MatecitoDB...", "usage": { "tokens": 230 } }`,
+
+  v2ConfigSet: `PUT /api/v2/project/:id/config/:key
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{ "value": false, "description": "Activa el modo mantenimiento" }`,
+
+  v2ConfigGet: `GET /api/v2/project/:id/config
+
+# Response
+{
+  "configs": {
+    "maintenance_mode": {
+      "value":       false,
+      "description": "Activa el modo mantenimiento",
+      "updated_at":  "2024-01-15T10:30:00Z"
+    },
+    "feature_new_ui": { "value": true, "description": "Activa nueva UI" }
+  }
+}`,
+
+  v2Form: `POST /api/v2/project/:id/forms
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name":       "contacto",
+  "collection": "messages",
+  "fields":     [
+    { "name": "email",   "type": "email",  "required": true },
+    { "name": "message", "type": "text",   "required": true }
+  ]
 }
 
-// ─── REST data ────────────────────────────────────────────────────────────────
+# URL pública: https://tu-proyecto.matecito.dev/f/contacto`,
 
-const REST_SECTIONS: RestSection[] = [
-    {
-        id: "autenticacion", icon: Users, color: "bg-blue-50 text-blue-600", label: "Autenticación",
-        endpoints: [
-            { method: "POST", path: "/auth/register", auth: "anon-key", desc: "Registro de usuario", body: `{ "email", "password", ...extra }`, response: `{ "user": { "id", "email", "username", ... }, "access_token": "jwt...", "refresh_token": "..." }` },
-            { method: "POST", path: "/auth/login", auth: "anon-key", desc: "Login con email y contraseña", body: `{ "email", "password" }`, response: `{ "user": { ... }, "access_token": "jwt...", "refresh_token": "...", "expires_in": 900 }` },
-            { method: "POST", path: "/auth/logout", auth: "project-jwt", desc: "Cerrar sesión (revoca refresh token)", body: `{ "refresh_token" }`, response: `{ "ok": true }` },
-            { method: "POST", path: "/auth/refresh", auth: "anon-key", desc: "Refrescar access token", body: `{ "refresh_token" }`, response: `{ "access_token": "jwt...", "refresh_token": "...", "expires_in": 900 }` },
-            { method: "GET", path: "/auth/me", auth: "project-jwt", desc: "Ver perfil del usuario autenticado", response: `{ "user": { "id", "email", "username", "name", "avatar_url", "created_at" } }` },
-            { method: "PATCH", path: "/auth/me", auth: "project-jwt", desc: "Actualizar perfil del usuario", body: `{ "name"?, "username"?, "avatar_seed"?, ...extra }`, response: `{ "user": { ... } }` },
-            { method: "POST", path: "/auth/request-reset", auth: "anon-key", desc: "Solicitar reset de contraseña (envía email)", body: `{ "email", "reset_url_base"? }`, response: `{ "ok": true }` },
-            { method: "POST", path: "/auth/reset-password", auth: "anon-key", desc: "Confirmar nueva contraseña con token del email", body: `{ "token", "password" }`, response: `{ "ok": true }` },
-            { method: "POST", path: "/auth/verify-email", auth: "anon-key", desc: "Verificar email con token del link", body: `{ "token" }`, response: `{ "ok": true, "user_id": "uuid" }` },
-            { method: "POST", path: "/auth/resend-verification", auth: "anon-key", desc: "Reenviar email de verificación", body: `{ "email"? | "user_id"?, "login_url"? }`, response: `{ "ok": true }` },
-            { method: "GET", path: "/auth/oauth/:provider", auth: "anon-key", desc: "Redirige al proveedor OAuth (Google, GitHub…)", query: "redirect_uri · state (CSRF)", response: "HTTP 302 redirect" },
-            { method: "GET", path: "/auth/oauth-providers", auth: "service-key", desc: "Listar proveedores OAuth configurados", response: `{ "providers": [{ "provider", "enabled" }] }` },
-            { method: "POST", path: "/auth/oauth-providers", auth: "service-key", desc: "Configurar proveedor OAuth", body: `{ "provider", "clientId", "clientSecret", "redirectUri"? }`, response: `{ "ok": true }` },
-            { method: "DELETE", path: "/auth/oauth-providers/:provider", auth: "service-key", desc: "Eliminar configuración OAuth", response: `{ "ok": true }` },
-            { method: "GET", path: "/auth/users", auth: "service-key", desc: "Listar usuarios del proyecto (admin)", query: "page · limit · search", response: `{ "users": [...], "total": 0, "pages": 0 }` },
-            { method: "DELETE", path: "/auth/users/:userId", auth: "service-key", desc: "Eliminar usuario (admin, irreversible)", response: `{ "ok": true }` },
-        ],
-    },
-    {
-        id: "registros", icon: Database, color: "bg-violet-50 text-violet-600", label: "Registros",
-        endpoints: [
-            {
-                method: "GET", path: "/records", auth: "jwt / service-key", desc: "Listar registros con filtros, búsqueda y paginación",
-                query: "collection (req) · select · page · limit · sort · order · search · include_deleted · include_expired · or · [campo]=op.valor",
-                response: `{ "records": [...], "pagination": { "page", "limit", "total", "pages", "next_cursor" } }`,
-                notes: "Filtros: ?title=ilike.%hola% · ?price=gte.100 · ?or=(price.gte.100,name.ilike.%café%)",
-            },
-            { method: "POST", path: "/records", auth: "jwt / service-key", desc: "Crear registro", body: `{ "collection", "data": { ...campos } }`, response: `{ "record": { "id", "collection", "data", "created_at", "updated_at" } }` },
-            { method: "GET", path: "/records/:id", auth: "jwt / service-key", desc: "Ver un registro por ID", query: "collection (req)", response: `{ "record": { ... } }` },
-            { method: "PATCH", path: "/records/:id", auth: "jwt / service-key", desc: "Editar un registro por ID", body: `{ "data": { ...campos }, "merge"?: true, "expires_at"? }`, response: `{ "record": { ... } }` },
-            { method: "PATCH", path: "/records", auth: "jwt / service-key", desc: "Bulk update — edita todos los que coinciden con los filtros", query: "collection (req) · [campo]=op.valor", body: `{ "data": { ...campos }, "merge"?: true }`, response: `{ "records": [...], "count": 0 }` },
-            { method: "DELETE", path: "/records/:id", auth: "jwt / service-key", desc: "Soft-delete de un registro (recuperable)", query: "collection (req)", response: `{ "ok": true }` },
-            { method: "DELETE", path: "/records", auth: "jwt / service-key", desc: "Bulk soft-delete — elimina todos los que coinciden", query: "collection (req) · [campo]=op.valor", response: `{ "count": 0 }` },
-            { method: "POST", path: "/records/upsert", auth: "jwt / service-key", desc: "Insertar o actualizar según campo de conflicto", body: `{ "collection", "data", "onConflict": ["campo"], "expires_at"? }`, response: `{ "record": { ... }, "upserted": true }`, notes: "upserted: true = insertado, false = actualizado" },
-            { method: "GET", path: "/records/count", auth: "jwt / service-key", desc: "Contar registros de una colección con filtros", query: "collection (req) · [campo]=op.valor · search", response: `{ "count": 42 }` },
-            { method: "GET", path: "/records/export", auth: "jwt / service-key", desc: "Exportar hasta 10 000 registros", query: "collection (req) · format (json|csv) · include_deleted · include_expired", response: "Descarga del archivo (JSON o CSV)" },
-            { method: "POST", path: "/records/:id/restore", auth: "jwt / service-key", desc: "Restaurar un registro soft-deleted", query: "collection (req)", response: `{ "record": { ... } }` },
-            { method: "DELETE", path: "/records/:id/hard", auth: "service-key", desc: "Borrado permanente (irreversible)", query: "collection (req)", response: `{ "ok": true }` },
-            { method: "POST", path: "/batch", auth: "jwt / service-key", desc: "Múltiples operaciones en una sola transacción", body: `{ "operations": [{ "op": "insert"|"update"|"delete", "collection", "data"?, "id"? }] }`, response: `{ "results": [{ "ok": true, "record"?: {...}, "recordId"?: "uuid", "error"?: "msg" }] }` },
-            { method: "POST", path: "/sql", auth: "service-key", desc: "Raw SQL parametrizado (rate limit: 30 req/min)", body: `{ "query": "SELECT ...", "params"?: [] }`, response: `{ "command", "rows": [...], "row_count", "fields": [...], "truncated", "duration_ms" }`, notes: "Solo para operaciones de lectura o admin. No usar desde clients." },
-        ],
-    },
-    {
-        id: "colecciones", icon: Layers, color: "bg-emerald-50 text-emerald-600", label: "Colecciones",
-        desc: "Gestión del schema del proyecto. Requiere service-key.",
-        endpoints: [
-            { method: "GET", path: "/collections", auth: "service-key", desc: "Listar todas las colecciones con sus campos", response: `{ "collections": [{ "name", "fields": [...] }] }` },
-            { method: "POST", path: "/collections", auth: "service-key", desc: "Crear colección (opcionalmente con campos iniciales)", body: `{ "name", "fields"?: [{ "name", "type", "required"?, "options"? }] }`, response: `{ "collection": { "name", "fields": [] } }` },
-            { method: "PATCH", path: "/collections/:name", auth: "service-key", desc: "Renombrar colección", body: `{ "name": "nuevo_nombre" }`, response: `{ "ok": true }` },
-            { method: "DELETE", path: "/collections/:name", auth: "service-key", desc: "Eliminar colección y todos sus registros (irreversible)", response: `{ "ok": true }` },
-            { method: "GET", path: "/collections/:name/fields", auth: "service-key", desc: "Listar campos de una colección", response: `{ "fields": [{ "id", "name", "type", "required", "options", "created_at" }] }` },
-            { method: "POST", path: "/collections/:name/fields", auth: "service-key", desc: "Añadir campo", body: `{ "name", "type": "text|number|boolean|email|date|file|json|relation|select", "required"?: false, "options"?: {} }`, response: `{ "field": { ... } }` },
-            { method: "PATCH", path: "/collections/:name/fields/:fieldId", auth: "service-key", desc: "Editar campo (nombre, required, options)", body: `{ "name"?, "required"?, "options"? }`, response: `{ "field": { ... } }` },
-            { method: "DELETE", path: "/collections/:name/fields/:fieldId", auth: "service-key", desc: "Eliminar campo (datos del campo se pierden)", response: `{ "ok": true }` },
-        ],
-    },
-    {
-        id: "permisos", icon: Shield, color: "bg-rose-50 text-rose-600", label: "Permisos",
-        desc: "Control de acceso por colección. Requiere service-key.",
-        endpoints: [
-            { method: "GET", path: "/permissions", auth: "service-key", desc: "Ver permisos de todas las colecciones", response: `{ "permissions": { "posts": { "list": "public", ... }, ... } }` },
-            { method: "GET", path: "/permissions/:collection", auth: "service-key", desc: "Ver permisos de una colección", response: `{ "permissions": { "list": "public", "get": "public", "create": "auth", "update": "auth", "delete": "service" } }` },
-            { method: "PATCH", path: "/permissions/:collection", auth: "service-key", desc: "Editar permisos de una colección", body: `{ "permissions": { "list"?, "get"?, "create"?, "update"?, "delete"? }, "filter_rule"? }`, response: `{ "ok": true }`, notes: "Niveles: public · auth · service · nobody. filter_rule: 'campo:{{auth.id}}'" },
-        ],
-    },
-    {
-        id: "smtp", icon: Mail, color: "bg-sky-50 text-sky-600", label: "SMTP & Email",
-        desc: "Configuración de email transaccional. Requiere service-key.",
-        endpoints: [
-            { method: "GET", path: "/smtp", auth: "service-key", desc: "Ver configuración SMTP actual", response: `{ "smtp": { "host", "port", "user", "from" } }` },
-            { method: "PUT", path: "/smtp", auth: "service-key", desc: "Reemplazar configuración SMTP completa", body: `{ "host", "port", "user", "pass", "from" }`, response: `{ "ok": true }` },
-            { method: "PATCH", path: "/smtp", auth: "service-key", desc: "Actualizar campos SMTP parcialmente", body: `{ "host"?, "port"?, "user"?, "pass"?, "from"? }`, response: `{ "ok": true }` },
-            { method: "DELETE", path: "/smtp", auth: "service-key", desc: "Eliminar configuración SMTP", response: `{ "ok": true }` },
-            { method: "POST", path: "/smtp/test", auth: "service-key", desc: "Enviar email de prueba para verificar conexión", body: `{ "to": "admin@example.com" }`, response: `{ "ok": true }` },
-            { method: "GET", path: "/email-templates", auth: "service-key", desc: "Listar plantillas de email", response: `{ "templates": [{ "id", "name", "subject", "body", "created_at" }] }` },
-            { method: "POST", path: "/email-templates/seed", auth: "service-key", desc: "Generar plantillas del sistema (welcome, reset-password, verify-email)", response: `{ "ok": true, "created": 3 }` },
-            { method: "POST", path: "/email-templates", auth: "service-key", desc: "Crear plantilla personalizada (soporta {{variable}})", body: `{ "name", "subject", "body" }`, response: `{ "template": { ... } }` },
-            { method: "GET", path: "/email-templates/:id", auth: "service-key", desc: "Ver plantilla por ID", response: `{ "template": { ... } }` },
-            { method: "PATCH", path: "/email-templates/:id", auth: "service-key", desc: "Editar plantilla", body: `{ "name"?, "subject"?, "body"? }`, response: `{ "template": { ... } }` },
-            { method: "DELETE", path: "/email-templates/:id", auth: "service-key", desc: "Eliminar plantilla", response: `{ "ok": true }` },
-        ],
-    },
-    {
-        id: "storage", icon: HardDrive, color: "bg-teal-50 text-teal-600", label: "Storage",
-        endpoints: [
-            { method: "GET", path: "/storage", auth: "jwt / service-key", desc: "Listar archivos (opcionalmente por prefijo/carpeta)", query: "path? · limit? · page?", response: `{ "files": [{ "id", "url", "mime", "size", "width"?, "height"?, "variant", "created_at" }] }` },
-            { method: "POST", path: "/storage/upload", auth: "jwt / service-key", desc: "Subir archivo (multipart/form-data)", body: `FormData: file (binario) · path · public? (true|false)`, response: `{ "file": { "id", "url", "mime", "size", "width"?, "height"?, "created_at" } }` },
-            { method: "POST", path: "/storage/upload-url", auth: "jwt / service-key", desc: "Subir desde URL externa", body: `{ "url": "https://...", "path", "public"? }`, response: `{ "file": { ... } }` },
-            { method: "DELETE", path: "/storage/:fileId", auth: "jwt / service-key", desc: "Eliminar archivo por ID", response: `{ "ok": true }` },
-        ],
-    },
-    {
-        id: "realtime", icon: Radio, color: "bg-amber-50 text-amber-600", label: "Realtime",
-        desc: "Conexión WebSocket para eventos en vivo.",
-        endpoints: [
-            {
-                method: "WS", path: "/ws", auth: "?key=apiKey o ?token=jwt", desc: "Conectar al servidor de tiempo real",
-                response: "WebSocket bidireccional",
-                notes: "Mensajes del cliente → servidor: { type: 'subscribe', collection } · { type: 'ping' }. Mensajes del servidor → cliente: { type: 'record.created'|'record.updated'|'record.deleted', collection, record, recordId } · { type: 'pong' }",
-            },
-        ],
-    },
-    {
-        id: "settings", icon: KeyRound, color: "bg-slate-50 text-slate-600", label: "Settings, Logs & Webhooks",
-        endpoints: [
-            { method: "GET", path: "/settings", auth: "service-key", desc: "Ver configuración del proyecto", response: `{ "settings": { "name", "api_keys": { "anon", "service" }, ... } }` },
-            { method: "PATCH", path: "/settings", auth: "service-key", desc: "Editar configuración del proyecto", body: `{ "name"?, ... }`, response: `{ "ok": true }` },
-            { method: "GET", path: "/stats", auth: "service-key", desc: "Estadísticas del proyecto", response: `{ "stats": { "total_records", "storage_used_mb", "requests_today", "active_users" } }` },
-            { method: "GET", path: "/logs", auth: "service-key", desc: "Logs de requests recientes", query: "limit · page · status · method · path", response: `{ "logs": [{ "method", "path", "status", "duration_ms", "ip", "user_id", "created_at" }] }` },
-            { method: "GET", path: "/api-keys", auth: "service-key", desc: "Listar API keys del proyecto", response: `{ "keys": [{ "id", "prefix", "created_at" }] }` },
-            { method: "POST", path: "/api-keys", auth: "service-key", desc: "Crear API key adicional", body: `{ "label"? }`, response: `{ "key": { "id", "value", "prefix" } }` },
-            { method: "DELETE", path: "/api-keys/:id", auth: "service-key", desc: "Revocar API key", response: `{ "ok": true }` },
-            { method: "GET", path: "/webhooks", auth: "service-key", desc: "Listar webhooks configurados", response: `{ "webhooks": [{ "id", "url", "events", "enabled", "created_at" }] }` },
-            { method: "POST", path: "/webhooks", auth: "service-key", desc: "Crear webhook", body: `{ "url", "events": ["record.created", ...], "secret"? }`, response: `{ "webhook": { ... } }` },
-            { method: "PATCH", path: "/webhooks/:webhookId", auth: "service-key", desc: "Editar webhook (url, events, enabled)", body: `{ "url"?, "events"?, "enabled"?, "secret"? }`, response: `{ "ok": true }` },
-            { method: "DELETE", path: "/webhooks/:webhookId", auth: "service-key", desc: "Eliminar webhook", response: `{ "ok": true }` },
-        ],
-    },
+  v2Submissions: `GET /api/v2/project/:id/forms/contacto/submissions
+Authorization: Bearer <token>
+
+# Response
+{
+  "submissions": [{
+    "id":         "uuid",
+    "email":      "juan@example.com",
+    "message":    "Hola!",
+    "created_at": "2024-01-15T10:30:00Z"
+  }]
+}`,
+
+  v2Filters: `# Between valores
+GET /api/v2/project/:id/records?collection=products&price[between]=10,100
+
+# Es nulo
+GET /api/v2/project/:id/records?collection=users&phone[isNull]=true
+
+# Contiene en array
+GET /api/v2/project/:id/records?collection=posts&tags[has]=javascript
+
+# Full-text search
+GET /api/v2/project/:id/records?collection=articles&q=base+datos
+
+# Incluir soft-deleted
+GET /api/v2/project/:id/records?collection=posts&include_deleted=true
+
+# Exportar
+GET /api/v2/project/:id/records?collection=orders&export=csv`,
+
+  v2AuthOAuth: `# Iniciar flujo OAuth
+GET /api/v2/project/:id/auth/oauth/:provider?redirect=https://myapp.com/callback
+# provider: google | github | discord | apple
+
+# Callback — intercambiar code por token
+POST /api/v2/project/:id/auth/oauth/:provider/callback
+{ "code": "...", "state": "..." }
+
+# Response
+{ "token": "eyJhbGci...", "user": { "id": "uuid", "email": "..." } }`,
+
+  v2AuthTOTP: `# Setup TOTP
+POST /api/v2/project/:id/auth/totp/setup
+Authorization: Bearer <token>
+# Response: { "secret": "...", "qr_url": "otpauth://..." }
+
+# Confirmar TOTP
+POST /api/v2/project/:id/auth/totp/confirm
+{ "code": "123456" }
+
+# Verificar en login
+POST /api/v2/project/:id/auth/totp/verify
+{ "code": "123456" }`,
+
+  v2Realtime: `# Conectar WebSocket (v2 — /realtime)
+wss://tu-proyecto.matecito.dev/api/v2/realtime
+
+# Autenticar
+→ { "type": "auth", "token": "Bearer <jwt>" }
+
+# Suscribirse
+→ { "type": "subscribe", "collection": "messages", "filter": { "room_id": "room-123" } }
+
+# Presence (v2)
+→ { "type": "presence", "channel": "room-123", "state": { "username": "Juan", "status": "online" } }
+
+# Recibir
+← { "type": "event",    "action": "create", "record": { ... } }
+← { "type": "presence", "users": [{ "id": "uuid", "username": "Juan" }] }`,
+
+  v2Notifications: `# Registrar dispositivo push
+POST /api/v2/project/:id/notifications/devices
+Authorization: Bearer <token>
+{ "token": "<fcm-token>", "platform": "android" }  // ios | android | web
+
+# Enviar notificación
+POST /api/v2/project/:id/notifications/send
+Authorization: Bearer <token>
+{
+  "user_ids": ["uuid-1", "uuid-2"],
+  "title":    "Nueva actualización",
+  "body":     "Versión 2.0 disponible",
+  "data":     { "screen": "updates" }
+}
+
+# Broadcast a todos
+POST /api/v2/project/:id/notifications/broadcast
+{ "title": "Mantenimiento", "body": "Sábado 02:00 AM" }`,
+
+  v2Batch: `# Batch de operaciones (v2)
+POST /api/v2/project/:id/batch
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "operations": [
+    { "method": "POST",   "path": "/records", "body": { "collection": "users", "data": { "name": "A" } } },
+    { "method": "PATCH",  "path": "/records/uuid-1", "body": { "status": "active" } },
+    { "method": "DELETE", "path": "/records/uuid-2" }
+  ]
+}
+
+# Response — todas las operaciones o ninguna (transaccional)
+{ "results": [{ "status": 201, "body": { ... } }, ...] }`,
+
+  // ─── Flutter ──────────────────────────────────────────────────────────────
+  flutterInstall: `# pubspec.yaml
+dependencies:
+  matecitodb_flutter: ^4.0.0
+  shared_preferences: ^2.2.0  # para persistencia de sesión
+  web_socket_channel: ^2.4.0  # para realtime`,
+
+  flutterInit: `import 'package:matecitodb_flutter/matecitodb_flutter.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final db = MatecitoDB.createClient(
+    'https://mi-proyecto.matecito.dev',
+    config: const ClientConfig(
+      apiKey:      'mi-anon-key',
+      // serviceKey: 'mi-service-key',  // solo server-side
+      apiVersion:  'v2',   // 'v1' por defecto
+      autoRefresh: true,   // refresh automático de tokens
+      debug:       false,  // logs HTTP en consola
+      timeoutMs:   15000,
+    ),
+  );
+
+  // Esperar a que la sesión persisida se restaure
+  await db.auth.sessionReady;
+
+  runApp(MyApp(db: db));
+}`,
+
+  flutterAuth: `// Registro
+final res = await db.auth.signUp(
+  email:    'user@example.com',
+  password: 'secure-password',
+  extra:    {'name': 'Juan Pérez'},
+);
+if (res.hasError) print(res.error!.message);
+
+// Login
+final res = await db.auth.signIn(
+  email:    'user@example.com',
+  password: 'secure-password',
+);
+final token = res.data?.accessToken;
+
+// Logout
+await db.auth.signOut();
+
+// Usuario actual
+final me = await db.auth.getMe();
+print(me.data?.email);
+
+// Estado actual (sin request)
+final isLogged = db.auth.isLoggedIn;
+final user     = db.auth.user;`,
+
+  flutterAuthStream: `// Stream de cambios de sesión
+StreamBuilder<AuthUser?>(
+  stream: db.auth.authStateStream,
+  builder: (context, snapshot) {
+    if (snapshot.data != null) return const HomeScreen();
+    return const LoginScreen();
+  },
+)
+
+// Callback (con unsubscribe)
+final unsub = db.auth.onAuthChange((user) {
+  if (user == null) Navigator.pushReplacementNamed(context, '/login');
+});
+
+@override
+void dispose() {
+  unsub();  // limpiar listener
+  super.dispose();
+}`,
+
+  flutterAuthPassword: `// Reset de contraseña
+await db.auth.requestPasswordReset('user@example.com');
+
+// Confirmar con token del email
+await db.auth.resetPassword('reset-token', 'new-secure-pass');
+
+// Verificar email
+await db.auth.verifyEmail(token);
+await db.auth.resendVerification(email: 'user@example.com');
+
+// Actualizar perfil
+await db.auth.updateProfile({'name': 'Nuevo nombre', 'avatar_url': 'https://...'});
+
+// Setear sesión manualmente (deep link, etc.)
+db.auth.setSession(accessToken: token, refreshToken: refreshToken);
+
+// Refresh manual
+await db.auth.refreshSession();`,
+
+  flutterAuthOAuth: `// Obtener URL OAuth (v2)
+final url = db.auth.getOAuthUrl(
+  'google',
+  'myapp://auth/callback',  // deeplink o URL de callback
+);
+
+// Abrir en browser
+await launchUrl(Uri.parse(url));
+
+// En el callback del deeplink
+final res = await db.auth.handleOAuthCallback({
+  'code':  uri.queryParameters['code']!,
+  'state': uri.queryParameters['state']!,
+});
+// res.data?.accessToken listo para usar`,
+
+  flutterAuthMagicTOTP: `// Magic link (v2)
+await db.auth.magicLink('user@example.com',
+  redirectUrl: 'myapp://auth/magic');
+
+// TOTP — Setup
+final res = await db.auth.totpSetup();
+final secret = res.data!['secret'];
+final qrUrl  = res.data!['qr_url'];
+
+// Confirmar con código del authenticator
+await db.auth.totpConfirm('123456');
+
+// Verificar en login (cuando 2FA está activo)
+await db.auth.totpVerify(totpSession, '123456');
+
+// Desactivar 2FA
+await db.auth.totpDisable();`,
+
+  flutterAuthAdmin: `// Admin — requiere serviceKey
+// Listar usuarios
+final res = await db.auth.admin.listUsers(page: 1, limit: 50, search: 'juan');
+
+// Eliminar usuario
+await db.auth.admin.deleteUser(userId);
+
+// OAuth providers
+await db.auth.oauth.configure('google',
+  clientId:     'CLIENT_ID',
+  clientSecret: 'CLIENT_SECRET',
+);
+final providers = await db.auth.oauth.listProviders();
+
+// Roles (v2)
+await db.auth.roles.assign(userId, 'moderator');
+await db.auth.roles.unassign(userId, 'moderator');
+await db.auth.roles.create('editor', description: 'Puede editar contenido');
+
+// Invitaciones (v2)
+final inv = await db.auth.invitations.create(
+  email: 'nuevo@example.com', role: 'editor', expiresIn: '48h',
+);
+final list = await db.auth.invitations.list();
+await db.auth.invitations.revoke(invitationId);`,
+
+  flutterQBFilters: `// QueryBuilder — misma API fluida que JS/TS
+final posts = await db
+  .from('posts')
+  .eq('status', 'published')
+  .order('created_at', ascending: false)
+  .limit(20)
+  .get();
+
+// Filtros combinados
+final results = await db
+  .from('products')
+  .gte('price', 100)
+  .lte('price', 500)
+  .ilike('name', '%laptop%')
+  .inValues('category', ['tech', 'gaming'])
+  .notInValues('status', ['draft'])
+  .get();
+
+// Nullable
+final noPhone = await db.from('users').isNull('phone').get();
+
+// Array contains (v2)
+final tagged = await db.from('posts').has('tags', 'dart').get();
+
+// OR conditions
+await db.from('users').or(['status.eq.active', 'role.eq.admin']).get();`,
+
+  flutterQBAdvanced: `// Between (v2)
+final recent = await db
+  .from('orders')
+  .between('total', 100, 1000)
+  .get();
+
+// Full-text search (v2)
+final articles = await db
+  .from('articles')
+  .searchFullText('machine learning', limit: 10)
+  .then((r) => r.data);
+
+// Búsqueda simple
+final found = await db.from('products').search('zapatillas').get();
+
+// Relaciones (populate) (v2)
+final withAuthor = await db
+  .from('posts')
+  .populate('author_id')  // o populate(['author_id', 'category_id'])
+  .limit(10)
+  .get();
+
+// POST /records/query (body complejo) (v2)
+final res = await db
+  .from('orders')
+  .queryBody(
+    where: {'status': 'pending'},
+    sort: 'created_at',
+    ascending: false,
+    limit: 50,
+    includeDeleted: false,
+  );`,
+
+  flutterQBMutations: `// Crear
+final post = await db.from('posts').insert({
+  'title':  'Hola Dart',
+  'status': 'draft',
+});
+
+// Crear múltiples
+final posts = await db.from('posts').insertMany([
+  {'title': 'Post A'},
+  {'title': 'Post B'},
+]);
+
+// Upsert (insert o update por clave única)
+await db.from('users')
+  .upsert({'email': 'j@ex.com', 'name': 'Juan'}, 'email');
+
+// Update filtrado
+await db.from('posts').eq('status', 'draft').update({'status': 'published'});
+
+// Merge (actualización parcial)
+await db.from('products').eq('id', productId).merge({'price': 299});
+
+// Con expiración
+await db.from('sessions')
+  .eq('id', sessionId)
+  .update({'active': true}, expiresAt: DateTime.now().add(Duration(hours: 2)));
+
+// Soft delete
+await db.from('posts').eq('id', postId).delete();
+
+// Hard delete (permanente)
+await db.from('posts').hardDelete(postId);
+
+// Restaurar
+await db.from('posts').restore(postId);`,
+
+  flutterQBPaginate: `// findOne por ID o filtro
+final user = await db.from('users').findOne('user-uuid');
+final byEmail = await db.from('users').findOne({'email': 'j@ex.com'});
+
+// find (lista sin paginación)
+final admins = await db.from('users').find({'role': 'admin'});
+
+// getFirst
+final latest = await db.from('posts').latest().getFirst();
+
+// count
+final total = await db.from('posts').eq('status', 'published').count();
+
+// Seleccionar campos
+final names = await db
+  .from('users')
+  .select(['id', 'name', 'email'])
+  .limit(100)
+  .get();
+
+// Paginación como Stream (consume página por página)
+await for (final page in db.from('orders').paginate(batchSize: 50)) {
+  for (final order in page) {
+    processOrder(order);
+  }
+}
+
+// Exportar
+final csvBytes = await db.from('orders').export(format: 'csv');
+await File('orders.csv').writeAsBytes(csvBytes);`,
+
+  flutterQBRealtime: `// subscribe desde QueryBuilder
+final unsub = db
+  .from('messages')
+  .eq('room_id', 'room-123')
+  .subscribe((event) {
+    // event.type: 'create' | 'update' | 'delete'
+    if (event.type == 'create') {
+      setState(() => messages.add(event.record!));
+    }
+  });
+
+// watch — devuelve Stream<RealtimeEvent>
+StreamBuilder<RealtimeEvent>(
+  stream: db.from('notifications').watch(),
+  builder: (context, snapshot) {
+    final event = snapshot.data;
+    if (event == null) return const SizedBox();
+    return NotificationBadge(event: event);
+  },
+)
+
+// Limpiar
+@override
+void dispose() {
+  unsub();
+  super.dispose();
+}`,
+
+  flutterStorage: `// Subir con path de archivo
+import 'package:matecitodb_flutter/matecitodb_flutter.dart';
+
+final file = MatecitoFile(
+  field:    'file',
+  path:     '/tmp/avatar.jpg',
+  filename: 'avatar.jpg',
+);
+
+final res = await db.storage.upload(file, onProgress: (sent, total) {
+  print('Progreso: \${(sent / total * 100).toInt()}%');
+});
+print(res.data?.url);  // URL pública
+
+// Subir desde URL remota
+final res = await db.storage.uploadFromUrl(
+  'https://example.com/photo.jpg',
+  filename: 'imported.jpg',
+);
+
+// Listar archivos del proyecto
+final files = await db.storage.list();
+for (final f in files.data ?? []) {
+  print('\${f.id} → \${f.url}');
+}
+
+// Eliminar
+await db.storage.delete(fileId);`,
+
+  flutterRealtime: `// Suscripción directa
+final unsub = db.realtime.subscribe('posts', (event) {
+  print('Acción: \${event.type}');
+  print('Record: \${event.record}');
+}, filter: {'status': 'published'});
+
+// Stream con StreamBuilder
+StreamBuilder<RealtimeEvent>(
+  stream: db.realtime.watch('messages',
+    filter: {'room_id': roomId}),
+  builder: (context, snap) {
+    final event = snap.data;
+    return event != null
+      ? MessageBubble(record: event.record!)
+      : const SizedBox();
+  },
+)
+
+// Estado de conexión
+final stopListening = db.realtime.onStatusChange((status) {
+  // 'connected' | 'disconnected'
+  print('Realtime: \$status');
+});
+
+print(db.realtime.isConnected);
+
+// Desconectar
+db.realtime.disconnect();`,
+
+  flutterCollections: `// Listar colecciones
+final res = await db.collections.list();
+
+// Crear colección con campos
+await db.collections.create('events', fields: [
+  {'name': 'title',    'type': 'text',   'required': true},
+  {'name': 'date',     'type': 'date',   'required': true},
+  {'name': 'capacity', 'type': 'number', 'required': false},
+]);
+
+// Renombrar / eliminar
+await db.collections.rename('old_name', 'new_name');
+await db.collections.delete('temp_table');
+
+// Gestión de campos
+final fields = db.collections.fields('posts');
+await fields.list();
+await fields.create(name: 'slug', type: 'text', required: true);
+await fields.update(fieldId, required: false);
+await fields.delete(fieldId);`,
+
+  flutterPermissions: `// Permisos por colección
+// Niveles: 'public' | 'auth' | 'service' | 'nobody'
+
+// Obtener todos
+final all = await db.permissions.getAll();
+
+// Obtener permisos de una colección
+final postPerms = await db.permissions.get('posts');
+
+// Actualizar por operación
+await db.permissions.set('posts', {
+  'list':   'public',   // cualquiera puede listar
+  'get':    'public',   // cualquiera puede ver uno
+  'create': 'auth',     // solo autenticados pueden crear
+  'update': 'auth',
+  'delete': 'service',  // solo serviceKey puede eliminar
+});
+
+// Aplicar mismo nivel a todo
+await db.permissions.setAll('drafts', 'auth');
+await db.permissions.setAll('admin_logs', 'service');`,
+
+  flutterWebhooks: `// Crear webhook
+final res = await db.webhooks.create(
+  url:    'https://myserver.com/hook',
+  events: ['record.created', 'record.deleted', 'auth.signup'],
+  secret: 'hmac-secret',
+);
+
+// Listar / actualizar / eliminar
+final list = await db.webhooks.list();
+await db.webhooks.update(hookId, enabled: false);
+await db.webhooks.delete(hookId);
+
+// Testear entrega
+await db.webhooks.test(hookId);
+
+// Historial de entregas
+final attempts = await db.webhooks.attempts(hookId, limit: 50);
+
+// Dead Letter Queue (entregas fallidas)
+final dlq = await db.webhooks.dlqList(hookId);
+await db.webhooks.dlqRetry(hookId, entryId);    // reintentar uno
+await db.webhooks.dlqRetryAll(hookId);           // reintentar todos
+await db.webhooks.dlqDiscard(hookId, entryId);   // descartar`,
+
+  flutterSmtp: `// Configurar SMTP
+await db.smtp.set(
+  host: 'smtp.gmail.com',
+  port: 587,
+  user: 'noreply@myapp.com',
+  from: 'noreply@myapp.com',
+  pass: 'app-password',
+);
+
+// Actualizar parcialmente
+await db.smtp.update(port: 465);
+
+// Testear configuración
+final err = await db.smtp.test('admin@myapp.com');
+if (err == null) print('SMTP OK');
+
+// Ver config actual
+final config = await db.smtp.get();
+
+// Eliminar config
+await db.smtp.clear();`,
+
+  flutterSql: `// SQL directo (requiere serviceKey)
+final res = await db.sql.query(
+  "SELECT id, name, email FROM auth_users WHERE created_at > NOW() - INTERVAL '7 days'"
+);
+
+if (!res.hasError) {
+  final rows = res.data!.rows;  // List<Map<String, dynamic>>
+  print('Filas: \${rows.length}');
+}
+
+// Útil para migraciones, reportes, etc.
+await db.sql.query(
+  "CREATE INDEX IF NOT EXISTS idx_posts_status ON posts_table(status)"
+);`,
+
+  flutterBatch: `// Batch básico
+final result = await db.batch()
+  .insert('users', {'name': 'Ana', 'role': 'editor'})
+  .insert('users', {'name': 'Luis', 'role': 'viewer'})
+  .update('user-uuid-1', {'role': 'admin'})
+  .delete('user-uuid-old')
+  .execute();
+
+// Atómico — todo o nada (v2)
+final atomic = await db.batch()
+  .atomic()
+  .insert('orders', {'product_id': 'p1', 'qty': 2})
+  .update('p1', {'stock': 98}, collection: 'products')
+  .execute();
+
+// Dry run — validar sin escribir (v2)
+final validation = await db.batch()
+  .dryRun()
+  .insert('posts', {'title': 'Test'})
+  .delete('invalid-uuid')
+  .execute();
+// validation.valid / validation.invalid / validation.errors`,
+
+  flutterFunctions: `// Invocar function (v2)
+final result = await db.functions.invoke('send-welcome', args: {
+  'email': 'user@example.com',
+  'name':  'Juan',
+});
+
+// CRUD de functions
+await db.functions.create(
+  name:      'process-order',
+  code:      "const { args } = context; return { ok: true }",
+  timeoutMs: 5000,
+  isPublic:  false,
+);
+final list = await db.functions.list();
+await db.functions.update('process-order', timeoutMs: 10000);
+await db.functions.delete('old-function');
+
+// Logs
+final logs = await db.functions.logs('send-welcome', limit: 20);
+
+// Variables de entorno
+await db.functions.envSet('STRIPE_KEY', 'sk_live_...');
+final env = await db.functions.envList();
+await db.functions.envDelete('OLD_KEY');
+
+// Cron jobs
+await db.functions.cronCreate(
+  name:         'nightly-report',
+  cronExpr:     '0 3 * * *',  // 3 AM todos los días
+  functionName: 'generate-report',
+  timezone:     'America/Buenos_Aires',
+);
+final crons = await db.functions.cronsList();
+await db.functions.cronRun('nightly-report');  // ejecutar manualmente
+await db.functions.cronDelete('nightly-report');
+
+// Triggers (DB events → function)
+await db.functions.triggerCreate(
+  collection:   'orders',
+  event:        'insert',  // insert | update | delete
+  functionName: 'process-order',
+);
+final triggers = await db.functions.triggersList();
+await db.functions.triggerToggle(triggerId, false);  // desactivar`,
+
+  flutterAnalytics: `// Trackear evento (v2)
+await db.analytics.track(
+  'purchase',
+  userId:     currentUser.id,
+  sessionId:  sessionId,
+  properties: {'product': 'Pro Plan', 'amount': 29.99, 'currency': 'USD'},
+);
+
+// Eventos agrupados
+final events = await db.analytics.getEvents(
+  groupBy: 'event',
+  from:    '2024-01-01',
+  to:      '2024-12-31',
+);
+for (final e in events) {
+  print('\${e.event}: \${e.count} veces, \${e.uniqueUsers} usuarios únicos');
+}
+
+// Funnel
+final funnel = await db.analytics.getFunnel(
+  ['page_view', 'signup', 'checkout', 'purchase'],
+);
+
+// Historial de un usuario
+final userEvents = await db.analytics.getUserEvents(userId, limit: 100);`,
+
+  flutterAI: `// Chat (v2)
+final res = await db.ai.chat([
+  ChatMessage(role: 'system',    content: 'Sos un asistente técnico.'),
+  ChatMessage(role: 'user',      content: '¿Cómo implemento auth?'),
+], maxTokens: 500, temperature: 0.7);
+print(res.data!['content']);
+
+// Embeddings
+final embed = await db.ai.embed('texto a vectorizar');
+final vector = embed.data!['embedding'];  // List<double>
+
+// Configurar proveedor
+await db.ai.configureProvider(
+  provider:       'openai',  // 'anthropic' | 'groq'
+  apiKey:         'sk-...',
+  model:          'gpt-4o-mini',
+  embedModel:     'text-embedding-3-small',
+  maxTokensPerDay: 100000,
+);
+
+// Generar schema con IA
+final schema = await db.ai.generateSchema(
+  'App de delivery con restaurantes, menú, pedidos y repartidores',
+);
+// Aplicar schema generado
+await db.ai.applySchema(schema['collections']);
+
+// Ver uso de tokens
+final usage = await db.ai.usage();`,
+
+  flutterConfig: `// Remote Config (v2)
+// Obtener todos los valores
+final configs = await db.remoteConfig.getAll();
+final maintenance = configs['maintenance_mode']?.value ?? false;
+final maxUpload   = configs['max_upload_mb']?.value ?? 10;
+
+// Obtener uno
+final res = await db.remoteConfig.get('feature_new_ui');
+print(res.data?.value);  // true/false
+
+// Crear / actualizar
+await db.remoteConfig.set('feature_new_ui', true,
+  description: 'Activa la nueva UI de dashboard',
+  isPublic:    true,
+);
+
+// Eliminar
+await db.remoteConfig.delete('old_flag');`,
+
+  flutterNotifications: `// Registrar token push
+await db.notifications.registerToken(fcmToken);
+
+// Enviar push a usuarios (requiere serviceKey)
+final result = await db.notifications.send(
+  userIds: [userId1, userId2],
+  title:   'Nueva actualización',
+  body:    'Versión 2.0 disponible',
+  data:    {'screen': 'updates', 'version': '2.0'},
+);
+print('Enviados: \${result.data?.successCount}');
+
+// In-App Notifications (v2)
+// Crear notificación in-app
+await db.notifications.sendInApp(
+  userIds: [userId],
+  title:   'Pedido listo',
+  body:    'Tu pedido #1234 está en camino.',
+  type:    'success',  // info | success | warning | error
+);
+
+// Listar mis notificaciones
+final list = await db.notifications.listMy(unreadOnly: true);
+for (final n in list.notifications) {
+  print('\${n.title}: \${n.body}');
+}
+
+// Contar no leídas
+final count = await db.notifications.unreadCount();
+
+// Marcar como leída
+await db.notifications.markAsRead(notificationId);
+await db.notifications.readAll();`,
+
+  flutterForms: `// Forms (v2)
+// Listar forms del proyecto
+final forms = await db.forms.list();
+
+// Ver submissions de un form
+final submissions = await db.forms.submissions('contacto', limit: 50);
+
+// Envío público (sin auth)
+await db.forms.submitPublic('form-id', {
+  'email':   'juan@example.com',
+  'message': 'Consulta sobre precios',
+});`,
+
+  flutterWorkflows: `// Workflows (v2) — State machines para registros
+// Listar workflows del proyecto
+final workflows = await db.workflows.list();
+
+// Ver estado actual de un registro en un workflow
+final state = await db.workflows.getState('orders', orderId);
+print('Estado: \${state.data?.currentState}');
+print('Transiciones: \${state.data?.allowedTransitions}');
+
+// Historial de transiciones
+final history = await db.workflows.history('order-flow',
+  recordId: orderId);`,
+
+  flutterGeo: `// Geo queries (v2)
+// Buscar registros cercanos a una ubicación
+final nearby = await db.geo.near(
+  'restaurants',
+  lat:      -34.6037,
+  lng:      -58.3816,   // Buenos Aires
+  radiusKm: 5,
+  limit:    20,
+  filter:   {'category': 'pizza'},
+);
+for (final r in nearby) {
+  print('\${r.data['name']} a \${r.distanceKm.toStringAsFixed(1)} km');
+}
+
+// Dentro de un bounding box
+final inBounds = await db.geo.bounds(
+  'events',
+  north: -34.5, south: -34.7,
+  east:  -58.3, west:  -58.5,
+);`,
+
+  flutterSync: `// Offline Sync (v2)
+// Pull — bajar cambios desde el servidor
+final changes = await db.sync.pull('posts',
+  DateTime.now().subtract(Duration(hours: 1)).millisecondsSinceEpoch,
+  limit: 100,
+);
+// changes: { records, deleted_ids, server_time }
+
+// Push — subir cambios locales
+final result = await db.sync.push('posts', [
+  {'id': 'local-uuid', 'title': 'Draft offline', 'op': 'insert'},
+  {'id': 'server-uuid', 'status': 'published', 'op': 'update'},
+], conflictStrategy: 'last_write_wins'); // o 'server_wins'`,
+
+  flutterSecurity: `// Security — IP Rules & Rate limits (v2)
+// Bloquear un rango de IPs
+await db.security.ipBlock('192.168.1.0/24',
+  description: 'Rango corporativo sospechoso');
+
+// Permitir un rango
+await db.security.ipAllow('10.0.0.0/8',
+  description: 'Red interna');
+
+// Listar / eliminar reglas
+final rules = await db.security.ipList();
+await db.security.ipDelete(ruleId);
+await db.security.ipToggle(ruleId, isActive: false);
+
+// Testear si una IP sería bloqueada
+final check = await db.security.ipTest('203.0.113.5');
+print(check.data);  // { blocked: true, rule_id: '...' }
+
+// Rate limits
+await db.security.rateLimitCreate(
+  path:     '/records',
+  max:      100,
+  windowMs: 60000,
+  keyBy:    'user',  // 'ip' | 'user' | 'apiKey'
+);
+final limits = await db.security.rateLimitList();
+await db.security.rateLimitDelete(limitId);`,
+
+  flutterCache: `// Response Cache (v2)
+// Cachear listados de 'products' por 5 minutos
+await db.cache.create(
+  collection: 'products',
+  ttlSeconds: 300,
+  varyBy:     [],  // mismo cache para todos los usuarios
+);
+
+// Cache por usuario (feed personalizado)
+await db.cache.create(
+  collection: 'feed',
+  ttlSeconds: 30,
+  varyBy:     ['user'],  // cache separado por usuario
+);
+
+// Por rol
+await db.cache.create(
+  collection: 'admin_reports',
+  ttlSeconds: 3600,
+  varyBy:     ['role'],
+);
+
+// Listar reglas
+final rules = await db.cache.list();
+
+// Invalidar inmediatamente (después de un write)
+await db.cache.purge(ruleId);
+
+// Estadísticas
+final stats = await db.cache.stats();
+print('Hit rate: \${stats.data?.hitRate}%');
+await db.cache.delete(ruleId);`,
+
+  flutterSchema: `// Schema Introspection (v2)
+// Ver schema completo del proyecto
+final schema = await db.schema.get();
+for (final col in schema.data?.collections ?? []) {
+  print('\${col.name}: \${col.fields.map((f) => f.name).join(', ')}');
+}
+// schema.data?.auth      → config de autenticación
+// schema.data?.project   → metadata del proyecto
+
+// Historial de migraciones
+final migrations = await db.schema.migrations(limit: 50);
+for (final m in migrations.data ?? []) {
+  print('v\${m.version}: \${m.operation} on \${m.collection}');
+}
+
+// Rollback de una migración (solo estructural, no recupera datos)
+await db.schema.rollback(version: 42);
+
+// Explain query (requiere serviceKey)
+final explain = await db.schema.explain(
+  'orders',
+  'status.eq.pending',
+  sort: 'created_at', order: 'desc',
+);
+// explain.data: { estimated_rows, index_used, suggestions }`,
+}
+
+// ═══════════════════════════════════════════════════════════
+// Section definitions
+// ═══════════════════════════════════════════════════════════
+
+interface Section {
+  id: string
+  title: string
+  icon: React.ReactNode
+  description?: string
+  snippets?: { title: string; code: string; lang: string; description?: string }[]
+  badges?: string[]
+}
+
+const SDK_SECTIONS: Section[] = [
+  {
+    id: 'sdk-intro', title: 'Introducción', icon: <Code2 className="w-4 h-4" />,
+    description: 'MatecitoDB es un Backend-as-a-Service (BaaS) con autenticación, bases de datos en tiempo real, storage y más. Soporta JavaScript/TypeScript y Flutter/Dart. El SDK soporta API v1 (default) y v2 (recomendada).',
+    badges: ['npm install matecitodb', 'Flutter: matecitodb_flutter: ^4.0.0', 'v1: default · v2: recomendada'],
+  },
+  {
+    id: 'sdk-api-version', title: 'API v1 vs v2', icon: <Globe className="w-4 h-4" />,
+    description: 'El SDK soporta ambas versiones. Por defecto usa v1 para compatibilidad. Activá v2 para Functions, Analytics, AI, Remote Config, Forms, filtros avanzados y fixes de seguridad.',
+    snippets: [
+      { title: 'API v1 (default)', code: CODE.clientV1, lang: 'typescript', description: 'Compatible con todos los proyectos existentes.' },
+      { title: 'API v2 (recomendada)', code: CODE.clientV2, lang: 'typescript', description: 'Incluye todos los módulos nuevos y security hardening.' },
+    ],
+    badges: ['v1: CRUD, Auth, Storage, Realtime, Webhooks', 'v2: v1 + Functions, Analytics, AI, Config, Forms, Notifications, vector search'],
+  },
+  {
+    id: 'sdk-init', title: 'Inicialización', icon: <Key className="w-4 h-4" />,
+    snippets: [{ title: 'lib/db.ts', code: CODE.client, lang: 'typescript', description: 'Inicializá el cliente con tus variables de entorno. Nunca expongas serviceKey en el cliente.' }],
+  },
+  {
+    id: 'sdk-auth-basic', title: 'Auth — Básico', icon: <Shield className="w-4 h-4" />,
+    description: 'Registro, login, logout y perfil del usuario actual.',
+    snippets: [{ title: 'Auth básico', code: CODE.auth, lang: 'typescript' }],
+  },
+  {
+    id: 'sdk-auth-session', title: 'Auth — Sesión', icon: <Shield className="w-4 h-4" />,
+    description: 'Gestión de tokens, refresh y listener de cambios de sesión.',
+    snippets: [{ title: 'Session & onAuthChange', code: CODE.authSession, lang: 'typescript' }],
+  },
+  {
+    id: 'sdk-auth-password', title: 'Auth — Contraseña', icon: <Shield className="w-4 h-4" />,
+    snippets: [{ title: 'Reset & verificación', code: CODE.authPassword, lang: 'typescript' }],
+  },
+  {
+    id: 'sdk-auth-oauth', title: 'Auth — OAuth (v2)', icon: <Shield className="w-4 h-4" />,
+    description: 'Login con Google, GitHub, Discord y Apple. Solo disponible en proyectos v2.',
+    snippets: [{ title: 'OAuth flow', code: CODE.authOAuth, lang: 'typescript' }],
+  },
+  {
+    id: 'sdk-auth-magiclink', title: 'Auth — Magic Link (v2)', icon: <Shield className="w-4 h-4" />,
+    description: 'Login sin contraseña por email. El usuario recibe un link que lo autentica automáticamente.',
+    snippets: [{ title: 'Magic link', code: CODE.authMagicLink, lang: 'typescript' }],
+  },
+  {
+    id: 'sdk-auth-totp', title: 'Auth — TOTP / 2FA (v2)', icon: <Shield className="w-4 h-4" />,
+    description: 'Autenticación de dos factores con Google Authenticator, Authy o cualquier app TOTP.',
+    snippets: [{ title: 'TOTP setup & verify', code: CODE.authTOTP, lang: 'typescript' }],
+  },
+  {
+    id: 'sdk-auth-admin', title: 'Auth — Admin & Roles', icon: <Shield className="w-4 h-4" />,
+    description: 'Gestión de usuarios y roles desde el servidor. Requiere serviceKey.',
+    snippets: [
+      { title: 'Admin API', code: CODE.authAdmin, lang: 'typescript' },
+      { title: 'Invitaciones', code: CODE.authInvitations, lang: 'typescript' },
+    ],
+  },
+  {
+    id: 'sdk-query-basic', title: 'QueryBuilder — Filtros', icon: <Database className="w-4 h-4" />,
+    description: 'API fluida y tipada para consultar datos. Todos los métodos son encadenables.',
+    snippets: [{ title: 'Filtros básicos', code: CODE.queryBuilder, lang: 'typescript' }],
+  },
+  {
+    id: 'sdk-query-advanced', title: 'QueryBuilder — Avanzado', icon: <Database className="w-4 h-4" />,
+    description: 'Full-text search, vector search, OR conditions, relaciones y más.',
+    snippets: [{ title: 'Filtros avanzados', code: CODE.queryBuilderAdvanced, lang: 'typescript' }],
+  },
+  {
+    id: 'sdk-query-mutations', title: 'QueryBuilder — Mutaciones', icon: <Database className="w-4 h-4" />,
+    description: 'Insert, upsert, update, merge, delete, hard delete y restore.',
+    snippets: [{ title: 'CRUD con QueryBuilder', code: CODE.queryBuilderMutations, lang: 'typescript' }],
+  },
+  {
+    id: 'sdk-query-paginate', title: 'QueryBuilder — Paginación', icon: <Database className="w-4 h-4" />,
+    description: 'paginate(), findOne(), count(), select() y export().',
+    snippets: [{ title: 'Paginación & utilidades', code: CODE.queryBuilderPaginate, lang: 'typescript' }],
+  },
+  {
+    id: 'sdk-query-realtime', title: 'QueryBuilder — Realtime', icon: <Zap className="w-4 h-4" />,
+    description: 'subscribe() y watch() directamente desde el QueryBuilder.',
+    snippets: [{ title: 'Realtime desde QB', code: CODE.queryBuilderRealtime, lang: 'typescript' }],
+  },
+  {
+    id: 'sdk-records', title: 'Records (API clásica)', icon: <Database className="w-4 h-4" />,
+    description: 'API imperativa con db.records.*. Compatible con v1 y v2.',
+    snippets: [{ title: 'db.records.*', code: CODE.records, lang: 'typescript' }],
+  },
+  {
+    id: 'sdk-realtime', title: 'Realtime', icon: <Zap className="w-4 h-4" />,
+    description: 'Suscripción a eventos en tiempo real. v1 usa /ws, v2 usa /realtime (con presence).',
+    snippets: [{ title: 'db.realtime.subscribe()', code: CODE.realtime, lang: 'typescript' }],
+  },
+  {
+    id: 'sdk-storage', title: 'Almacenamiento', icon: <FileText className="w-4 h-4" />,
+    snippets: [{ title: 'Storage', code: CODE.storage, lang: 'typescript' }],
+  },
+  {
+    id: 'sdk-emails', title: 'Email (SMTP)', icon: <Mail className="w-4 h-4" />,
+    snippets: [{ title: 'SMTP', code: CODE.emails, lang: 'typescript' }],
+  },
+  {
+    id: 'sdk-functions', title: 'Functions (v2)', icon: <Workflow className="w-4 h-4" />,
+    description: 'Ejecutar y gestionar serverless functions. Requiere proyecto v2.',
+    snippets: [{ title: 'db.functions.*', code: CODE.functions, lang: 'typescript' }],
+  },
+  {
+    id: 'sdk-analytics', title: 'Analytics (v2)', icon: <BarChart3 className="w-4 h-4" />,
+    description: 'Eventos, funnels y métricas de uso. Requiere proyecto v2.',
+    snippets: [{ title: 'db.analytics.*', code: CODE.analytics, lang: 'typescript' }],
+  },
+  {
+    id: 'sdk-ai', title: 'AI Gateway (v2)', icon: <Sparkles className="w-4 h-4" />,
+    description: 'Integrá OpenAI, Anthropic o Groq sin exponer API keys al cliente.',
+    snippets: [{ title: 'db.ai.*', code: CODE.aiGateway, lang: 'typescript' }],
+  },
+  {
+    id: 'sdk-config', title: 'Remote Config (v2)', icon: <Settings className="w-4 h-4" />,
+    description: 'Feature flags y configuración remota en tiempo real.',
+    snippets: [{ title: 'db.config.*', code: CODE.remoteConfig, lang: 'typescript' }],
+  },
+  {
+    id: 'sdk-notifications', title: 'Notificaciones (v2)', icon: <Bell className="w-4 h-4" />,
+    description: 'Push notifications a dispositivos iOS, Android y Web.',
+    snippets: [{ title: 'db.notifications.*', code: CODE.notifications, lang: 'typescript' }],
+  },
 ]
 
-// ─── SDK data ─────────────────────────────────────────────────────────────────
-
-const SDK_SECTIONS: SdkSection[] = [
-    {
-        id: "sdk-install", icon: Package, color: "bg-slate-100 text-slate-700", label: "Instalación",
-        blocks: [
-            {
-                code: `npm install matecitodb`,
-                note: "Flutter/Dart: agrega matecitodb_flutter: ^3.1.0 a tu pubspec.yaml",
-            },
-            {
-                title: ".env.local",
-                code: `MATECITODB_URL=https://tu-proyecto.matecito.dev\nNEXT_PUBLIC_MATECITODB_API_KEY=mk_anon_...\nMATECITODB_API_KEY=mk_service_...`,
-                note: "Generá este archivo automáticamente con: npx matecitodb init",
-            },
-            {
-                title: "lib/db.ts",
-                code: `import { createClient } from 'matecitodb'\nimport type { Database } from '@/matecito/database'\n\nexport const db = createClient<Database>({\n  url:    process.env.MATECITODB_URL!,\n  apiKey: process.env.NEXT_PUBLIC_MATECITODB_API_KEY!,\n  // serviceKey para server-side / admin:\n  // serviceKey: process.env.MATECITODB_API_KEY!,\n})`,
-                note: "Generá el tipo Database con: npx matecitodb generate types",
-            },
-        ],
-    },
-    {
-        id: "sdk-auth", icon: Users, color: "bg-blue-50 text-blue-600", label: "Autenticación",
-        blocks: [
-            {
-                title: "Registro, Login y Logout",
-                code: `// Registrar\nconst { data, error } = await db.auth.signUp({\n  email: 'user@ejemplo.com', password: 'pass123'\n})\n\n// Login\nconst { data, error } = await db.auth.signIn({\n  email: 'user@ejemplo.com', password: 'pass123'\n})\n\n// Logout\nawait db.auth.signOut()\n\n// Estado actual\nconst user  = db.auth.user\nconst token = db.auth.token\nconst ok    = db.auth.isLoggedIn`,
-            },
-            {
-                title: "Observar cambios de sesión",
-                code: `const unsub = db.auth.onAuthChange((user) => {\n  console.log(user ? \`Hola \${user.email}\` : 'Sesión cerrada')\n})\nunsub() // dejar de escuchar`,
-            },
-            {
-                title: "Verificación de email y reset de contraseña",
-                code: `// Verificar email con el token del link\nawait db.auth.verifyEmail(token)\n\n// Reenviar email de verificación\nawait db.auth.resendVerification({ email: 'user@ejemplo.com' })\n\n// Solicitar reset (envía email)\nawait db.auth.requestPasswordReset('user@ejemplo.com', {\n  resetUrlBase: 'https://miapp.com/reset'\n})\n\n// Confirmar nuevo password\nawait db.auth.resetPassword(token, 'nueva-contraseña')`,
-            },
-            {
-                title: "OAuth",
-                code: `// 1. Generar URL con state para protección CSRF\nconst state = crypto.randomUUID()\nconst url = db.auth.getOAuthUrl(\n  'google',\n  'https://miapp.com/callback',\n  { state }\n)\nwindow.location.href = url\n\n// 2. Completar en el callback\nconst { data } = await db.auth.handleOAuthCallback({\n  access_token:  searchParams.get('access_token'),\n  refresh_token: searchParams.get('refresh_token'),\n})`,
-            },
-            {
-                title: "Admin de usuarios (requiere serviceKey)",
-                code: `// Listar usuarios con búsqueda\nconst { data } = await db.auth.admin.listUsers({\n  limit: 20, search: 'juan'\n})\n\n// Eliminar usuario\nawait db.auth.admin.deleteUser(userId)\n\n// Configurar OAuth\nawait db.auth.oauth.configure('google', {\n  clientId: '...', clientSecret: '...'\n})\nawait db.auth.oauth.remove('github')`,
-                note: "db.auth.admin y db.auth.oauth requieren serviceKey. Nunca los uses desde el cliente.",
-            },
-        ],
-    },
-    {
-        id: "sdk-queries", icon: Database, color: "bg-violet-50 text-violet-600", label: "Registros (CRUD)",
-        blocks: [
-            {
-                title: "Consultar",
-                code: `// Todos\nconst records = await db.from('posts').find()\n\n// Con filtros, selección y paginación\nconst { data, total, pages } = await db.from('posts')\n  .select('id, title, author')\n  .eq('status', 'publicado')\n  .gte('views', 100)\n  .ilike('title', '%matecito%')\n  .latest()\n  .limit(20)\n  .page(2)\n\n// Por ID\nconst { data } = await db.from('posts').getOne('abc-123')\n\n// Primero que coincide\nconst post = await db.from('posts').findOne({ slug: 'mi-post' })\n\n// Contar\nconst count = await db.from('posts').eq('status', 'publicado').count()`,
-            },
-            {
-                title: "Filtros disponibles",
-                code: `db.from('products')\n  .eq('status', 'active')       // =\n  .neq('type', 'digital')       // !=\n  .gt('price', 100)             // >\n  .gte('stock', 1)              // >=\n  .lt('age', 18)                // <\n  .lte('price', 500)            // <=\n  .like('name', 'Juan%')        // LIKE\n  .ilike('title', '%café%')     // ILIKE\n  .inValues('tag', ['a', 'b'])  // IN (...)\n  .notInValues('status', ['spam'])\n  .or('price.gte.100,name.ilike.%café%') // OR\n  .search('texto')              // ILIKE en todos los campos\n  .find()`,
-            },
-            {
-                title: "Insertar, actualizar y upsert",
-                code: `// Insertar\nconst { data } = await db.from('posts').insert({ title: 'Hola' })\n\n// Actualizar (por ID o bulk)\nawait db.from('posts').eq('id', 'abc').update({ title: 'Editado' })\nawait db.from('posts').eq('status', 'draft').update({ archived: true })\n\n// Merge — preserva campos no enviados\nawait db.from('posts').eq('id', 'abc').merge({ views: 42 })\n\n// Upsert — inserta o actualiza según campo de conflicto\nconst { data, upserted } = await db.from('profiles').upsert(\n  { user_id: 'abc', bio: 'Dev' }, 'user_id'\n)\nconsole.log(upserted) // true = insertado, false = actualizado\n\n// Insertar múltiples\nconst records = await db.from('products').insertMany([\n  { name: 'Yerba', price: 500 },\n  { name: 'Mate',  price: 1200 },\n])`,
-            },
-            {
-                title: "Soft-delete, restore y hard-delete",
-                code: `// Soft-delete (recuperable)\nawait db.from('posts').delete('abc-123')\n\n// Bulk soft-delete\nawait db.from('posts').eq('status', 'spam').delete()\n\n// Restaurar\nawait db.from('posts').restore('abc-123')\n\n// Borrado permanente\nawait db.from('posts').hardDelete('abc-123')\n\n// Ver registros eliminados\nconst { data } = await db.from('posts').includeDeleted().find()\n\n// Ver registros expirados\nconst { data } = await db.from('sessions').includeExpired().find()`,
-            },
-            {
-                title: "Paginar como stream y exportar",
-                code: `// Iterar sobre todas las páginas\nfor await (const batch of db.from('posts').paginate({ batchSize: 100 })) {\n  console.log('Lote:', batch.length)\n}\n\n// Exportar hasta 10 000 registros (devuelve Blob)\nconst blob = await db.from('posts').export({ format: 'csv' })\nconst url  = URL.createObjectURL(blob)\n\n// Con expiración en update/upsert\nawait db.from('sessions').eq('id', 'xyz').update(\n  { active: true },\n  { expiresAt: new Date(Date.now() + 3600_000) }\n)`,
-            },
-        ],
-    },
-    {
-        id: "sdk-realtime", icon: Radio, color: "bg-teal-50 text-teal-600", label: "Tiempo Real",
-        blocks: [
-            {
-                title: "Suscribirse a una colección (TypeScript)",
-                code: `// Callback\nconst unsub = db.from('messages').subscribe((event) => {\n  console.log(event.action)     // 'created' | 'updated' | 'deleted'\n  console.log(event.collection) // 'messages'\n  console.log(event.record)     // objeto plano\n  console.log(event.recordId)   // ID del registro\n})\nunsub()\n\n// Estado de conexión\ndb.realtime.onStatusChange((status) => {\n  console.log(status) // 'connected' | 'disconnected'\n})\n\ndb.realtime.disconnect()`,
-            },
-            {
-                title: "Stream en Flutter/Dart",
-                code: `// StreamBuilder\nStreamBuilder<RealtimeEvent>(\n  stream: db.from('chat').watch(),\n  builder: (context, snapshot) {\n    final event = snapshot.data;\n    if (event?.action == RealtimeAction.created) {\n      // nuevo registro llegó\n    }\n    return const SizedBox.shrink();\n  },\n)\n\n// Callback clásico\nfinal unsub = db.from('messages').subscribe((event) {\n  print(event.action);\n});\nunsub();`,
-                note: "El SDK reconecta automáticamente con backoff exponencial y detecta conexiones zombi via ping/pong cada 30s.",
-            },
-        ],
-    },
-    {
-        id: "sdk-storage", icon: HardDrive, color: "bg-emerald-50 text-emerald-600", label: "Almacenamiento",
-        blocks: [
-            {
-                title: "Subir archivos",
-                code: `// Browser (File object)\nconst { data, error } = await db.storage.upload(file, {\n  path: 'avatars/user-1.png', public: true\n})\nconsole.log(data.url)\n\n// Desde URL (server-side)\nawait db.storage.uploadFromUrl('https://ejemplo.com/img.jpg', {\n  path: 'imports/img.jpg'\n})`,
-            },
-            {
-                title: "Listar, obtener URL y eliminar",
-                code: `// Listar archivos en una carpeta\nconst { data: files } = await db.storage.list('avatars/')\n// files[0]: { id, url, mime, size, width, height, createdAt }\n\n// URL pública sin hacer request\nconst url = db.storage.getPublicUrl('avatars/user-1.png')\n\n// Eliminar\nawait db.storage.delete('avatars/user-1.png')`,
-            },
-        ],
-    },
-    {
-        id: "sdk-collections", icon: Layers, color: "bg-emerald-50 text-emerald-600", label: "Colecciones (Schema)",
-        blocks: [
-            {
-                title: "Crear, renombrar y eliminar colecciones",
-                code: `// Listar\nconst { data: cols } = await db.collections.list()\n\n// Crear con campos iniciales\nawait db.collections.create('products', {\n  fields: [\n    { name: 'name',     type: 'text',     required: true },\n    { name: 'price',    type: 'number',   required: true },\n    { name: 'image',    type: 'file' },\n    { name: 'category', type: 'relation', options: { collection: 'categories' } },\n    { name: 'tags',     type: 'select',   options: { values: ['nuevo','oferta'] } },\n  ]\n})\n\nawait db.collections.rename('old_name', 'new_name')\nawait db.collections.delete('temp_data')`,
-                note: "Tipos de campo: text · number · boolean · email · date · file · json · relation · select",
-            },
-            {
-                title: "Gestión de campos",
-                code: `// Listar campos\nconst { data: fields } = await db.collections.fields('products').list()\n\n// Agregar campo\nawait db.collections.fields('products').create({\n  name: 'discount', type: 'number'\n})\n\n// Actualizar campo\nawait db.collections.fields('products').update(fieldId, {\n  required: true\n})\n\n// Eliminar campo\nawait db.collections.fields('products').delete(fieldId)`,
-            },
-        ],
-    },
-    {
-        id: "sdk-smtp", icon: Mail, color: "bg-sky-50 text-sky-600", label: "Email (SMTP)",
-        blocks: [
-            {
-                title: "Configuración SMTP",
-                code: `// Configurar\nawait db.smtp.set({\n  host: 'smtp.gmail.com', port: 587,\n  user: 'noreply@miapp.com', pass: 'app-password',\n  from: 'Mi App <noreply@miapp.com>',\n})\n\n// Actualizar parcialmente\nawait db.smtp.update({ port: 465 })\n\n// Test de conexión\nconst { error } = await db.smtp.test('admin@miapp.com')`,
-            },
-            {
-                title: "Plantillas (soportan {{variable}})",
-                code: `// Generar plantillas del sistema\nawait db.emailTemplates.seed()\n\n// Crear plantilla personalizada\nawait db.emailTemplates.create({\n  name:    'pedido_confirmado',\n  subject: 'Tu pedido {{order_id}} fue confirmado',\n  body:    '<h1>Hola {{user_name}}</h1><p>¡Tu pedido está en camino!</p>',\n})\n\n// Listar, actualizar y eliminar\nconst { data: list } = await db.emailTemplates.list()\nawait db.emailTemplates.update('uuid', { subject: 'Nuevo asunto' })\nawait db.emailTemplates.delete('uuid')`,
-            },
-        ],
-    },
-    {
-        id: "sdk-permissions", icon: Shield, color: "bg-amber-50 text-amber-600", label: "Permisos (RLS)",
-        blocks: [
-            {
-                code: `// Ver permisos de todas las colecciones\nconst { data } = await db.permissions.getAll()\n\n// Ver permisos de una colección\nconst { data } = await db.permissions.get('posts')\n\n// Configurar permisos por operación\nawait db.permissions.set('posts', {\n  list:   'public',   // sin autenticación\n  get:    'public',\n  create: 'auth',     // requiere JWT\n  update: 'auth',\n  delete: 'service',  // solo serviceKey\n})\n\n// Aplicar el mismo nivel a todas las operaciones\nawait db.permissions.setAll('private_data', 'service')`,
-                note: "Niveles: public · auth · service · nobody. Requiere serviceKey.",
-            },
-        ],
-    },
-    {
-        id: "sdk-stats", icon: Terminal, color: "bg-slate-50 text-slate-600", label: "Estadísticas y Logs",
-        blocks: [
-            {
-                title: "Estadísticas del proyecto",
-                code: `const { data: stats } = await db.stats.get()\nconsole.log(stats.total_records)    // registros en todas las colecciones\nconsole.log(stats.storage_used_mb)  // MB usados en Storage\nconsole.log(stats.requests_today)   // requests en las últimas 24h\nconsole.log(stats.active_users)     // usuarios con sesión activa`,
-            },
-            {
-                title: "Logs de requests",
-                code: `// Últimos 50 logs\nconst { data: logs } = await db.logs.list({ limit: 50 })\n\n// Filtrar por código de respuesta\nconst { data: errors } = await db.logs.list({ status: 500 })\n\n// Filtrar por método HTTP\nconst { data: writes } = await db.logs.list({ method: 'POST' })\n\n// Filtrar por path\nconst { data: auth }   = await db.logs.list({ path: '/auth' })\n\n// Cada log tiene:\n// { method, path, status, duration_ms, ip, user_id, created_at }`,
-                note: "Requiere serviceKey.",
-            },
-        ],
-    },
-    {
-        id: "sdk-webhooks", icon: Webhook, color: "bg-violet-50 text-violet-600", label: "Webhooks",
-        blocks: [
-            {
-                title: "Crear y gestionar webhooks",
-                code: `// Crear\nconst { data: hook } = await db.webhooks.create({\n  url:    'https://miapp.com/hooks/matecito',\n  events: ['record.created', 'record.deleted'],\n  secret: 'mi-secreto-de-firma',\n})\n\n// Listar\nconst { data: hooks } = await db.webhooks.list()\n\n// Deshabilitar temporalmente\nawait db.webhooks.update('hook-uuid', { enabled: false })\n\n// Eliminar\nawait db.webhooks.delete('hook-uuid')`,
-                note: "Eventos: record.created · record.updated · record.deleted · auth.signup · auth.login · storage.upload",
-            },
-            {
-                title: "Verificar firma en tu endpoint receptor",
-                code: `import { createHmac } from 'crypto'\n\nfunction verifyWebhook(\n  body: string,\n  signature: string,\n  secret: string\n): boolean {\n  const expected = 'sha256=' +\n    createHmac('sha256', secret).update(body).digest('hex')\n  return expected === signature\n}\n\n// En tu Route Handler (Next.js):\nexport async function POST(req: Request) {\n  const sig  = req.headers.get('x-matecito-signature') ?? ''\n  const body = await req.text()\n\n  if (!verifyWebhook(body, sig, process.env.WEBHOOK_SECRET!)) {\n    return new Response('Forbidden', { status: 403 })\n  }\n\n  const { event, collection, record } = JSON.parse(body)\n  // event: 'record.created' | 'record.updated' | ...\n  return new Response('OK')\n}`,
-                note: "Payload: { event, collection, record, timestamp }. Header: X-Matecito-Signature: sha256=HMAC(secret, body).",
-            },
-        ],
-    },
-    {
-        id: "sdk-cli", icon: Code2, color: "bg-slate-100 text-slate-700", label: "CLI",
-        blocks: [
-            {
-                code: `# Inicializar proyecto — genera .env.local interactivamente\n# (verifica conexión antes de guardar)\nnpx matecitodb init\n\n# Generar interfaces TypeScript desde el schema actual\nnpx matecitodb generate types\n# → matecito.types.ts con todas las colecciones tipadas\n\n# Scaffold de autenticación para Next.js App Router\nnpx matecitodb generate auth\n\n# React hook con CRUD + realtime para una colección\nnpx matecitodb generate hook posts\n# → hooks/usePosts.ts`,
-            },
-            {
-                title: "Uso del schema generado",
-                code: `// matecito.types.ts (generado automáticamente)\nexport interface Database {\n  posts: {\n    id:         string\n    title:      string\n    status:     'borrador' | 'publicado'\n    views:      number\n    created_at: string\n  }\n  // ...más colecciones\n}\n\n// lib/db.ts\nimport { createClient } from 'matecitodb'\nimport type { Database } from '@/matecito.types'\n\nexport const db = createClient<Database>({ url, apiKey })\n\n// Ahora db.from('posts') está completamente tipado\nconst { data: posts } = await db.from('posts').find()\n// posts es Database['posts'][] con autocompletado`,
-                note: "Regenerá los tipos cada vez que modifiques el schema: npx matecitodb generate types",
-            },
-        ],
-    },
+const V1_SECTIONS: Section[] = [
+  {
+    id: 'v1-intro', title: 'Overview', icon: <Globe className="w-4 h-4" />,
+    description: 'API v1 — versión estable con CRUD, Auth, Storage, Realtime y Webhooks. Versión por defecto del SDK. Ideal para proyectos existentes.',
+    snippets: [{ title: 'Base URL', code: 'https://tu-proyecto.matecito.dev/api/v1/', lang: 'http' }],
+    badges: ['SDK default: apiVersion: "v1"', 'Estable y probada en producción', 'Headers: Authorization: Bearer <token>'],
+  },
+  {
+    id: 'v1-auth', title: 'Autenticación', icon: <Shield className="w-4 h-4" />,
+    snippets: [
+      { title: 'POST /auth/register', code: CODE.v1Register, lang: 'http' },
+      { title: 'POST /auth/login', code: CODE.v1Login, lang: 'http' },
+      { title: 'POST /auth/refresh', code: CODE.v1Refresh, lang: 'http' },
+      { title: 'Resetear contraseña', code: CODE.v1PasswordReset, lang: 'http' },
+    ],
+  },
+  {
+    id: 'v1-records', title: 'Registros', icon: <Database className="w-4 h-4" />,
+    snippets: [
+      { title: 'GET /records', code: CODE.v1ListRecords, lang: 'http' },
+      { title: 'POST /records', code: CODE.v1CreateRecord, lang: 'http' },
+      { title: 'PATCH /records/:id', code: CODE.v1UpdateRecord, lang: 'http' },
+      { title: 'DELETE /records/:id', code: CODE.v1DeleteRecord, lang: 'http' },
+    ],
+  },
+  {
+    id: 'v1-collections', title: 'Colecciones', icon: <Code2 className="w-4 h-4" />,
+    snippets: [
+      { title: 'GET /collections', code: CODE.v1ListCollections, lang: 'http' },
+      { title: 'POST /collections', code: CODE.v1CreateCollection, lang: 'http' },
+      { title: 'POST /collections/:name/fields', code: CODE.v1AddField, lang: 'http' },
+    ],
+  },
+  {
+    id: 'v1-storage', title: 'Storage', icon: <FileText className="w-4 h-4" />,
+    snippets: [{ title: 'Upload / List / Delete', code: CODE.v1Storage, lang: 'http' }],
+  },
+  {
+    id: 'v1-realtime', title: 'Realtime (WebSocket)', icon: <Zap className="w-4 h-4" />,
+    description: 'Conexión WebSocket para eventos en tiempo real. La URL de conexión usa wss:// en producción.',
+    snippets: [{ title: 'WS v1 — /ws', code: CODE.v1Realtime, lang: 'http' }],
+  },
+  {
+    id: 'v1-permissions', title: 'Permisos', icon: <Shield className="w-4 h-4" />,
+    snippets: [{ title: 'GET / POST /permissions', code: CODE.v1Permissions, lang: 'http' }],
+  },
+  {
+    id: 'v1-webhooks', title: 'Webhooks', icon: <Zap className="w-4 h-4" />,
+    snippets: [{ title: 'POST /webhooks', code: CODE.v1Webhook, lang: 'http' }],
+  },
+  {
+    id: 'v1-stats', title: 'Stats', icon: <BarChart3 className="w-4 h-4" />,
+    snippets: [{ title: 'GET /stats', code: CODE.v1Stats, lang: 'http' }],
+  },
 ]
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+const V2_SECTIONS: Section[] = [
+  {
+    id: 'v2-intro', title: 'Overview', icon: <Sparkles className="w-4 h-4" />,
+    description: 'API v2 incluye todo lo de v1 + Functions, Analytics, AI Gateway, Remote Config, Forms, Notifications, batch operations y filtros avanzados. La migración de v1 a v2 es irreversible.',
+    snippets: [{ title: 'Base URL', code: 'https://tu-proyecto.matecito.dev/api/v2/', lang: 'http' }],
+    badges: ['Nuevos proyectos: v2 por defecto', 'Migración v1→v2: irreversible desde el dashboard', 'Security: token refresh, rate limiting, CORS config, AES-256 para API keys'],
+  },
+  {
+    id: 'v2-auth-oauth', title: 'Auth — OAuth', icon: <Shield className="w-4 h-4" />,
+    description: 'Login social con Google, GitHub, Discord y Apple.',
+    snippets: [{ title: 'OAuth flow', code: CODE.v2AuthOAuth, lang: 'http' }],
+  },
+  {
+    id: 'v2-auth-totp', title: 'Auth — TOTP / 2FA', icon: <Shield className="w-4 h-4" />,
+    description: 'Autenticación de dos factores con apps TOTP (Google Authenticator, Authy).',
+    snippets: [{ title: 'TOTP endpoints', code: CODE.v2AuthTOTP, lang: 'http' }],
+  },
+  {
+    id: 'v2-functions', title: 'Functions', icon: <Workflow className="w-4 h-4" />,
+    snippets: [
+      { title: 'POST /functions — Crear', code: CODE.v2Function, lang: 'http' },
+      { title: 'POST /functions/:name/invoke', code: CODE.v2Invoke, lang: 'http' },
+      { title: 'GET /functions/history', code: CODE.v2FunctionHistory, lang: 'http' },
+    ],
+  },
+  {
+    id: 'v2-analytics', title: 'Analytics', icon: <BarChart3 className="w-4 h-4" />,
+    snippets: [
+      { title: 'POST /analytics/track', code: CODE.v2Track, lang: 'http' },
+      { title: 'GET /analytics/events', code: CODE.v2Events, lang: 'http' },
+      { title: 'GET /analytics/funnel', code: CODE.v2Funnel, lang: 'http' },
+    ],
+  },
+  {
+    id: 'v2-ai', title: 'AI Gateway', icon: <Sparkles className="w-4 h-4" />,
+    snippets: [
+      { title: 'PUT /project/ai-config', code: CODE.v2AIConfig, lang: 'http', description: 'Configurá el proveedor AI. Keys encriptadas con AES-256.' },
+      { title: 'POST /ai/chat', code: CODE.v2AIChat, lang: 'http' },
+    ],
+  },
+  {
+    id: 'v2-config', title: 'Remote Config', icon: <Settings className="w-4 h-4" />,
+    snippets: [
+      { title: 'PUT /config/:key', code: CODE.v2ConfigSet, lang: 'http' },
+      { title: 'GET /config', code: CODE.v2ConfigGet, lang: 'http' },
+    ],
+  },
+  {
+    id: 'v2-forms', title: 'Forms', icon: <FileText className="w-4 h-4" />,
+    snippets: [
+      { title: 'POST /forms', code: CODE.v2Form, lang: 'http' },
+      { title: 'GET /forms/:name/submissions', code: CODE.v2Submissions, lang: 'http' },
+    ],
+  },
+  {
+    id: 'v2-notifications', title: 'Notificaciones Push', icon: <Bell className="w-4 h-4" />,
+    description: 'Push notifications a dispositivos iOS, Android y Web via FCM/APNs.',
+    snippets: [{ title: 'Devices & Send', code: CODE.v2Notifications, lang: 'http' }],
+  },
+  {
+    id: 'v2-realtime', title: 'Realtime (WebSocket)', icon: <Zap className="w-4 h-4" />,
+    description: 'v2 usa /realtime en lugar de /ws. Incluye soporte de presence para saber qué usuarios están conectados.',
+    snippets: [{ title: 'WS v2 — /realtime', code: CODE.v2Realtime, lang: 'http' }],
+  },
+  {
+    id: 'v2-batch', title: 'Batch Operations', icon: <Database className="w-4 h-4" />,
+    description: 'Ejecutar múltiples operaciones en una sola request. Transaccional — o todas pasan o ninguna.',
+    snippets: [{ title: 'POST /batch', code: CODE.v2Batch, lang: 'http' }],
+  },
+  {
+    id: 'v2-filters', title: 'Filtros avanzados', icon: <Database className="w-4 h-4" />,
+    description: 'v2 extiende los query params de v1 con between, isNull, has (arrays), full-text search, include_deleted y export.',
+    snippets: [{ title: 'Query params v2', code: CODE.v2Filters, lang: 'http' }],
+  },
+]
 
-const METHOD_COLORS: Record<string, string> = {
-    GET: "bg-emerald-100 text-emerald-700",
-    POST: "bg-blue-100 text-blue-700",
-    PATCH: "bg-amber-100 text-amber-700",
-    DELETE: "bg-red-100 text-red-700",
-    WS: "bg-teal-100 text-teal-700",
-}
+const FLUTTER_SECTIONS: Section[] = [
+  {
+    id: 'fl-intro', title: 'Introducción', icon: <Smartphone className="w-4 h-4" />,
+    description: 'El SDK Flutter de MatecitoDB tiene paridad completa con el SDK JS/TS. Soporta Auth, QueryBuilder, Realtime, Storage, Collections, Permissions, Webhooks, SMTP, SQL, Batch, y todos los módulos v2: Functions (con crons + triggers), Analytics, AI Gateway, Remote Config, Notifications (push + in-app), Forms, Workflows, Geo, Sync, Security y Cache.',
+    badges: ['matecitodb_flutter: ^4.0.0', 'Dart SDK: >=3.0.0', 'Flutter: >=3.10.0', 'Null-safe', 'Auto-refresh de tokens', 'Retry con backoff exponencial'],
+  },
+  {
+    id: 'fl-install', title: 'Instalación e Init', icon: <Terminal className="w-4 h-4" />,
+    snippets: [
+      { title: 'pubspec.yaml', code: CODE.flutterInstall, lang: 'yaml' },
+      { title: 'main.dart — createClient', code: CODE.flutterInit, lang: 'dart', description: 'Esperá a sessionReady antes de renderizar la app para restaurar sesión persistida.' },
+    ],
+  },
+  {
+    id: 'fl-auth-basic', title: 'Auth — Básico', icon: <Shield className="w-4 h-4" />,
+    snippets: [
+      { title: 'signUp / signIn / signOut / getMe', code: CODE.flutterAuth, lang: 'dart' },
+      { title: 'Stream de sesión', code: CODE.flutterAuthStream, lang: 'dart', description: 'authStateStream emite AuthUser? al loguearse/desloguearse.' },
+    ],
+  },
+  {
+    id: 'fl-auth-session', title: 'Auth — Sesión & Contraseña', icon: <Shield className="w-4 h-4" />,
+    snippets: [{ title: 'refresh / reset / updateProfile', code: CODE.flutterAuthPassword, lang: 'dart' }],
+  },
+  {
+    id: 'fl-auth-oauth', title: 'Auth — OAuth (v2)', icon: <Shield className="w-4 h-4" />,
+    description: 'Login social con Google, GitHub, Discord, Apple. Manejá el deeplink de callback con handleOAuthCallback.',
+    snippets: [{ title: 'getOAuthUrl + handleOAuthCallback', code: CODE.flutterAuthOAuth, lang: 'dart' }],
+  },
+  {
+    id: 'fl-auth-totp', title: 'Auth — Magic Link & TOTP (v2)', icon: <Shield className="w-4 h-4" />,
+    snippets: [{ title: 'magicLink / TOTP setup / verify', code: CODE.flutterAuthMagicTOTP, lang: 'dart' }],
+  },
+  {
+    id: 'fl-auth-admin', title: 'Auth — Admin, Roles & Invitaciones', icon: <Shield className="w-4 h-4" />,
+    description: 'admin.* y roles.* requieren serviceKey. invitations.* solo v2.',
+    snippets: [{ title: 'admin / oauth / roles / invitations', code: CODE.flutterAuthAdmin, lang: 'dart' }],
+  },
+  {
+    id: 'fl-qb-filters', title: 'QueryBuilder — Filtros', icon: <Database className="w-4 h-4" />,
+    description: 'API fluida y tipada. Todos los métodos son encadenables.',
+    snippets: [{ title: 'eq / gte / ilike / inValues / isNull / has', code: CODE.flutterQBFilters, lang: 'dart' }],
+  },
+  {
+    id: 'fl-qb-advanced', title: 'QueryBuilder — Avanzado', icon: <Database className="w-4 h-4" />,
+    description: 'between, full-text search, populate relaciones, or conditions, queryBody (v2).',
+    snippets: [{ title: 'between / searchFullText / populate / queryBody', code: CODE.flutterQBAdvanced, lang: 'dart' }],
+  },
+  {
+    id: 'fl-qb-mutations', title: 'QueryBuilder — Mutaciones', icon: <Database className="w-4 h-4" />,
+    description: 'insert, insertMany, upsert, update, merge (con expiración), delete, hardDelete, restore.',
+    snippets: [{ title: 'CRUD + upsert + expiración', code: CODE.flutterQBMutations, lang: 'dart' }],
+  },
+  {
+    id: 'fl-qb-paginate', title: 'QueryBuilder — Paginación & Utilidades', icon: <Database className="w-4 h-4" />,
+    description: 'findOne, find, getFirst, count, select, paginate (Stream), export a CSV/JSON.',
+    snippets: [{ title: 'paginate / find / count / export', code: CODE.flutterQBPaginate, lang: 'dart' }],
+  },
+  {
+    id: 'fl-qb-realtime', title: 'QueryBuilder — Realtime', icon: <Zap className="w-4 h-4" />,
+    description: 'subscribe() callback y watch() Stream directamente desde el QueryBuilder.',
+    snippets: [{ title: 'subscribe + StreamBuilder', code: CODE.flutterQBRealtime, lang: 'dart' }],
+  },
+  {
+    id: 'fl-storage', title: 'Storage', icon: <FileText className="w-4 h-4" />,
+    description: 'upload (con progress callback), uploadFromUrl, list, delete. El servidor convierte imágenes a WebP.',
+    snippets: [{ title: 'upload / uploadFromUrl / list / delete', code: CODE.flutterStorage, lang: 'dart' }],
+  },
+  {
+    id: 'fl-realtime', title: 'Realtime Service', icon: <Zap className="w-4 h-4" />,
+    description: 'WebSocket con reconexión automática (backoff exponencial), ping/pong y re-subscribe automático tras reconexión.',
+    snippets: [{ title: 'subscribe / watch / onStatusChange', code: CODE.flutterRealtime, lang: 'dart' }],
+  },
+  {
+    id: 'fl-collections', title: 'Colecciones & Campos', icon: <Code2 className="w-4 h-4" />,
+    description: 'Gestión de schema: crear/renombrar/eliminar colecciones y sus campos.',
+    snippets: [{ title: 'collections + fields', code: CODE.flutterCollections, lang: 'dart' }],
+  },
+  {
+    id: 'fl-permissions', title: 'Permisos', icon: <Shield className="w-4 h-4" />,
+    description: 'Niveles: public, auth, service, nobody. Por operación (list/get/create/update/delete).',
+    snippets: [{ title: 'permissions.set / setAll', code: CODE.flutterPermissions, lang: 'dart' }],
+  },
+  {
+    id: 'fl-webhooks', title: 'Webhooks', icon: <Zap className="w-4 h-4" />,
+    description: 'Eventos: record.created/updated/deleted, auth.signup/login, storage.upload. Incluye DLQ para reintentos.',
+    snippets: [{ title: 'create / test / DLQ', code: CODE.flutterWebhooks, lang: 'dart' }],
+  },
+  {
+    id: 'fl-smtp', title: 'SMTP', icon: <Mail className="w-4 h-4" />,
+    description: 'Configuración de email transaccional para autenticación y notificaciones.',
+    snippets: [{ title: 'smtp.set / test / clear', code: CODE.flutterSmtp, lang: 'dart' }],
+  },
+  {
+    id: 'fl-sql', title: 'SQL Directo', icon: <Terminal className="w-4 h-4" />,
+    description: 'Ejecutar SQL raw contra el schema aislado del proyecto. Requiere serviceKey.',
+    snippets: [{ title: 'db.sql.query()', code: CODE.flutterSql, lang: 'dart' }],
+  },
+  {
+    id: 'fl-batch', title: 'Batch', icon: <Database className="w-4 h-4" />,
+    description: 'Múltiples operaciones en una request. atomic() = transaccional. dryRun() = validar sin escribir (v2).',
+    snippets: [{ title: 'batch / atomic / dryRun', code: CODE.flutterBatch, lang: 'dart' }],
+  },
+  {
+    id: 'fl-functions', title: 'Functions (v2)', icon: <Workflow className="w-4 h-4" />,
+    description: 'Serverless functions con CRUD, env vars, cron jobs y triggers por eventos de DB.',
+    snippets: [{ title: 'invoke / create / logs / env / crons / triggers', code: CODE.flutterFunctions, lang: 'dart' }],
+  },
+  {
+    id: 'fl-analytics', title: 'Analytics (v2)', icon: <BarChart3 className="w-4 h-4" />,
+    description: 'Track eventos, groupBy, funnels y historial por usuario.',
+    snippets: [{ title: 'track / getEvents / getFunnel / getUserEvents', code: CODE.flutterAnalytics, lang: 'dart' }],
+  },
+  {
+    id: 'fl-ai', title: 'AI Gateway (v2)', icon: <Sparkles className="w-4 h-4" />,
+    description: 'Chat, embeddings, generación de schema con IA, configuración de proveedor y usage tracking.',
+    snippets: [{ title: 'chat / embed / configureProvider / generateSchema', code: CODE.flutterAI, lang: 'dart' }],
+  },
+  {
+    id: 'fl-config', title: 'Remote Config (v2)', icon: <Settings className="w-4 h-4" />,
+    description: 'Feature flags y configuración remota. remoteConfig (no config) es el accessor en el SDK.',
+    snippets: [{ title: 'db.remoteConfig.*', code: CODE.flutterConfig, lang: 'dart' }],
+  },
+  {
+    id: 'fl-notifications', title: 'Notificaciones (v2)', icon: <Bell className="w-4 h-4" />,
+    description: 'Push notifications (FCM) + in-app notifications con conteo de no leídas y marcado como leído.',
+    snippets: [{ title: 'push + in-app notifications', code: CODE.flutterNotifications, lang: 'dart' }],
+  },
+  {
+    id: 'fl-forms', title: 'Forms (v2)', icon: <FileText className="w-4 h-4" />,
+    description: 'Listar forms, ver submissions, y envío público sin auth.',
+    snippets: [{ title: 'list / submissions / submitPublic', code: CODE.flutterForms, lang: 'dart' }],
+  },
+  {
+    id: 'fl-workflows', title: 'Workflows (v2)', icon: <Workflow className="w-4 h-4" />,
+    description: 'State machines para registros. Definí flujos (borrador→revisión→publicado) y consultá el estado de cada registro.',
+    snippets: [{ title: 'getState / history', code: CODE.flutterWorkflows, lang: 'dart' }],
+  },
+  {
+    id: 'fl-geo', title: 'Geo (v2)', icon: <Globe className="w-4 h-4" />,
+    description: 'Búsqueda de registros por proximidad geográfica y bounding box.',
+    snippets: [{ title: 'geo.near / geo.bounds', code: CODE.flutterGeo, lang: 'dart' }],
+  },
+  {
+    id: 'fl-sync', title: 'Offline Sync (v2)', icon: <Zap className="w-4 h-4" />,
+    description: 'Sincronización offline-first: pull de cambios y push de operaciones locales con estrategias de conflicto.',
+    snippets: [{ title: 'sync.pull / sync.push', code: CODE.flutterSync, lang: 'dart' }],
+  },
+  {
+    id: 'fl-security', title: 'Security (v2)', icon: <Shield className="w-4 h-4" />,
+    description: 'IP allowlist/blocklist y rate limits por endpoint. Solo v2.',
+    snippets: [{ title: 'ipBlock / ipAllow / rateLimitCreate', code: CODE.flutterSecurity, lang: 'dart' }],
+  },
+  {
+    id: 'fl-cache', title: 'Cache (v2)', icon: <Settings className="w-4 h-4" />,
+    description: 'Cache de responses por colección con TTL y varyBy (global, por usuario, por rol).',
+    snippets: [{ title: 'cache.create / purge / stats', code: CODE.flutterCache, lang: 'dart' }],
+  },
+  {
+    id: 'fl-schema', title: 'Schema Introspection (v2)', icon: <Database className="w-4 h-4" />,
+    description: 'Schema completo del proyecto, historial de migraciones, rollback estructural y explain de queries.',
+    snippets: [{ title: 'schema.get / migrations / rollback / explain', code: CODE.flutterSchema, lang: 'dart' }],
+  },
+]
 
-const AUTH_LABELS: Record<string, string> = {
-    "anon-key": "Anon Key",
-    "project-jwt": "Project JWT",
-    "service-key": "Service Key",
-    "jwt / service-key": "JWT · Service Key",
-    "?key=anonKey o ?token=jwt": "API Key / JWT",
-}
+// ═══════════════════════════════════════════════════════════
+// Components
+// ═══════════════════════════════════════════════════════════
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+function CodeBlock({ code, lang, title }: { code: string; lang: string; title?: string }) {
+  const [copied, setCopied] = useState(false)
 
-function EndpointCard({ ep }: { ep: Endpoint }) {
-    return (
-        <div className="border border-slate-200 rounded-xl overflow-hidden">
-            <div className="flex items-start gap-3 px-4 py-3 bg-slate-50 border-b border-slate-200">
-                <span className={`shrink-0 px-2 py-0.5 rounded-md text-xs font-bold font-mono ${METHOD_COLORS[ep.method] ?? 'bg-slate-100 text-slate-600'}`}>
-                    {ep.method}
-                </span>
-                <div className="flex-1 min-w-0">
-                    <code className="text-sm font-mono text-slate-800 font-semibold">{ep.path}</code>
-                    <p className="text-xs text-slate-500 mt-0.5">{ep.desc}</p>
-                </div>
-                <span className="shrink-0 text-[10px] font-semibold px-2 py-1 bg-white border border-slate-200 rounded-lg text-slate-500 whitespace-nowrap">
-                    {AUTH_LABELS[ep.auth] ?? ep.auth}
-                </span>
-            </div>
-            <div className="px-4 py-3 space-y-2.5">
-                {'query' in ep && (
-                    <div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Query params</p>
-                        <code className="text-xs text-slate-600 font-mono">{ep.query}</code>
-                    </div>
-                )}
-                {'body' in ep && (
-                    <div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Body</p>
-                        <pre className="text-xs font-mono text-slate-700 bg-slate-50 border border-slate-100 rounded-lg p-3 overflow-x-auto">{ep.body}</pre>
-                    </div>
-                )}
-                <div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Respuesta</p>
-                    <pre className="text-xs font-mono text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg p-3 overflow-x-auto">{ep.response}</pre>
-                </div>
-                {'notes' in ep && (
-                    <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">⚠ {ep.notes}</p>
-                )}
-            </div>
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <div className="rounded-xl overflow-hidden border group" style={{ borderColor: 'var(--border)' }}>
+      {title && (
+        <div className="flex items-center justify-between px-4 py-2 border-b" style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)' }}>
+          <span className="text-[11px] font-medium" style={{ color: 'var(--fg-secondary)' }}>{title}</span>
+          <span className="text-[10px] font-mono" style={{ color: 'var(--fg-tertiary)' }}>{lang}</span>
         </div>
-    )
-}
-
-function CodeBlock({ code, title, note }: SdkBlock) {
-    return (
-        <div className="space-y-2">
-            {title && <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{title}</p>}
-            <pre className="text-xs font-mono bg-slate-50 border border-slate-200 text-slate-800 rounded-xl p-4 overflow-x-auto leading-relaxed whitespace-pre">
-                <code>{code}</code>
-            </pre>
-            {note && (
-                <p className="text-xs text-violet-700 bg-violet-50 border border-violet-100 rounded-lg px-3 py-2">{note}</p>
-            )}
+      )}
+      {!title && (
+        <div className="flex items-center justify-end px-3 py-1.5 border-b" style={{ backgroundColor: 'var(--bg-tertiary)', borderColor: 'var(--border)' }}>
+          <span className="text-[10px] font-mono" style={{ color: 'var(--fg-tertiary)' }}>{lang}</span>
         </div>
-    )
+      )}
+      <div className="relative">
+        <pre className="p-4 text-xs font-mono overflow-x-auto leading-relaxed" style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--fg-secondary)' }}>
+          {code}
+        </pre>
+        <button onClick={handleCopy}
+          className="absolute top-2 right-2 p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[var(--bg-secondary)]"
+          style={{ color: 'var(--fg-tertiary)' }}>
+          {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+        </button>
+      </div>
+    </div>
+  )
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+function SectionContent({ section }: { section: Section }) {
+  return (
+    <div className="space-y-6">
+      {section.description && (
+        <p className="text-sm leading-relaxed" style={{ color: 'var(--fg-secondary)' }}>{section.description}</p>
+      )}
+      {section.badges && (
+        <div className="flex flex-wrap gap-2">
+          {section.badges.map((b, i) => (
+            <div key={i} className="inline-flex px-3 py-1.5 rounded-lg text-xs font-mono" style={{ backgroundColor: 'var(--bg-secondary)', color: 'var(--fg-secondary)', border: `1px solid var(--border)` }}>
+              {b}
+            </div>
+          ))}
+        </div>
+      )}
+      {section.snippets?.map((s, i) => (
+        <div key={i} className="space-y-2">
+          {s.description && <p className="text-xs" style={{ color: 'var(--fg-tertiary)' }}>{s.description}</p>}
+          <CodeBlock code={s.code} lang={s.lang} title={s.title} />
+        </div>
+      ))}
+    </div>
+  )
+}
 
-type Tab = "sdk" | "rest"
+// ═══════════════════════════════════════════════════════════
+// Main Page
+// ═══════════════════════════════════════════════════════════
 
 export default function DocsPage() {
-    const [tab, setTab] = useState<Tab>("sdk")
-    const [activeSdk, setActiveSdk] = useState(SDK_SECTIONS[0].id)
-    const [activeRest, setActiveRest] = useState(REST_SECTIONS[0].id)
+  const [activeTab, setActiveTab] = useState<Tab>('sdk')
+  const [activeSection, setActiveSection] = useState('sdk-intro')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const contentRef = useRef<HTMLDivElement>(null)
 
-    const currentSdkSection = SDK_SECTIONS.find(s => s.id === activeSdk)!
-    const currentRestSection = REST_SECTIONS.find(s => s.id === activeRest)!
+  const sectionsMap: Record<Tab, Section[]> = {
+    sdk:       SDK_SECTIONS,
+    'rest-v1': V1_SECTIONS,
+    'rest-v2': V2_SECTIONS,
+    flutter:   FLUTTER_SECTIONS,
+  }
+  const sections = sectionsMap[activeTab]
 
-    return (
-        <div className="min-h-screen bg-white flex flex-col">
+  useEffect(() => {
+    setActiveSection(sections[0]?.id || '')
+    setMobileMenuOpen(false)
+  }, [activeTab])
 
-            {/* Top bar */}
-            <div className="border-b border-slate-200 bg-white sticky top-0 z-20">
-                <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between gap-6">
-                    <div className="flex items-center gap-3">
-                        <span className="font-bold text-slate-900 text-sm">matecitodb</span>
-                        <span className="text-slate-300">/</span>
-                        <span className="text-sm text-slate-500">Documentación</span>
-                    </div>
+  const scrollToSection = (id: string) => {
+    setActiveSection(id)
+    setMobileMenuOpen(false)
+    const el = document.getElementById(id)
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
-                    {/* Tabs */}
-                    <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
-                        <button
-                            onClick={() => setTab("sdk")}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${tab === "sdk" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
-                                }`}
-                        >
-                            <Layers className="w-3.5 h-3.5" /> SDK
-                        </button>
-                        <button
-                            onClick={() => setTab("rest")}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${tab === "rest" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
-                                }`}
-                        >
-                            <Search className="w-3.5 h-3.5" /> REST API
-                        </button>
-                    </div>
-                </div>
-            </div>
+  const filteredSections = searchQuery
+    ? sections.filter(s =>
+        s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : sections
 
-            {/* Body: sidebar + content, no scroll on outer container */}
-            <div className="flex-1 flex max-w-6xl mx-auto w-full overflow-hidden" style={{ height: 'calc(100vh - 3.5rem)' }}>
+  const tabs: { id: Tab; label: string; icon: React.ReactNode; short: string; badge?: string }[] = [
+    { id: 'sdk',       label: 'SDK JavaScript', icon: <Code2 className="w-4 h-4" />,      short: 'SDK' },
+    { id: 'flutter',   label: 'SDK Flutter',    icon: <Smartphone className="w-4 h-4" />, short: 'Flutter' },
+    { id: 'rest-v1',   label: 'REST API v1',    icon: <Globe className="w-4 h-4" />,       short: 'v1',      badge: 'stable' },
+    { id: 'rest-v2',   label: 'REST API v2',    icon: <Sparkles className="w-4 h-4" />,   short: 'v2',      badge: 'recommended' },
+  ]
 
-                {/* Sidebar */}
-                <aside className="w-52 shrink-0 border-r border-slate-100 overflow-y-auto py-6 px-3">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 mb-3">
-                        {tab === "sdk" ? "SDK" : "Endpoints"}
-                    </p>
-
-                    {tab === "sdk" && SDK_SECTIONS.map(s => (
-                        <button
-                            key={s.id}
-                            onClick={() => setActiveSdk(s.id)}
-                            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left ${activeSdk === s.id
-                                    ? "bg-violet-50 text-violet-700 font-semibold"
-                                    : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
-                                }`}
-                        >
-                            <s.icon className="w-3.5 h-3.5 shrink-0" />
-                            {s.label}
-                            {activeSdk === s.id && <ChevronRight className="w-3 h-3 ml-auto" />}
-                        </button>
-                    ))}
-
-                    {tab === "rest" && REST_SECTIONS.map(s => (
-                        <button
-                            key={s.id}
-                            onClick={() => setActiveRest(s.id)}
-                            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left ${activeRest === s.id
-                                    ? "bg-violet-50 text-violet-700 font-semibold"
-                                    : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
-                                }`}
-                        >
-                            <s.icon className="w-3.5 h-3.5 shrink-0" />
-                            {s.label}
-                            {activeRest === s.id && <ChevronRight className="w-3 h-3 ml-auto" />}
-                        </button>
-                    ))}
-                </aside>
-
-                {/* Content panel — only this scrolls */}
-                <main className="flex-1 overflow-y-auto px-8 py-8">
-
-                    {/* SDK panel */}
-                    {tab === "sdk" && (
-                        <div className="max-w-2xl space-y-6">
-                            <div className="flex items-center gap-3">
-                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${currentSdkSection.color}`}>
-                                    <currentSdkSection.icon className="w-4 h-4" />
-                                </div>
-                                <h1 className="text-xl font-bold text-slate-900">{currentSdkSection.label}</h1>
-                            </div>
-                            {currentSdkSection.blocks.map((block, i) => (
-                                <CodeBlock key={i} {...block} />
-                            ))}
-                        </div>
-                    )}
-
-                    {/* REST panel */}
-                    {tab === "rest" && (
-                        <div className="max-w-2xl space-y-4">
-                            <div className="flex items-center gap-3 mb-2">
-                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${currentRestSection.color}`}>
-                                    <currentRestSection.icon className="w-4 h-4" />
-                                </div>
-                                <div>
-                                    <h1 className="text-xl font-bold text-slate-900">{currentRestSection.label}</h1>
-                                    {currentRestSection.desc && (
-                                        <p className="text-xs text-slate-500 mt-0.5">{currentRestSection.desc}</p>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Auth keys reminder — only on auth section */}
-                            {currentRestSection.id === "autenticacion" && (
-                                <div className="grid grid-cols-3 gap-3 mb-2">
-                                    {[
-                                        { label: "Anon Key", header: "x-matecito-key: mk_anon_...", desc: "Apps cliente. Seguro exponerlo." },
-                                        { label: "Service Key", header: "x-matecito-key: mk_service_...", desc: "Solo backend. Acceso total." },
-                                        { label: "Project JWT", header: "Authorization: Bearer <token>", desc: "Usuario autenticado." },
-                                    ].map(a => (
-                                        <div key={a.label} className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1.5">
-                                            <p className="text-xs font-bold text-slate-700">{a.label}</p>
-                                            <code className="block text-[10px] font-mono text-violet-700 bg-violet-50 rounded px-1.5 py-1 break-all">{a.header}</code>
-                                            <p className="text-[10px] text-slate-500">{a.desc}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            {currentRestSection.endpoints.map((ep, i) => (
-                                <EndpointCard key={i} ep={ep} />
-                            ))}
-
-                            <div className="bg-violet-50 border border-violet-200 rounded-xl p-4 space-y-1">
-                                <p className="text-xs font-semibold text-slate-700">URL base</p>
-                                <code className="block text-xs font-mono text-violet-700">https://&#123;subdomain&#125;.matecito.dev</code>
-                                <p className="text-xs text-slate-500">
-                                    Encontralo en{" "}
-                                    <Link href="/dashboard" className="text-violet-600 underline underline-offset-2">Dashboard</Link>
-                                    {" "}→ Conexión & Keys.
-                                </p>
-                            </div>
-                        </div>
-                    )}
-
-                </main>
-            </div>
+  return (
+    <div className="h-screen flex flex-col" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--fg-primary)' }}>
+      {/* Top header */}
+      <header className="h-14 flex items-center justify-between px-6 shrink-0 border-b" style={{ borderColor: 'var(--border)' }}>
+        <div className="flex items-center gap-3">
+          <img src="/logos/matecitologo.png" alt="Matecito" className="w-7 h-7 object-contain" />
+          <h1 className="text-sm font-semibold" style={{ color: 'var(--fg-primary)' }}>Documentación</h1>
         </div>
-    )
+
+        {/* Search */}
+        <div className="relative hidden sm:block">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5" style={{ color: 'var(--fg-tertiary)' }} />
+          <input
+            type="text" placeholder="Buscar en docs..."
+            value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+            className="pl-8 pr-3 py-1.5 text-xs rounded-lg border outline-none w-56 transition-colors focus:border-[var(--accent)]"
+            style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border)', color: 'var(--fg-primary)' }}
+          />
+        </div>
+
+        {/* Mobile menu toggle */}
+        <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="sm:hidden p-1.5 rounded-md hover:bg-[var(--bg-secondary)]">
+          {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+      </header>
+
+      {/* Tabs */}
+      <div className="flex items-center gap-0.5 px-6 py-1 border-b shrink-0 overflow-x-auto" style={{ borderColor: 'var(--border)' }}>
+        {tabs.map(tab => (
+          <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+            className={cn("flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-md whitespace-nowrap transition-colors",
+              activeTab === tab.id
+                ? "text-[var(--accent)]"
+                : "text-[var(--fg-tertiary)] hover:text-[var(--fg-secondary)] hover:bg-[var(--bg-secondary)]")}
+            style={activeTab === tab.id ? { backgroundColor: 'var(--accent-soft)' } : {}}
+          >
+            {tab.icon}
+            <span className="hidden sm:inline">{tab.label}</span>
+            <span className="sm:hidden">{tab.short}</span>
+            {tab.badge && (
+              <span className={cn("hidden sm:inline text-[9px] px-1.5 py-0.5 rounded-full font-medium",
+                tab.badge === 'recommended' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400' : 'bg-slate-100 text-slate-600 dark:bg-slate-800/50 dark:text-slate-400')}>
+                {tab.badge}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar TOC — desktop */}
+        <aside className={cn(
+          "w-56 shrink-0 border-r overflow-y-auto hidden sm:block",
+          mobileMenuOpen ? "!block absolute sm:relative z-30 h-[calc(100vh-7.5rem)] bg-[var(--bg-primary)]" : ""
+        )} style={{ borderColor: 'var(--border)' }}>
+          <nav className="p-3 space-y-0.5">
+            {filteredSections.map(section => (
+              <button key={section.id} onClick={() => scrollToSection(section.id)}
+                className={cn(
+                  "w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] transition-all text-left",
+                  activeSection === section.id ? "font-medium" : "hover:bg-[var(--bg-secondary)]"
+                )}
+                style={activeSection === section.id
+                  ? { backgroundColor: 'var(--accent-soft)', color: 'var(--accent)' }
+                  : { color: 'var(--fg-secondary)' }
+                }
+              >
+                <span className="shrink-0">{section.icon}</span>
+                <span className="truncate">{section.title}</span>
+              </button>
+            ))}
+          </nav>
+        </aside>
+
+        {/* Mobile overlay */}
+        {mobileMenuOpen && (
+          <div className="fixed inset-0 z-20 bg-[var(--bg-overlay)] sm:hidden" onClick={() => setMobileMenuOpen(false)}>
+            <aside className="w-64 h-[calc(100vh-7.5rem)] overflow-y-auto" style={{ backgroundColor: 'var(--bg-primary)' }}>
+              <nav className="p-3 space-y-0.5">
+                {filteredSections.map(section => (
+                  <button key={section.id} onClick={() => scrollToSection(section.id)}
+                    className={cn(
+                      "w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] transition-all text-left",
+                      activeSection === section.id ? "font-medium" : "hover:bg-[var(--bg-secondary)]"
+                    )}
+                    style={activeSection === section.id
+                      ? { backgroundColor: 'var(--accent-soft)', color: 'var(--accent)' }
+                      : { color: 'var(--fg-secondary)' }
+                    }
+                  >
+                    <span className="shrink-0">{section.icon}</span>
+                    <span className="truncate">{section.title}</span>
+                  </button>
+                ))}
+              </nav>
+            </aside>
+          </div>
+        )}
+
+        {/* Content */}
+        <main ref={contentRef} className="flex-1 overflow-y-auto">
+          <div className="max-w-3xl mx-auto p-6 lg:p-8 space-y-10">
+            {filteredSections.map(section => (
+              <section key={section.id} id={section.id} className="scroll-mt-20">
+                <div className="flex items-center gap-2.5 mb-4">
+                  <span style={{ color: 'var(--fg-tertiary)' }}>{section.icon}</span>
+                  <h2 className="text-lg font-bold" style={{ color: 'var(--fg-primary)' }}>{section.title}</h2>
+                </div>
+                <SectionContent section={section} />
+              </section>
+            ))}
+
+            {filteredSections.length === 0 && (
+              <div className="text-center py-16">
+                <Search className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--fg-tertiary)' }} />
+                <p className="text-sm" style={{ color: 'var(--fg-secondary)' }}>Sin resultados para "{searchQuery}"</p>
+              </div>
+            )}
+
+            <div className="h-20" />
+          </div>
+        </main>
+      </div>
+    </div>
+  )
 }
