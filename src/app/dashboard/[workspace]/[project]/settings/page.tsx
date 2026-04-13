@@ -128,7 +128,8 @@ function TabGeneral() {
     const projectUrl = subdomain !== '—' ? `https://${subdomain}.matecito.dev` : '—'
 
     return (
-        <div className="flex flex-col gap-5 max-w-xl">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
+            <div className="flex flex-col gap-5">
             <Section title="Proyecto" icon={Globe}>
                 <Row label="Nombre">
                     <span className="text-sm text-[var(--fg-tertiary)]">{settings?.name ?? '—'}</span>
@@ -192,6 +193,19 @@ function TabGeneral() {
                     Guardar cambios
                 </button>
             </div>
+            </div>{/* col 1 */}
+
+            <div className="flex flex-col gap-5">
+            <Section title="CORS — Orígenes permitidos" icon={Shield}>
+                <p className="text-xs text-[var(--fg-tertiary)] -mt-1">
+                    Un origen por línea (ej: <span className="font-mono text-[var(--fg-secondary)]">https://miapp.com</span>).
+                    Vacío = permite cualquier origen.
+                </p>
+                <textarea value={allowedOrigins} onChange={e => setAllowedOrigins(e.target.value)}
+                    placeholder={'https://miapp.com\nhttps://staging.miapp.com'} rows={6}
+                    className="w-full bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--fg-primary)] placeholder-[var(--fg-tertiary)] font-mono focus:outline-none focus:border-[var(--accent)] transition resize-none" />
+            </Section>
+            </div>{/* col 2 */}
         </div>
     )
 }
@@ -262,7 +276,8 @@ function TabApiKeys() {
     const serviceKey = project?.service_key ?? settings?.service_key ?? '—'
 
     return (
-        <div className="flex flex-col gap-5 max-w-xl">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
+            <div className="flex flex-col gap-5">
             <Section title="Keys del proyecto" icon={KeyRound}>
                 <Row label="Anon Key" desc="Para uso público en el cliente">
                     <div className="flex items-center gap-2">
@@ -323,6 +338,8 @@ function TabApiKeys() {
                     Nueva key
                 </button>
             </Section>
+            </div>{/* col 1 */}
+            <div />{/* col 2 placeholder */}
         </div>
     )
 }
@@ -567,7 +584,7 @@ function TabConexion() {
     }
 
     return (
-        <div className="flex flex-col gap-5 max-w-2xl">
+        <div className="flex flex-col gap-5">
             {/* Lang switch */}
             <div className="flex gap-1 self-start p-1 rounded-lg border border-[var(--border)] bg-[var(--bg-tertiary)]">
                 {(['js', 'flutter'] as const).map(l => (
@@ -579,12 +596,14 @@ function TabConexion() {
                 ))}
             </div>
 
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             {Object.entries(snippets).map(([key, snip]) => (
                 <div key={key}>
                     <p className="text-xs font-semibold text-[var(--fg-tertiary)] uppercase tracking-widest mb-2">{labels[key]}</p>
                     <CodeBlock code={snip[lang]} />
                 </div>
             ))}
+            </div>{/* grid */}
         </div>
     )
 }
@@ -631,9 +650,9 @@ function TabMigracion() {
     )
 
     return (
-        <div className="flex flex-col gap-5 max-w-xl">
+        <div className="flex flex-col gap-5">
             {/* Features grid */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
                 {V2_FEATURES.map(f => (
                     <div key={f.title} className="flex gap-3 p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-tertiary)]">
                         <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-[var(--accent-soft)] text-[var(--accent)]">
