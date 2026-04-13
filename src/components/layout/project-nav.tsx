@@ -90,10 +90,7 @@ const SECTIONS: Section[] = [
     label: 'Ajustes',
     icon: Settings,
     items: [
-      { id: 'connect', label: 'Conexión SDK', icon: Key, suffix: '/connect' },
-      { id: 'security', label: 'Permisos', icon: Shield, suffix: '/security' },
-      { id: 'settings-page', label: 'Configuración', icon: Settings, suffix: '/settings' },
-      { id: 'migrate', label: 'Migrar a v2', icon: Zap, suffix: '/migrate' },
+      { id: 'settings-page', label: 'Ajustes', icon: Settings, suffix: '/settings' },
     ],
   },
 ]
