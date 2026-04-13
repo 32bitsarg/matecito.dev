@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useId } from 'react'
 import { createPortal } from 'react-dom'
 import { useProject } from '@/contexts/ProjectContext'
 import type { Collection, Field, FieldType } from '@/contexts/ProjectContext'
@@ -8,11 +8,29 @@ import {
   Database, Plus, Trash2, Pencil, Loader2, RefreshCw, X, Save,
   Search, ToggleLeft, ToggleRight, EyeOff, Eye, Download, RotateCcw,
   Table2, Settings, ChevronDown, ChevronRight, Edit3, Type, Hash,
-  Mail, Calendar, FileIcon, Braces, Link2, ListFilter, Skull,
+  Mail, Calendar, FileIcon, Braces, Link2, ListFilter, Skull, GripVertical,
+  CheckCircle2, Circle, Star,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { getToken } from '@/lib/api'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? ''
 const LIMIT = 50
@@ -458,14 +476,473 @@ function StructureTab({ collection, onRename, onDelete }: { collection: Collecti
   )
 }
 
+// ─── Create Collection Modal ──────────────────────────────────────────────────
+
+interface DraftField {
+  id: string
+  name: string
+  type: FieldType
+  required: boolean
+  relationTarget: string
+  selectValues: string
+  maxSelect: number
+}
+
+function makeDraftField(): DraftField {
+  return {
+    id: Math.random().toString(36).slice(2),
+    name: '',
+    type: 'text',
+    required: false,
+    relationTarget: '',
+    selectValues: '',
+    maxSelect: 1,
+  }
+}
+
+function SortableField({
+  field,
+  collections,
+  onChange,
+  onRemove,
+}: {
+  field: DraftField
+  collections: Collection[]
+  onChange: (f: DraftField) => void
+  onRemove: () => void
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: field.id })
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 }
+  const meta = getFieldMeta(field.type)
+  const Icon = meta.icon
+
+  return (
+    <div ref={setNodeRef} style={style} className={cn(
+      "group flex flex-col gap-2 p-3 rounded-xl border transition-all",
+      isDragging ? "border-[var(--accent)] bg-[var(--accent-soft)]" : "border-[var(--border)] bg-[var(--bg-secondary)] hover:border-[var(--accent)]/40"
+    )}>
+      {/* Row 1: drag + name + type + required + delete */}
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing p-1 text-[var(--fg-tertiary)] hover:text-[var(--fg-secondary)] shrink-0"
+        >
+          <GripVertical className="w-4 h-4" />
+        </button>
+
+        {/* Name */}
+        <input
+          type="text"
+          placeholder="nombre_campo"
+          value={field.name}
+          onChange={e => onChange({ ...field, name: e.target.value.toLowerCase().replace(/\s+/g, '_') })}
+          className="flex-1 min-w-0 px-2.5 py-1.5 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg text-xs font-mono text-[var(--fg-primary)] outline-none focus:border-[var(--accent)] transition-all"
+        />
+
+        {/* Type selector */}
+        <div className="relative">
+          <select
+            value={field.type}
+            onChange={e => onChange({ ...field, type: e.target.value as FieldType })}
+            className={cn(
+              "appearance-none pl-7 pr-2 py-1.5 rounded-lg border text-xs font-medium outline-none focus:border-[var(--accent)] transition-all cursor-pointer",
+              meta.bg, meta.color
+            )}
+          >
+            {FIELD_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+          </select>
+          <Icon className={cn("absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none", meta.color)} />
+        </div>
+
+        {/* Required toggle */}
+        <button
+          type="button"
+          onClick={() => onChange({ ...field, required: !field.required })}
+          title={field.required ? 'Requerido' : 'Opcional'}
+          className={cn("shrink-0 transition-colors", field.required ? "text-red-400" : "text-[var(--fg-tertiary)] hover:text-[var(--fg-secondary)]")}
+        >
+          {field.required ? <CheckCircle2 className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
+        </button>
+
+        {/* Remove */}
+        <button
+          type="button"
+          onClick={onRemove}
+          className="shrink-0 opacity-0 group-hover:opacity-100 p-1 rounded text-[var(--fg-tertiary)] hover:text-red-500 hover:bg-red-950/20 transition-all"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      {/* Row 2: type-specific extras */}
+      {field.type === 'relation' && (
+        <div className="ml-7 flex items-center gap-2">
+          <Link2 className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
+          <select
+            value={field.relationTarget}
+            onChange={e => onChange({ ...field, relationTarget: e.target.value })}
+            className="flex-1 px-2.5 py-1.5 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg text-xs outline-none focus:border-[var(--accent)] text-[var(--fg-primary)]"
+          >
+            <option value="">→ seleccioná la colección destino</option>
+            {collections.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
+          </select>
+        </div>
+      )}
+
+      {field.type === 'select' && (
+        <div className="ml-7 flex gap-2">
+          <input
+            type="text"
+            placeholder="opción1, opción2, opción3"
+            value={field.selectValues}
+            onChange={e => onChange({ ...field, selectValues: e.target.value })}
+            className="flex-1 px-2.5 py-1.5 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg text-xs font-mono outline-none focus:border-[var(--accent)] text-[var(--fg-primary)]"
+          />
+          <input
+            type="number"
+            min={1}
+            max={20}
+            value={field.maxSelect}
+            onChange={e => onChange({ ...field, maxSelect: Number(e.target.value) })}
+            title="Máximo de selecciones"
+            className="w-16 px-2 py-1.5 bg-[var(--bg-primary)] border border-[var(--border)] rounded-lg text-xs text-center outline-none focus:border-[var(--accent)] text-[var(--fg-primary)]"
+          />
+        </div>
+      )}
+    </div>
+  )
+}
+
+function CreateCollectionModal({
+  collections,
+  onClose,
+  onCreate,
+  creating,
+}: {
+  collections: Collection[]
+  onClose: () => void
+  onCreate: (name: string, fields: any[]) => Promise<void>
+  creating: boolean
+}) {
+  const [name, setName] = useState('')
+  const [fields, setFields] = useState<DraftField[]>([makeDraftField()])
+  const [step, setStep] = useState<'name' | 'fields'>('name')
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  )
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (over && active.id !== over.id) {
+      setFields(f => {
+        const oldIndex = f.findIndex(x => x.id === active.id)
+        const newIndex = f.findIndex(x => x.id === over.id)
+        return arrayMove(f, oldIndex, newIndex)
+      })
+    }
+  }
+
+  const addField = () => setFields(f => [...f, makeDraftField()])
+
+  const updateField = (id: string, updated: DraftField) =>
+    setFields(f => f.map(x => x.id === id ? updated : x))
+
+  const removeField = (id: string) =>
+    setFields(f => f.filter(x => x.id !== id))
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const colName = name.trim().toLowerCase().replace(/\s+/g, '_')
+    if (!colName) return
+
+    const payload = fields
+      .filter(f => f.name.trim())
+      .map(f => {
+        const base: any = { name: f.name.trim(), type: f.type, required: f.required }
+        if (f.type === 'relation' && f.relationTarget) base.options = { target: f.relationTarget }
+        if (f.type === 'select') {
+          const values = f.selectValues.split(',').map(v => v.trim()).filter(Boolean)
+          base.options = { values, maxSelect: f.maxSelect }
+        }
+        return base
+      })
+
+    await onCreate(colName, payload)
+  }
+
+  const slugName = name.trim().toLowerCase().replace(/\s+/g, '_')
+  const validName = /^[a-z][a-z0-9_]*$/.test(slugName) || slugName === ''
+
+  // Quick-add common field sets
+  const TEMPLATES = [
+    {
+      label: 'Blog post',
+      icon: '📝',
+      fields: [
+        { name: 'title', type: 'text', required: true },
+        { name: 'body', type: 'text', required: false },
+        { name: 'published', type: 'bool', required: false },
+        { name: 'author_id', type: 'relation', required: false },
+      ],
+    },
+    {
+      label: 'Producto',
+      icon: '🛍️',
+      fields: [
+        { name: 'name', type: 'text', required: true },
+        { name: 'price', type: 'number', required: true },
+        { name: 'stock', type: 'number', required: false },
+        { name: 'category', type: 'select', required: false },
+      ],
+    },
+    {
+      label: 'Usuario',
+      icon: '👤',
+      fields: [
+        { name: 'name', type: 'text', required: true },
+        { name: 'email', type: 'email', required: true },
+        { name: 'role', type: 'select', required: false },
+        { name: 'active', type: 'bool', required: false },
+      ],
+    },
+    {
+      label: 'Vacía',
+      icon: '✨',
+      fields: [],
+    },
+  ]
+
+  const applyTemplate = (tpl: typeof TEMPLATES[0]) => {
+    setFields(
+      tpl.fields.length > 0
+        ? tpl.fields.map(f => ({ ...makeDraftField(), ...f } as DraftField))
+        : [makeDraftField()]
+    )
+    setStep('fields')
+  }
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)' }}>
+      <div className="absolute inset-0" onClick={onClose} />
+
+      <form
+        onSubmit={handleSubmit}
+        className="relative w-full max-w-xl bg-[var(--bg-tertiary)] rounded-2xl overflow-hidden flex flex-col shadow-2xl"
+        style={{ maxHeight: '88vh' }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)]">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-[var(--accent-soft)] flex items-center justify-center">
+              <Database className="w-4 h-4 text-[var(--accent)]" />
+            </div>
+            <div>
+              <h3 className="font-bold text-[var(--fg-primary)] text-sm">Nueva colección</h3>
+              {slugName && <p className="text-[10px] text-[var(--fg-tertiary)] font-mono mt-0.5">{slugName}</p>}
+            </div>
+          </div>
+          <button type="button" onClick={onClose} className="p-1.5 rounded-lg hover:bg-[var(--bg-secondary)] text-[var(--fg-tertiary)]">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Steps indicator */}
+        <div className="flex border-b border-[var(--border)]">
+          <button
+            type="button"
+            onClick={() => setStep('name')}
+            className={cn("flex-1 px-4 py-2.5 text-xs font-semibold transition-colors border-b-2",
+              step === 'name' ? "border-[var(--accent)] text-[var(--accent)]" : "border-transparent text-[var(--fg-tertiary)] hover:text-[var(--fg-secondary)]"
+            )}
+          >
+            1 · Nombre
+          </button>
+          <button
+            type="button"
+            onClick={() => slugName && validName && setStep('fields')}
+            className={cn("flex-1 px-4 py-2.5 text-xs font-semibold transition-colors border-b-2",
+              step === 'fields' ? "border-[var(--accent)] text-[var(--accent)]" : "border-transparent text-[var(--fg-tertiary)] hover:text-[var(--fg-secondary)]"
+            )}
+          >
+            2 · Campos
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto">
+          {/* Step 1: Name + template */}
+          {step === 'name' && (
+            <div className="px-6 py-5 space-y-5">
+              <div>
+                <label className="text-[10px] font-bold text-[var(--fg-tertiary)] uppercase tracking-widest mb-2 block">Nombre de la colección</label>
+                <input
+                  type="text"
+                  autoFocus
+                  placeholder="ej: posts, productos, clientes"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  className={cn(
+                    "w-full px-3.5 py-2.5 bg-[var(--bg-secondary)] border rounded-xl text-sm font-mono text-[var(--fg-primary)] outline-none transition-all",
+                    !validName && name ? "border-red-500 focus:border-red-500" : "border-[var(--border)] focus:border-[var(--accent)]"
+                  )}
+                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); if (slugName && validName) setStep('fields') } }}
+                />
+                {!validName && name && (
+                  <p className="text-[10px] text-red-400 mt-1">Solo minúsculas, números y guiones bajos. Debe comenzar con letra.</p>
+                )}
+                {validName && slugName && (
+                  <p className="text-[10px] text-[var(--fg-tertiary)] mt-1">Se guardará como: <code className="text-[var(--accent)]">{slugName}</code></p>
+                )}
+              </div>
+
+              <div>
+                <p className="text-[10px] font-bold text-[var(--fg-tertiary)] uppercase tracking-widest mb-3">Empezar desde plantilla</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {TEMPLATES.map(tpl => (
+                    <button
+                      key={tpl.label}
+                      type="button"
+                      onClick={() => {
+                        if (!slugName || !validName) { toast.error('Ingresá el nombre primero'); return }
+                        applyTemplate(tpl)
+                      }}
+                      className="flex items-center gap-3 p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] hover:border-[var(--accent)]/50 hover:bg-[var(--accent-soft)] text-left transition-all group"
+                    >
+                      <span className="text-xl">{tpl.icon}</span>
+                      <div>
+                        <p className="text-xs font-semibold text-[var(--fg-primary)] group-hover:text-[var(--accent)]">{tpl.label}</p>
+                        <p className="text-[10px] text-[var(--fg-tertiary)]">{tpl.fields.length > 0 ? `${tpl.fields.length} campos` : 'Sin campos'}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 2: Fields */}
+          {step === 'fields' && (
+            <div className="px-6 py-4 space-y-2">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-[10px] font-bold text-[var(--fg-tertiary)] uppercase tracking-widest">
+                  Campos · <span className="text-[var(--accent)]">{fields.filter(f => f.name).length} definidos</span>
+                </p>
+                <div className="flex items-center gap-2 text-[10px] text-[var(--fg-tertiary)]">
+                  <Circle className="w-3 h-3" /> <span>Opcional</span>
+                  <CheckCircle2 className="w-3 h-3 text-red-400 ml-2" /> <span>Requerido</span>
+                </div>
+              </div>
+
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
+                  <div className="space-y-2">
+                    {fields.map(field => (
+                      <SortableField
+                        key={field.id}
+                        field={field}
+                        collections={collections}
+                        onChange={updated => updateField(field.id, updated)}
+                        onRemove={() => removeField(field.id)}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+
+              <button
+                type="button"
+                onClick={addField}
+                className="w-full flex items-center justify-center gap-2 py-2.5 mt-1 rounded-xl border-2 border-dashed border-[var(--border)] hover:border-[var(--accent)]/50 hover:bg-[var(--accent-soft)] text-[var(--fg-tertiary)] hover:text-[var(--accent)] text-xs font-semibold transition-all"
+              >
+                <Plus className="w-4 h-4" /> Agregar campo
+              </button>
+
+              {/* Relation hint */}
+              {fields.some(f => f.type === 'relation') && (
+                <div className="flex items-start gap-2 p-3 rounded-xl bg-[var(--accent-soft)] border border-[var(--border)] mt-2">
+                  <Link2 className="w-3.5 h-3.5 text-[var(--accent)] mt-0.5 shrink-0" />
+                  <p className="text-[10px] text-[var(--fg-secondary)]">
+                    Los campos de relación guardan el <code className="text-[var(--accent)]">id</code> del registro relacionado.
+                    Podés seleccionar la colección destino en cada campo.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between px-6 py-3 border-t border-[var(--border)] bg-[var(--bg-secondary)]">
+          <div className="text-[10px] text-[var(--fg-tertiary)]">
+            {step === 'fields' && fields.filter(f => f.name.trim()).length === 0 && (
+              <span className="text-amber-400">Podés crear la colección sin campos y agregarlos después.</span>
+            )}
+          </div>
+          <div className="flex gap-2">
+            {step === 'fields' && (
+              <button type="button" onClick={() => setStep('name')} className="px-4 py-2 rounded-lg border border-[var(--border)] text-xs text-[var(--fg-secondary)] hover:bg-[var(--bg-primary)]">
+                Atrás
+              </button>
+            )}
+            {step === 'name' ? (
+              <button
+                type="button"
+                onClick={() => { if (slugName && validName) setStep('fields'); else toast.error('Ingresá un nombre válido') }}
+                className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white text-xs font-semibold hover:opacity-90 disabled:opacity-50"
+              >
+                Siguiente →
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={creating || !slugName || !validName}
+                className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white text-xs font-semibold hover:opacity-90 disabled:opacity-50 flex items-center gap-2"
+              >
+                {creating && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                {creating ? 'Creando...' : 'Crear colección'}
+              </button>
+            )}
+          </div>
+        </div>
+      </form>
+    </div>
+  )
+}
+
 // ─── Main Unified Page ────────────────────────────────────────────────────────
 
 export default function TablesPage() {
-  const { collections, loading: ctxLoading, updateCollection, deleteCollection } = useProject()
+  const { collections, loading: ctxLoading, updateCollection, deleteCollection, createCollection } = useProject()
   const [selectedCollection, setSelectedCollection] = useState<string | null>(null)
   const [tab, setTab] = useState<'records' | 'structure'>('records')
   const [editingCollection, setEditingCollection] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [newColName, setNewColName] = useState('')
+  const [creating, setCreating] = useState(false)
+
+  const handleCreateCollection = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const name = newColName.trim().toLowerCase().replace(/\s+/g, '_')
+    if (!name || creating) return
+    setCreating(true)
+    try {
+      await createCollection(name)
+      toast.success(`Colección "${name}" creada`)
+      setSelectedCollection(name)
+      setNewColName('')
+      setShowCreateModal(false)
+      setTab('structure')
+    } catch (err: any) {
+      toast.error(err.message || 'Error al crear colección')
+    } finally {
+      setCreating(false)
+    }
+  }
 
   useEffect(() => {
     if (!selectedCollection && collections.length > 0) {
@@ -508,12 +985,22 @@ export default function TablesPage() {
     <div className="h-[calc(100vh-13rem)] flex gap-4">
       {/* Collections sidebar */}
       <aside className="w-52 shrink-0 flex flex-col bg-[var(--bg-primary)] border border-[var(--border)] rounded-xl overflow-hidden">
-        <div className="px-4 py-3 border-b border-[var(--border)]">
-          <p className="text-[10px] font-bold text-[var(--fg-tertiary)] uppercase tracking-widest">Tablas</p>
+        <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between">
+          <p className="text-[10px] font-bold text-[var(--fg-tertiary)] uppercase tracking-widest">Colecciones</p>
+          <button
+            onClick={() => { setNewColName(''); setShowCreateModal(true) }}
+            className="p-1 rounded-lg text-[var(--fg-tertiary)] hover:text-[var(--accent)] hover:bg-[var(--accent-soft)] transition-colors"
+            title="Nueva colección"
+          >
+            <Plus className="w-3.5 h-3.5" />
+          </button>
         </div>
         <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
           {collections.length === 0 ? (
-            <p className="text-xs text-[var(--fg-tertiary)] text-center py-8 italic">Sin tablas aún</p>
+            <div className="flex flex-col items-center gap-2 py-8">
+              <p className="text-xs text-[var(--fg-tertiary)] text-center italic">Sin colecciones aún</p>
+              <button onClick={() => { setNewColName(''); setShowCreateModal(true) }} className="text-xs text-[var(--accent)] font-semibold">+ Crear una</button>
+            </div>
           ) : collections.map(col => (
             <button key={col.name} onClick={() => { setSelectedCollection(col.name); setTab('records') }}
               className={cn("w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-left transition-all",
@@ -530,7 +1017,8 @@ export default function TablesPage() {
         {!selectedCollection || !current ? (
           <div className="flex flex-col items-center justify-center h-full gap-3 text-center">
             <Database className="w-10 h-10 text-[var(--fg-tertiary)]" />
-            <p className="text-[var(--fg-secondary)] font-medium">Seleccioná una tabla</p>
+            <p className="text-[var(--fg-secondary)] font-medium">Seleccioná una colección</p>
+            <button onClick={() => { setNewColName(''); setShowCreateModal(true) }} className="text-xs text-[var(--accent)] font-semibold">+ Nueva colección</button>
           </div>
         ) : (
           <>
@@ -576,6 +1064,31 @@ export default function TablesPage() {
           </>
         )}
       </div>
+
+      {/* Create collection modal */}
+      {showCreateModal && createPortal(
+        <CreateCollectionModal
+          collections={collections}
+          onClose={() => setShowCreateModal(false)}
+          onCreate={async (name, fields) => {
+            setCreating(true)
+            try {
+              await createCollection({ name, fields })
+              toast.success(`Colección "${name}" creada`)
+              setSelectedCollection(name)
+              setShowCreateModal(false)
+              setTab('structure')
+            } catch (err: any) {
+              toast.error(err.message || 'Error al crear colección')
+              throw err
+            } finally {
+              setCreating(false)
+            }
+          }}
+          creating={creating}
+        />,
+        document.body
+      )}
     </div>
   )
 }
