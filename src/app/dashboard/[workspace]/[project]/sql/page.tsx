@@ -37,10 +37,11 @@ export default function SqlEditorPage() {
         setResult(null)
 
         try {
-            const res = await api.post(`/api/v1/project/${projectId}/sql`, { sql: query })
+            const res = await api.post(`/api/v2/project/${projectId}/sql`, { sql: query })
             setResult(res)
         } catch (err: any) {
             setError(err.data?.error ?? err.message)
+            if (err.data) setResult(err.data) // keep statement_index / statement_preview
         } finally {
             setLoading(false)
         }
@@ -138,14 +139,44 @@ export default function SqlEditorPage() {
                 {error && !loading && (
                     <div className="bg-red-950/20 border border-red-800/40 rounded-xl p-5 flex items-start gap-3">
                         <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                        <div>
-                            <p className="text-sm font-bold text-red-700 mb-1">Error en la consulta</p>
-                            <pre className="text-xs font-mono text-red-400 whitespace-pre-wrap">{error}</pre>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-red-400 mb-1">
+                                {result?.statement_index
+                                    ? `Error en statement #${result.statement_index} (${result.statements_ok ?? 0} ejecutados OK)`
+                                    : 'Error en la consulta'}
+                            </p>
+                            <pre className="text-xs font-mono text-red-300 whitespace-pre-wrap">{error}</pre>
+                            {result?.statement_preview && (
+                                <pre className="mt-2 text-[10px] font-mono text-red-900 bg-red-950/40 rounded p-2 truncate">{result.statement_preview}</pre>
+                            )}
                         </div>
                     </div>
                 )}
 
-                {result && !loading && (
+                {result?.statements_executed && !loading && (
+                    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-primary)] overflow-hidden">
+                        <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--border)]">
+                            <div className="flex items-center gap-3">
+                                <Check className="w-4 h-4 text-emerald-400" />
+                                <span className="text-sm font-semibold text-emerald-400">
+                                    {result.statements_executed} statement{result.statements_executed !== 1 ? 's' : ''} ejecutados correctamente
+                                </span>
+                            </div>
+                            <span className="text-[10px] font-mono text-[var(--fg-tertiary)]">{result.duration_ms}ms</span>
+                        </div>
+                        <div className="p-4 flex flex-col gap-1.5 max-h-80 overflow-y-auto">
+                            {result.results?.map((r: any) => (
+                                <div key={r.index} className="flex items-center gap-3 text-xs">
+                                    <span className="text-[var(--fg-tertiary)] w-6 text-right shrink-0">#{r.index}</span>
+                                    <span className="font-mono font-bold text-[var(--fg-secondary)] w-20 shrink-0">{r.command}</span>
+                                    <span className="text-[var(--fg-tertiary)]">{r.row_count > 0 ? `${r.row_count} fila(s)` : 'ok'}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {result && !result.statements_executed && !loading && (
                     <div className="flex flex-col h-full bg-[var(--bg-primary)] rounded-xl border border-[var(--border)] overflow-hidden">
                         {/* Result bar */}
                         <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--border)] shrink-0">
