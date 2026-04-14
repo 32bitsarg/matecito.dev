@@ -136,4 +136,20 @@ final res = await db.healthCheck();
 
 ---
 
+## Health check
+
+````carousel
+```ts
+const { data, error } = await db.healthCheck()
+// data: { status: 'ok' }
+```
+<!-- slide -->
+```dart
+final res = await db.healthCheck();
+// res.data: { 'status': 'ok' }
+```
+````
+
+---
+
 Siguiente: [Autenticación](auth.md)

@@ -1,0 +1,53 @@
+# MatecitoDB
+
+> MatecitoDB es el SDK oficial de [matecito.dev](https://matecito.dev) — un Backend-as-a-Service (BaaS) argentino con TypeScript nativo, consultas fluidas, tiempo real por WebSockets, autenticación completa, storage de archivos y herramientas de administración.
+
+MatecitoDB permite a desarrolladores de TypeScript/JavaScript y Flutter conectarse a su backend con una sola línea de código. Incluye query builder tipado, autenticación con JWT y OAuth, realtime por WebSockets, storage, batch transaccional, SQL raw, permisos por colección, SMTP, webhooks y CLI para generación de código.
+
+**Instalación (npm):**
+```bash
+npm install matecitodb
+```
+
+**Instalación (Flutter/Dart):**
+```yaml
+dependencies:
+  matecitodb_flutter: ^4.0.0
+```
+
+**Uso básico:**
+```ts
+import { createClient } from 'matecitodb'
+
+const db = createClient({
+  url:    'https://tu-proyecto.matecito.dev',
+  apiKey: 'mk_anon_...',
+})
+
+const { data: posts } = await db.from('posts').eq('status', 'publicado').find()
+```
+
+---
+
+## Documentación
+
+- [Inicio rápido](https://matecito.dev/docs/doc/getting-started.md): Instalación, inicialización del cliente, módulos disponibles, health check
+- [Records & CRUD](https://matecito.dev/docs/doc/records.md): Consultas, filtros, paginación, insertar, actualizar, upsert, eliminar, exportar
+- [Autenticación](https://matecito.dev/docs/doc/auth.md): signUp, signIn, signOut, OAuth, reset de contraseña, verificación de email, admin
+- [Realtime](https://matecito.dev/docs/doc/realtime.md): Suscripciones WebSocket, estado de conexión, reconexión automática
+- [Storage](https://matecito.dev/docs/doc/storage.md): Subir archivos, listar, eliminar, URL pública, progress (Flutter)
+- [Batch Operations](https://matecito.dev/docs/doc/batch.md): Múltiples operaciones en una transacción, modo atómico, dry run
+- [SQL Directo](https://matecito.dev/docs/doc/sql.md): Queries SQL raw, parámetros seguros, mutations
+- [Permisos](https://matecito.dev/docs/doc/permissions.md): Control de acceso por colección (public / auth / service / nobody)
+- [Colecciones y Schema](https://matecito.dev/docs/doc/collections.md): Crear y gestionar colecciones y campos desde el SDK
+- [Stats y Logs](https://matecito.dev/docs/doc/stats-and-logs.md): Estadísticas del proyecto, logs de requests filtrables
+- [SMTP y Email Templates](https://matecito.dev/docs/doc/smtp-and-email.md): Configurar SMTP, crear y usar templates con variables
+- [Webhooks](https://matecito.dev/docs/doc/webhooks.md): Crear, listar, actualizar y eliminar webhooks
+- [CLI](https://matecito.dev/docs/doc/cli.md): init, generate types, generate auth, generate hook
+- [Manejo de errores](https://matecito.dev/docs/doc/error-handling.md): Patrón { data, error }, auto-retry, auto-refresh, debug mode
+
+## Referencia adicional
+
+- [Documentación interactiva completa](https://matecito.dev/docs): SDK TypeScript, REST API v1 y v2, Flutter/Dart — con ejemplos de código
+- [Paquete NPM](https://www.npmjs.com/package/matecitodb): matecitodb en npm
+- [matecito.dev](https://matecito.dev): Sitio oficial

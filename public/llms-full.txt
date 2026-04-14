@@ -1,0 +1,2175 @@
+# MatecitoDB — Documentación completa
+# SDK npm: matecitodb | Flutter: matecitodb_flutter
+# Sitio: https://matecito.dev | npm: https://www.npmjs.com/package/matecitodb
+# Índice de docs: https://matecito.dev/llms.txt
+
+---
+
+# Inicio rápido
+
+MatecitoDB es un Backend-as-a-Service completo. Este SDK te permite interactuar con tus registros, autenticación, storage y herramientas de administración de forma type-safe e intuitiva.
+
+## Instalación
+
+### TypeScript / JavaScript
+```bash
+npm install matecitodb
+```
+
+### Flutter / Dart
+```yaml
+dependencies:
+  matecitodb_flutter: ^3.1.0
+```
+
+---
+
+## Inicialización
+
+````carousel
+```ts
+import { createClient } from 'matecitodb'
+
+const db = createClient({
+  url:         'https://tu-proyecto.matecito.dev',
+  apiKey:      'mk_anon_...',    // clave pública (client-side)
+  // serviceKey: 'mk_service_...', // admin/server-side
+  autoRefresh: true,
+  timeout:     30_000,
+  retry:       { attempts: 3, baseDelay: 500 },
+  debug:       false,            // loguea requests (headers sensibles redactados)
+})
+```
+<!-- slide -->
+```dart
+import 'package:matecitodb_flutter/matecitodb_flutter.dart';
+
+final db = MatecitoDB.createClient(
+  'https://tu-proyecto.matecito.dev',
+  config: const ClientConfig(
+    apiKey:      'mk_anon_...',
+    autoRefresh: true,
+    timeoutMs:   30000,
+    retry:       RetryConfig(attempts: 3, baseDelayMs: 500),
+    debug:       false,
+  ),
+);
+```
+````
+
+---
+
+## Variables de entorno (Next.js / Vite)
+
+```env
+# .env.local
+NEXT_PUBLIC_MATECITODB_API_KEY=mk_anon_...
+MATECITODB_API_KEY=mk_service_...
+MATECITODB_URL=https://tu-proyecto.matecito.dev
+```
+
+O generalo automáticamente con el CLI:
+
+```bash
+npx matecitodb init
+```
+
+---
+
+## Módulos disponibles
+
+El SDK está organizado en módulos accesibles desde la instancia `db`:
+
+| Módulo | Descripción |
+|--------|-------------|
+| `db.from('coleccion')` | CRUD, filtros, paginación, exportación |
+| `db.auth` | Registro, login, OAuth, JWT |
+| `db.realtime` | WebSockets, eventos en vivo |
+| `db.storage` | Archivos y URLs públicas |
+| `db.batch()` | Operaciones en una sola transacción |
+| `db.sql` | SQL raw (requiere serviceKey) |
+| `db.permissions` | Control de acceso por colección |
+| `db.collections` | Gestión de schema (admin) |
+| `db.stats` / `db.logs` | Monitoreo del proyecto |
+| `db.smtp` / `db.emailTemplates` | Email transaccional |
+| `db.webhooks` | Eventos hacia URLs externas |
+
+---
+
+## Formato de respuesta
+
+La mayoría de los métodos devuelven `{ data, error }`. Nunca tiran excepciones salvo `find()`, `findOne()` y `count()`.
+
+````carousel
+```ts
+const { data: posts, error } = await db.from('posts').find()
+
+if (error) {
+  console.error(error.status)   // código HTTP (0 = error de red)
+  console.error(error.message)  // mensaje legible
+  console.error(error.raw)      // respuesta raw del servidor
+} else {
+  console.log(posts)
+}
+```
+<!-- slide -->
+```dart
+final res = await db.from('posts').find();
+
+if (res.error != null) {
+  print(res.error!.status);   // código HTTP
+  print(res.error!.message);  // mensaje legible
+} else {
+  print(res.data);
+}
+```
+````
+
+---
+
+## Health check
+
+````carousel
+```ts
+const { data, error } = await db.healthCheck()
+// data: { status: 'ok' }
+```
+<!-- slide -->
+```dart
+final res = await db.healthCheck();
+// res.data: { 'status': 'ok' }
+```
+````
+
+---
+
+## Health check
+
+````carousel
+```ts
+const { data, error } = await db.healthCheck()
+// data: { status: 'ok' }
+```
+<!-- slide -->
+```dart
+final res = await db.healthCheck();
+// res.data: { 'status': 'ok' }
+```
+````
+
+---
+
+Siguiente: [Autenticación](auth.md)
+
+---
+
+# Records & CRUD
+
+El `QueryBuilder` te permite interactuar con tus datos de forma fluida y type-safe. Accedé con `db.from('nombre_coleccion')`. El builder es **thenable** — podés usar `await` directamente sobre la cadena.
+
+---
+
+## Consultar registros
+
+````carousel
+```ts
+// Traer todos
+const records = await db.from('posts').find()
+
+// Con filtros y opciones
+const { data: posts, error } = await db.from('posts')
+  .select('id, title, author')
+  .eq('status', 'publicado')
+  .gte('views', 100)
+  .ilike('title', '%matecito%')
+  .latest()
+  .limit(20)
+  .page(2)
+
+// Pagination info
+const { data, total, pages, nextCursor } = await db.from('posts').find()
+
+// Por ID
+const { data: post } = await db.from('posts').getOne('abc-123')
+
+// Primero que coincide
+const { data: post } = await db.from('posts')
+  .eq('slug', 'mi-post')
+  .getFirst()
+
+// findOne — acepta ID string o mapa de filtros
+const post = await db.from('posts').findOne('abc-123')
+const post = await db.from('posts').findOne({ slug: 'mi-post' })
+
+// Contar
+const count = await db.from('posts').eq('status', 'publicado').count()
+```
+<!-- slide -->
+```dart
+// Traer todos
+final records = await db.from('posts').find();
+
+// Con filtros y opciones
+final res = await db.from('posts')
+    .select(['id', 'title', 'author'])
+    .eq('status', 'publicado')
+    .gte('views', 100)
+    .ilike('title', '%matecito%')
+    .latest()
+    .limit(20)
+    .page(2)
+    .get();
+
+// Pagination info
+final posts     = res.data;
+final total     = res.total;
+final pages     = res.pages;
+final nextCursor = res.nextCursor;
+
+// Por ID
+final single = await db.from('posts').getOne('abc-123');
+
+// Primero que coincide
+final first = await db.from('posts').eq('slug', 'mi-post').getFirst();
+
+// findOne
+final post = await db.from('posts').findOne('abc-123');
+final post = await db.from('posts').findOne({'slug': 'mi-post'});
+
+// Contar
+final count = await db.from('posts').eq('status', 'publicado').count();
+```
+````
+
+---
+
+## Filtros disponibles
+
+| Método | Operador SQL | Ejemplo |
+|--------|-------------|---------|
+| `.eq(col, val)` | `=` | `.eq('status', 'activo')` |
+| `.neq(col, val)` | `!=` | `.neq('role', 'admin')` |
+| `.gt(col, val)` | `>` | `.gt('price', 100)` |
+| `.gte(col, val)` | `>=` | `.gte('age', 18)` |
+| `.lt(col, val)` | `<` | `.lt('stock', 10)` |
+| `.lte(col, val)` | `<=` | `.lte('price', 500)` |
+| `.like(col, pattern)` | `LIKE` | `.like('name', 'Juan%')` |
+| `.ilike(col, pattern)` | `ILIKE` | `.ilike('title', '%café%')` |
+| `.inValues(col, arr)` | `IN (...)` | `.inValues('tag', ['a','b'])` |
+| `.notInValues(col, arr)` | `NOT IN (...)` | `.notInValues('status', ['spam'])` |
+| `.or(expr)` | `OR (...)` | ver abajo |
+| `.search(texto)` | `ILIKE` global | `.search('matecito')` |
+
+### Filtro OR
+
+````carousel
+```ts
+// Precio >= 100 O nombre contiene 'café'
+await db.from('products')
+  .or('price.gte.100,name.ilike.%café%')
+  .find()
+```
+<!-- slide -->
+```dart
+await db.from('products')
+    .or(['price.gte.100', 'name.ilike.%café%'])
+    .find();
+```
+````
+
+### Búsqueda full-text
+
+````carousel
+```ts
+// Busca el texto en todos los campos del registro
+await db.from('products').search('yerba mate').find()
+```
+<!-- slide -->
+```dart
+await db.from('products').search('yerba mate').find();
+```
+````
+
+### Fechas como filtro
+
+````carousel
+```ts
+// Acepta objetos Date — se envía como ISO 8601 completo (con hora)
+await db.from('events')
+  .gte('date', new Date('2025-01-01'))
+  .lt('date', new Date('2026-01-01'))
+  .find()
+```
+<!-- slide -->
+```dart
+await db.from('events')
+    .gte('date', DateTime(2025, 1, 1))
+    .lt('date', DateTime(2026, 1, 1))
+    .find();
+```
+````
+
+---
+
+## Seleccionar campos
+
+````carousel
+```ts
+// Traer solo algunos campos
+await db.from('posts').select('id, title, created_at').find()
+```
+<!-- slide -->
+```dart
+await db.from('posts').select(['id', 'title', 'created_at']).find();
+```
+````
+
+---
+
+## Ordenar y paginar
+
+````carousel
+```ts
+db.from('posts').latest()                            // ORDER BY created_at DESC
+db.from('posts').oldest()                            // ORDER BY created_at ASC
+db.from('posts').order('title', { ascending: true }) // ORDER BY title ASC
+db.from('posts').limit(50).page(3)
+```
+<!-- slide -->
+```dart
+db.from('posts').latest();
+db.from('posts').oldest();
+db.from('posts').order('title', ascending: true);
+db.from('posts').limit(50).page(3);
+```
+````
+
+---
+
+## Insertar
+
+````carousel
+```ts
+const { data: post, error } = await db.from('posts').insert({
+  title:   'Nuevo post',
+  content: 'Contenido...',
+})
+```
+<!-- slide -->
+```dart
+final res = await db.from('posts').insert({
+  'title':   'Nuevo post',
+  'content': 'Contenido...',
+});
+final post = res.data; // registro aplanado
+```
+````
+
+---
+
+## Actualizar
+
+````carousel
+```ts
+// Por ID (un solo registro)
+await db.from('posts').eq('id', 'abc-123').update({ title: 'Nuevo título' })
+
+// Bulk update — todos los que coinciden con los filtros
+await db.from('posts').eq('status', 'borrador').update({ archived: true })
+
+// Merge — actualiza solo los campos enviados, preserva el resto
+await db.from('posts').eq('id', 'abc-123').merge({ views: 42 })
+
+// Con fecha de expiración
+await db.from('sessions').eq('id', 'xyz').update(
+  { active: true },
+  { expiresAt: new Date(Date.now() + 3600_000) }
+)
+```
+<!-- slide -->
+```dart
+// Por ID
+await db.from('posts').eq('id', 'abc-123').update({'title': 'Nuevo título'}).get();
+
+// Bulk update
+await db.from('posts').eq('status', 'borrador').update({'archived': true}).get();
+
+// Merge
+await db.from('posts').eq('id', 'abc-123').merge({'views': 42}).get();
+
+// Con expiración
+await db.from('sessions').eq('id', 'xyz').update(
+  {'active': true},
+  expiresAt: DateTime.now().add(const Duration(hours: 1)),
+).get();
+```
+````
+
+---
+
+## Upsert
+
+Inserta el registro si no existe; si existe (según el campo de conflicto), lo actualiza.
+
+````carousel
+```ts
+const { data, upserted } = await db.from('profiles').upsert(
+  { user_id: 'abc', bio: 'Dev apasionado' },
+  'user_id'
+)
+
+console.log(upserted) // true = insertado, false = actualizado
+```
+<!-- slide -->
+```dart
+final res = await db.from('profiles').upsert(
+  {'user_id': 'abc', 'bio': 'Dev apasionado'},
+  'user_id',
+).get();
+
+final upsertRes = res as MatecitoUpsertResponse;
+print(upsertRes.upserted); // true = insertado, false = actualizado
+```
+````
+
+---
+
+## Eliminar
+
+````carousel
+```ts
+// Soft-delete (recuperable)
+await db.from('posts').delete('abc-123')
+
+// Bulk soft-delete
+await db.from('posts').eq('status', 'spam').delete()
+
+// Restaurar
+await db.from('posts').restore('abc-123')
+
+// Borrado permanente (irreversible)
+await db.from('posts').hardDelete('abc-123')
+```
+<!-- slide -->
+```dart
+// Soft-delete
+await db.from('posts').delete('abc-123').get();
+
+// Bulk soft-delete
+await db.from('posts').eq('status', 'spam').delete().get();
+
+// Restaurar
+await db.from('posts').restore('abc-123');
+
+// Borrado permanente
+await db.from('posts').hardDelete('abc-123');
+```
+````
+
+---
+
+## Incluir registros eliminados y expirados
+
+````carousel
+```ts
+// Ver registros soft-deleted
+const { data } = await db.from('posts').includeDeleted().find()
+
+// Ver registros con expires_at vencido
+const { data } = await db.from('sessions').includeExpired().find()
+```
+<!-- slide -->
+```dart
+final res = await db.from('posts').includeDeleted().find();
+final res = await db.from('sessions').includeExpired().find();
+```
+````
+
+---
+
+## Insertar múltiples (batch)
+
+````carousel
+```ts
+const records = await db.from('products').insertMany([
+  { name: 'Yerba', price: 500 },
+  { name: 'Mate',  price: 1200 },
+])
+```
+<!-- slide -->
+```dart
+final records = await db.from('products').insertMany([
+  {'name': 'Yerba', 'price': 500},
+  {'name': 'Mate',  'price': 1200},
+]);
+```
+````
+
+---
+
+## Paginar como stream
+
+````carousel
+```ts
+for await (const batch of db.from('posts').paginate({ batchSize: 100 })) {
+  console.log('Lote:', batch.length, 'posts')
+  processBatch(batch)
+}
+```
+<!-- slide -->
+```dart
+await for (final batch in db.from('posts').paginate(batchSize: 100)) {
+  print('Lote: ${batch.length} registros');
+  processBatch(batch);
+}
+```
+````
+
+---
+
+## Exportar
+
+````carousel
+```ts
+// Devuelve un Blob con todos los registros (hasta 10k)
+const blob = await db.from('posts').export({ format: 'csv' })
+const blob = await db.from('posts').export({ format: 'json' })
+
+// Descargar en el browser
+const url = URL.createObjectURL(blob)
+const a = document.createElement('a')
+a.href = url
+a.download = 'posts.csv'
+a.click()
+```
+<!-- slide -->
+```dart
+// Devuelve Uint8List
+final bytes = await db.from('posts').export(format: 'csv');
+final bytes = await db.from('posts').export(format: 'json');
+
+// Guardar en disco
+await File('/tmp/posts.csv').writeAsBytes(bytes);
+```
+````
+
+---
+
+## Suscribirse desde el builder
+
+````carousel
+```ts
+// Ver Realtime para más detalles
+const unsub = db.from('messages').subscribe((event) => {
+  console.log(event.action, event.record)
+})
+```
+<!-- slide -->
+```dart
+// Callback
+final unsub = db.from('messages').subscribe((event) {
+  print('${event.action}: ${event.record}');
+});
+
+// Stream
+db.from('messages').watch().listen((event) { ... });
+```
+````
+
+---
+
+Siguiente: [Autenticación](auth.md)
+
+---
+
+# Autenticación
+
+MatecitoDB incluye un sistema de autenticación completo: email/password, OAuth, verificación de email, reset de contraseña y gestión de usuarios admin.
+
+## Registro e inicio de sesión
+
+````carousel
+```ts
+// Registrar
+const { data, error } = await db.auth.signUp({
+  email:    'usuario@ejemplo.com',
+  password: 'contraseña123',
+  username: 'miusuario',  // campo extra opcional
+})
+
+// Iniciar sesión
+const { data, error } = await db.auth.signIn({
+  email:    'usuario@ejemplo.com',
+  password: 'contraseña123',
+})
+
+// Cerrar sesión
+await db.auth.signOut()
+
+// Estado actual
+const user     = db.auth.user
+const token    = db.auth.token
+const loggedIn = db.auth.isLoggedIn
+```
+<!-- slide -->
+```dart
+// Registrar
+final res = await db.auth.signUp(
+  email:    'usuario@ejemplo.com',
+  password: 'contraseña123',
+  extra:    {'username': 'miusuario'},
+);
+
+// Iniciar sesión
+final res = await db.auth.signIn(
+  email:    'usuario@ejemplo.com',
+  password: 'contraseña123',
+);
+
+// Cerrar sesión
+await db.auth.signOut();
+
+// Estado actual
+final user     = db.auth.user;
+final token    = db.auth.token;
+final loggedIn = db.auth.isLoggedIn;
+```
+````
+
+La sesión se persiste automáticamente en `localStorage` (Web) o `SharedPreferences` (Flutter).
+
+---
+
+## Escuchar cambios de sesión
+
+````carousel
+```ts
+const unsubscribe = db.auth.onAuthChange((user) => {
+  if (user) {
+    console.log('Sesión activa:', user.email)
+  } else {
+    console.log('Sesión cerrada')
+  }
+})
+
+// Dejar de escuchar
+unsubscribe()
+```
+<!-- slide -->
+```dart
+// Callback
+final unsub = db.auth.onAuthChange((user) {
+  if (user != null) {
+    print('Sesión activa: ${user.email}');
+  } else {
+    print('Sesión cerrada');
+  }
+});
+unsub();
+
+// Stream (ideal para StreamBuilder / Provider)
+StreamBuilder<AuthUser?>(
+  stream: db.auth.authStateStream,
+  builder: (context, snapshot) {
+    final user = snapshot.data;
+    return user != null
+        ? Text('Hola, ${user.email}')
+        : const LoginScreen();
+  },
+)
+```
+````
+
+---
+
+## Perfil y contraseña
+
+````carousel
+```ts
+// Obtener perfil fresco del servidor
+const { data: user } = await db.auth.getMe()
+
+// Actualizar perfil
+await db.auth.updateProfile({ name: 'Juan', avatar_seed: 'abc' })
+
+// Solicitar reset de contraseña (envía email)
+await db.auth.requestPasswordReset('usuario@ejemplo.com', {
+  resetUrlBase: 'https://miapp.com/reset',
+})
+
+// Confirmar nuevo password con el token del email
+await db.auth.resetPassword(token, 'nueva-contraseña')
+```
+<!-- slide -->
+```dart
+// Obtener perfil fresco
+await db.auth.getMe();
+
+// Actualizar perfil
+await db.auth.updateProfile({'name': 'Juan', 'avatar_seed': 'abc'});
+
+// Solicitar reset de contraseña
+await db.auth.requestPasswordReset(
+  'usuario@ejemplo.com',
+  resetUrlBase: 'https://miapp.com/reset',
+);
+
+// Confirmar nuevo password
+await db.auth.resetPassword(token, 'nueva-contraseña');
+```
+````
+
+---
+
+## Verificación de email
+
+````carousel
+```ts
+// Verificar con el token del link enviado por email
+const { data, error } = await db.auth.verifyEmail(token)
+
+// Reenviar email de verificación
+await db.auth.resendVerification({ email: 'usuario@ejemplo.com' })
+await db.auth.resendVerification({ userId: 'user-uuid' })
+```
+<!-- slide -->
+```dart
+// Verificar con el token del link
+await db.auth.verifyEmail(token);
+
+// Reenviar email de verificación
+await db.auth.resendVerification(email: 'usuario@ejemplo.com');
+await db.auth.resendVerification(userId: 'user-uuid');
+```
+````
+
+---
+
+## OAuth
+
+````carousel
+```ts
+// 1. Generar URL con state para protección CSRF
+const state = crypto.randomUUID()
+const url = db.auth.getOAuthUrl('google', 'https://miapp.com/callback', { state })
+
+// 2. Redirigir al usuario a `url`
+window.location.href = url
+
+// 3. En el callback, completar el flujo
+const { data, error } = await db.auth.handleOAuthCallback({
+  access_token:  searchParams.get('access_token'),
+  refresh_token: searchParams.get('refresh_token'),
+})
+
+// Inyectar sesión manualmente (SSO / server-side)
+db.auth.setSession({
+  accessToken:  'jwt...',
+  refreshToken: 'refresh...',
+})
+```
+<!-- slide -->
+```dart
+// 1. Generar URL con state para CSRF
+final state = const Uuid().v4();
+final url = db.auth.getOAuthUrl(
+  'google',
+  'https://miapp.com/callback',
+  state: state,
+);
+
+// 2. Abrir en el navegador
+await launchUrl(Uri.parse(url));
+
+// 3. Completar desde el deep link
+final res = await db.auth.handleOAuthCallback({
+  'access_token':  params['access_token'],
+  'refresh_token': params['refresh_token'],
+});
+
+// Inyectar sesión manualmente
+db.auth.setSession(
+  accessToken:  'jwt...',
+  refreshToken: 'refresh...',
+);
+```
+````
+
+---
+
+## Administración de usuarios (requiere `serviceKey`)
+
+````carousel
+```ts
+// Listar usuarios con búsqueda y paginación
+const { data } = await db.auth.admin.listUsers({
+  limit:  20,
+  page:   1,
+  search: 'juan',
+})
+
+// Eliminar usuario (irreversible)
+await db.auth.admin.deleteUser('user-uuid')
+```
+<!-- slide -->
+```dart
+// Listar usuarios
+final res = await db.auth.admin.listUsers(
+  limit:  20,
+  page:   1,
+  search: 'juan',
+);
+
+// Eliminar usuario
+await db.auth.admin.deleteUser('user-uuid');
+```
+````
+
+---
+
+## Configurar proveedores OAuth (requiere `serviceKey`)
+
+````carousel
+```ts
+// Configurar proveedor
+await db.auth.oauth.configure('google', {
+  clientId:     'TU_CLIENT_ID',
+  clientSecret: 'TU_CLIENT_SECRET',
+  redirectUri:  'https://miapp.com/callback',
+})
+
+// Listar proveedores activos
+const { data: providers } = await db.auth.oauth.listProviders()
+
+// Eliminar proveedor
+await db.auth.oauth.remove('github')
+```
+<!-- slide -->
+```dart
+await db.auth.oauth.configure('google',
+  clientId:     'TU_CLIENT_ID',
+  clientSecret: 'TU_CLIENT_SECRET',
+  redirectUri:  'https://miapp.com/callback',
+);
+
+final res = await db.auth.oauth.listProviders();
+
+await db.auth.oauth.remove('github');
+```
+````
+
+---
+
+Siguiente: [Records & CRUD](records.md)
+
+---
+
+# Realtime
+
+El módulo Realtime te permite suscribirte a cambios en vivo en tus colecciones mediante WebSockets. La conexión se mantiene automáticamente con reconexión exponencial y heartbeat (ping/pong cada 30 segundos).
+
+---
+
+## Suscribirse a una colección
+
+````carousel
+```ts
+// Escuchar todos los cambios
+const unsub = db.from('messages').subscribe((event) => {
+  console.log(event.action)     // 'created' | 'updated' | 'deleted'
+  console.log(event.collection) // 'messages'
+  console.log(event.record)     // el registro como objeto plano
+  console.log(event.recordId)   // ID del registro
+})
+
+// Dejar de escuchar
+unsub()
+```
+<!-- slide -->
+```dart
+// Callback
+final unsub = db.from('messages').subscribe<Map<String,dynamic>>((event) {
+  print(event.action);      // RealtimeAction.created / updated / deleted
+  print(event.collection);  // 'messages'
+  print(event.record);      // Map<String,dynamic>
+  print(event.recordId);
+});
+unsub();
+
+// Stream (ideal para StreamBuilder)
+db.from('messages').watch().listen((event) {
+  print('${event.action}: ${event.record}');
+});
+```
+````
+
+---
+
+## StreamBuilder en Flutter
+
+````carousel
+```dart
+StreamBuilder<RealtimeEvent>(
+  stream: db.from('chat').watch(),
+  builder: (context, snapshot) {
+    if (!snapshot.hasData) return const SizedBox.shrink();
+    final event = snapshot.data!;
+
+    switch (event.action) {
+      case RealtimeAction.created:
+        print('Nuevo mensaje: ${event.record?['text']}');
+      case RealtimeAction.updated:
+        print('Mensaje editado');
+      case RealtimeAction.deleted:
+        print('Mensaje eliminado: ${event.recordId}');
+      default:
+        break;
+    }
+    return const SizedBox.shrink();
+  },
+)
+```
+````
+
+---
+
+## Estado de la conexión
+
+````carousel
+```ts
+const unsub = db.realtime.onStatusChange((status) => {
+  // 'connected' | 'disconnected'
+  console.log('Realtime:', status)
+})
+
+unsub() // dejar de escuchar
+
+// Saber si está conectado
+console.log(db.realtime.isConnected)
+```
+<!-- slide -->
+```dart
+final unsub = db.realtime.onStatusChange((status) {
+  // 'connected' | 'disconnected'
+  print('Realtime: $status');
+});
+unsub();
+
+// Saber si está conectado
+print(db.realtime.isConnected);
+```
+````
+
+---
+
+## Desconectar manualmente
+
+````carousel
+```ts
+// Cierra el WebSocket y limpia todas las suscripciones
+db.realtime.disconnect()
+```
+<!-- slide -->
+```dart
+db.realtime.disconnect();
+```
+````
+
+---
+
+## Reconexión automática
+
+El SDK maneja la reconexión automáticamente cuando:
+
+- Se pierde la conexión de red
+- El servidor cierra el socket inesperadamente
+- Un pong no llega en 5 segundos después del ping (conexión zombi)
+
+El tiempo entre reintentos crece exponencialmente desde 2 segundos hasta un máximo de 30 segundos.
+
+Al reconectarse, el SDK re-suscribe automáticamente a todas las colecciones activas.
+
+---
+
+Siguiente: [Storage](storage.md)
+
+---
+
+# Storage & Archivos
+
+El módulo Storage te permite subir, listar y gestionar archivos en tu proyecto.
+
+---
+
+## Subir archivos
+
+````carousel
+```ts
+// Desde un File (browser)
+const fileInput = document.getElementById('avatar') as HTMLInputElement
+const file = fileInput.files?.[0]
+
+const { data, error } = await db.storage.upload(file, {
+  path:   'avatars/user-1.png',
+  public: true,
+})
+
+console.log(data.url)  // URL pública del archivo
+
+// Desde URL (server-side)
+await db.storage.uploadFromUrl('https://ejemplo.com/foto.jpg', {
+  path: 'imports/foto.jpg',
+})
+```
+<!-- slide -->
+```dart
+import 'dart:io';
+
+// Desde File
+final res = await db.storage.upload(
+  File('ruta/imagen.png'),
+  path:   'avatars/user-1.png',
+  public: true,
+);
+print(res.data?.url);
+
+// Desde bytes (útil con image_picker, etc.)
+final res = await db.storage.uploadBytes(
+  imageBytes,
+  path:        'avatars/user-1.jpg',
+  contentType: 'image/jpeg',
+  public:      true,
+);
+```
+````
+
+---
+
+## Subir con progreso (Flutter)
+
+````carousel
+```dart
+await db.storage.upload(
+  File('video.mp4'),
+  path: 'videos/intro.mp4',
+  onProgress: (sent, total) {
+    final percent = (sent / total * 100).toStringAsFixed(1);
+    print('Subiendo: $percent%');
+  },
+);
+```
+````
+
+---
+
+## Listar y gestionar archivos
+
+````carousel
+```ts
+// Listar archivos en una carpeta
+const { data: files } = await db.storage.list('avatars/')
+
+for (const file of files) {
+  console.log(file.url, file.size, file.mime)
+}
+
+// Eliminar archivo
+const { error } = await db.storage.delete('avatars/user-1.png')
+
+// URL pública (sin hacer request)
+const url = db.storage.getPublicUrl('avatars/user-1.png')
+```
+<!-- slide -->
+```dart
+// Listar
+final res = await db.storage.list('avatars/');
+for (final file in res.data ?? []) {
+  print('${file.url} — ${file.size} bytes');
+}
+
+// Eliminar
+await db.storage.delete('avatars/user-1.png');
+
+// URL pública
+final url = db.storage.getPublicUrl('avatars/user-1.png');
+```
+````
+
+---
+
+## Propiedades del archivo (`StorageFile`)
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | string | UUID del archivo |
+| `url` | string | URL pública |
+| `mime` | string | Tipo MIME (ej. `image/png`) |
+| `size` | number | Tamaño en bytes |
+| `width` | number? | Ancho (si es imagen) |
+| `height` | number? | Alto (si es imagen) |
+| `variant` | string | Variante del archivo |
+| `createdAt` | Date | Fecha de subida |
+
+---
+
+Siguiente: [Colecciones](collections.md)
+
+---
+
+# Batch Operations
+
+El módulo Batch te permite ejecutar múltiples operaciones en una sola transacción del servidor: todas se aplican o ninguna.
+
+---
+
+## Operaciones básicas
+
+````carousel
+```ts
+const result = await db.batch()
+  .insert('posts',    { title: 'Post A', status: 'publicado' })
+  .insert('posts',    { title: 'Post B', status: 'borrador' })
+  .update('settings', { key: 'theme', value: 'dark' }, { eq: { key: 'theme' } })
+  .delete('drafts',   'draft-uuid')
+  .execute()
+
+for (const item of result.results) {
+  if (item.ok) {
+    console.log('OK:', item.record)
+  } else {
+    console.error('Error:', item.error)
+  }
+}
+```
+<!-- slide -->
+```dart
+final result = await db.batch()
+    .insert('posts',    {'title': 'Post A', 'status': 'publicado'})
+    .insert('posts',    {'title': 'Post B', 'status': 'borrador'})
+    .update('settings', {'value': 'dark'}, eq: {'key': 'theme'})
+    .delete('drafts',   'draft-uuid')
+    .execute();
+
+for (final item in result.results) {
+  if (item.ok) {
+    print('OK: ${item.record}');
+  } else {
+    print('Error: ${item.error}');
+  }
+}
+```
+````
+
+---
+
+## Modo atómico
+
+En modo atómico, si una operación falla, **todas se revierten**.
+
+````carousel
+```ts
+const result = await db.batch({ atomic: true })
+  .insert('orders',        { user_id: 'abc', total: 1500 })
+  .update('users',         { credits: 0 }, { eq: { id: 'abc' } })
+  .delete('cart_items',    'cart-uuid')
+  .execute()
+
+if (!result.ok) {
+  console.error('Transacción fallida, todo revertido:', result.error)
+}
+```
+<!-- slide -->
+```dart
+final result = await db.batch(atomic: true)
+    .insert('orders',     {'user_id': 'abc', 'total': 1500})
+    .update('users',      {'credits': 0}, eq: {'id': 'abc'})
+    .delete('cart_items', 'cart-uuid')
+    .execute();
+
+if (!result.ok) {
+  print('Transacción fallida: ${result.error}');
+}
+```
+````
+
+---
+
+## Dry run (validación sin persistir)
+
+````carousel
+```ts
+// Simula las operaciones sin escribir en la base de datos
+const result = await db.batch({ dryRun: true })
+  .insert('products', { name: 'Yerba', price: -10 })  // precio negativo
+  .execute()
+
+if (!result.ok) {
+  console.error('Validación falló:', result.results[0].error)
+  // 'price must be a positive number'
+}
+```
+<!-- slide -->
+```dart
+final result = await db.batch(dryRun: true)
+    .insert('products', {'name': 'Yerba', 'price': -10})
+    .execute();
+
+if (!result.ok) {
+  print('Validación falló: ${result.results.first.error}');
+}
+```
+````
+
+---
+
+## REST API (v2)
+
+```http
+POST /api/v2/project/:id/batch
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "atomic": true,
+  "operations": [
+    { "method": "POST",   "path": "/records", "body": { "collection": "users", "data": { "name": "Ana" } } },
+    { "method": "PATCH",  "path": "/records/uuid-1", "body": { "status": "active" } },
+    { "method": "DELETE", "path": "/records/uuid-2" }
+  ]
+}
+
+# Response
+{ "ok": true, "results": [{ "status": 201, "body": { ... } }, ...] }
+```
+
+---
+
+Siguiente: [SQL Directo](sql.md)
+
+---
+
+# SQL Directo
+
+El módulo SQL te permite ejecutar queries raw contra tu base de datos. Requiere `serviceKey`.
+
+---
+
+## Ejecutar una query
+
+````carousel
+```ts
+const { data, error } = await db.sql.run(
+  'SELECT id, title, views FROM posts WHERE views > $1 ORDER BY views DESC LIMIT $2',
+  [100, 10]
+)
+
+if (error) {
+  console.error(error.message)
+} else {
+  console.log(data.rows)        // array de objetos planos
+  console.log(data.rowCount)    // cantidad de filas devueltas
+  console.log(data.durationMs)  // tiempo de ejecución en ms
+  console.log(data.truncated)   // true si el resultado fue cortado
+}
+```
+<!-- slide -->
+```dart
+final res = await db.sql.query(
+  'SELECT id, title, views FROM posts WHERE views > \$1 LIMIT \$2',
+  [100, 10],
+);
+
+if (res.error != null) {
+  print(res.error!.message);
+} else {
+  print(res.data!['rows']);        // List<Map<String,dynamic>>
+  print(res.data!['rowCount']);    // int
+  print(res.data!['durationMs']);  // double
+}
+```
+````
+
+---
+
+## Mutations con SQL
+
+````carousel
+```ts
+// Insertar
+await db.sql.run(
+  'INSERT INTO events (name, payload) VALUES ($1, $2)',
+  ['user.signup', JSON.stringify({ userId: 'abc' })]
+)
+
+// Actualizar masivo
+const { data } = await db.sql.run(
+  'UPDATE posts SET status = $1 WHERE created_at < $2 RETURNING id',
+  ['archivado', '2024-01-01']
+)
+console.log(`${data.rowCount} posts archivados`)
+```
+<!-- slide -->
+```dart
+// Insertar
+await db.sql.query(
+  'INSERT INTO events (name, payload) VALUES (\$1, \$2)',
+  ['user.signup', '{"userId":"abc"}'],
+);
+
+// Actualizar masivo
+final res = await db.sql.query(
+  'UPDATE posts SET status = \$1 WHERE created_at < \$2',
+  ['archivado', '2024-01-01'],
+);
+print('${res.data!['rowCount']} posts archivados');
+```
+````
+
+---
+
+## Respuesta del SQL Runner
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `rows` | `object[]` | Array de filas como objetos planos |
+| `rowCount` | `number` | Cantidad de filas en la respuesta |
+| `durationMs` | `number` | Tiempo de ejecución en milisegundos |
+| `truncated` | `boolean` | `true` si el resultado fue cortado por límite interno |
+
+> **Nota:** Los resultados se limitan a 1000 filas. Para exportar datasets grandes, usá el método `.export()` en el query builder.
+
+---
+
+## Seguridad
+
+- Siempre usá parámetros (`$1`, `$2`, ...) en lugar de interpolar valores directamente — previene SQL injection.
+- El módulo SQL solo está disponible con `serviceKey`. **Nunca expongas el `serviceKey` en el cliente.**
+- Las operaciones de DDL (`DROP TABLE`, `ALTER TABLE`) pueden romper el schema de tu proyecto — usalas con cuidado.
+
+---
+
+Siguiente: [Permisos](permissions.md)
+
+---
+
+# Permisos
+
+Controlá quién puede leer y escribir en cada colección. Requiere `serviceKey`.
+
+---
+
+## Niveles de acceso
+
+| Nivel | Descripción |
+|-------|-------------|
+| `public` | Sin autenticación — cualquiera puede acceder |
+| `auth` | Requiere un JWT válido (usuario autenticado) |
+| `service` | Solo con `serviceKey` (admin / server-side) |
+| `nobody` | Nadie puede acceder (útil para bloquear temporalmente) |
+
+---
+
+## Ver permisos
+
+````carousel
+```ts
+// Ver permisos de todas las colecciones
+const { data } = await db.permissions.getAll()
+// { posts: { list: 'public', get: 'public', create: 'auth', update: 'auth', delete: 'service' }, ... }
+
+// Ver permisos de una colección específica
+const { data: perms } = await db.permissions.get('posts')
+console.log(perms.list)    // 'public'
+console.log(perms.create)  // 'auth'
+```
+<!-- slide -->
+```dart
+// Todas las colecciones
+final res = await db.permissions.getAll();
+
+// Una colección
+final res = await db.permissions.get('posts');
+print(res.data?['list']);    // 'public'
+print(res.data?['create']);  // 'auth'
+```
+````
+
+---
+
+## Actualizar permisos
+
+````carousel
+```ts
+// Configurar por operación
+await db.permissions.set('posts', {
+  list:   'public',   // cualquiera puede listar
+  get:    'public',   // cualquiera puede ver uno
+  create: 'auth',     // solo usuarios autenticados crean
+  update: 'auth',     // solo usuarios autenticados actualizan
+  delete: 'service',  // solo el servidor puede borrar
+})
+
+// Aplicar el mismo nivel a TODAS las operaciones
+await db.permissions.setAll('private_data', 'service')
+await db.permissions.setAll('public_config', 'public')
+
+// Bloquear completamente (mantenimiento / colección interna)
+await db.permissions.setAll('system_logs', 'nobody')
+```
+<!-- slide -->
+```dart
+// Configurar por operación
+await db.permissions.set('posts', {
+  'list':   'public',
+  'get':    'public',
+  'create': 'auth',
+  'update': 'auth',
+  'delete': 'service',
+});
+
+// Aplicar el mismo nivel a todas las operaciones
+await db.permissions.setAll('private_data', 'service');
+await db.permissions.setAll('public_config', 'public');
+```
+````
+
+---
+
+## Operaciones disponibles
+
+| Operación | Descripción |
+|-----------|-------------|
+| `list` | Listar registros (GET con filtros) |
+| `get` | Obtener un registro por ID |
+| `create` | Insertar nuevos registros |
+| `update` | Actualizar registros existentes |
+| `delete` | Eliminar registros (soft o hard) |
+
+---
+
+## REST API (v1)
+
+```http
+# Ver permisos de una colección
+GET /api/v1/project/:id/permissions?collection=posts
+Authorization: Bearer <service-token>
+
+# Actualizar permisos
+POST /api/v1/project/:id/permissions
+Authorization: Bearer <service-token>
+Content-Type: application/json
+
+{
+  "collection": "posts",
+  "list":   "public",
+  "get":    "public",
+  "create": "auth",
+  "update": "auth",
+  "delete": "service"
+}
+```
+
+---
+
+Siguiente: [Stats y Logs](stats-and-logs.md)
+
+---
+
+# Colecciones y Schema
+
+MatecitoDB te permite gestionar tu schema directamente desde el SDK. Requiere `serviceKey`.
+
+---
+
+## Operaciones sobre colecciones
+
+````carousel
+```ts
+// Listar todas las colecciones
+const { data: cols } = await db.collections.list()
+
+// Crear con campos iniciales
+await db.collections.create('products', {
+  fields: [
+    { name: 'name',     type: 'text',     required: true },
+    { name: 'price',    type: 'number',   required: true },
+    { name: 'in_stock', type: 'boolean' },
+    { name: 'image',    type: 'file' },
+    { name: 'category', type: 'relation', options: { collection: 'categories' } },
+    { name: 'tags',     type: 'select',   options: { values: ['nuevo', 'oferta'] } },
+  ]
+})
+
+// Renombrar
+await db.collections.rename('old_name', 'new_name')
+
+// Eliminar (todos los registros se pierden)
+await db.collections.delete('temp_data')
+```
+<!-- slide -->
+```dart
+// Listar colecciones
+final res = await db.collections.list();
+
+// Crear con campos
+await db.collections.create('products', fields: [
+  {'name': 'name',     'type': 'text',     'required': true},
+  {'name': 'price',    'type': 'number',   'required': true},
+  {'name': 'in_stock', 'type': 'boolean'},
+  {'name': 'image',    'type': 'file'},
+  {'name': 'category', 'type': 'relation', 'options': {'collection': 'categories'}},
+]);
+
+// Renombrar
+await db.collections.rename('old_name', 'new_name');
+
+// Eliminar
+await db.collections.delete('temp_data');
+```
+````
+
+---
+
+## Tipos de campo
+
+| Tipo | Descripción |
+|------|-------------|
+| `text` | Cadena de texto |
+| `number` | Número (entero o decimal) |
+| `boolean` | Verdadero / Falso |
+| `email` | Email validado |
+| `date` | Fecha y hora |
+| `file` | Referencia a archivo en Storage |
+| `json` | Objeto JSON libre |
+| `relation` | FK a otra colección |
+| `select` | Lista de valores fijos |
+
+---
+
+## Operaciones sobre campos
+
+````carousel
+```ts
+// Listar campos de una colección
+const { data: fields } = await db.collections.fields('products').list()
+
+// Agregar campo
+await db.collections.fields('products').create({
+  name:     'discount',
+  type:     'number',
+  required: false,
+})
+
+// Actualizar campo (ej. volverlo requerido)
+await db.collections.fields('products').update(fieldId, {
+  required: true,
+})
+
+// Eliminar campo (los datos de ese campo en los registros se pierden)
+await db.collections.fields('products').delete(fieldId)
+```
+<!-- slide -->
+```dart
+// Listar campos
+final res = await db.collections.fields('products').list();
+
+// Agregar
+await db.collections.fields('products').create(
+  name:     'discount',
+  type:     'number',
+  required: false,
+);
+
+// Actualizar
+await db.collections.fields('products').update(fieldId, required: true);
+
+// Eliminar
+await db.collections.fields('products').delete(fieldId);
+```
+````
+
+---
+
+## Permisos por colección
+
+Podés controlar quién puede leer y escribir en cada colección. Ver [Permisos](../README.md#permisos) para más detalles.
+
+---
+
+Siguiente: [Realtime](realtime.md)
+
+---
+
+# Stats y Logs
+
+Monitoreo e infraestructura del proyecto accesibles via `db.stats` y `db.logs`. Requieren `serviceKey`.
+
+---
+
+## Estadísticas del proyecto
+
+````carousel
+```ts
+const { data: stats, error } = await db.stats.get()
+
+if (stats) {
+  console.log('Registros totales:',  stats.total_records)
+  console.log('Storage usado (MB):', stats.storage_used_mb)
+  console.log('Requests hoy:',       stats.requests_today)
+  console.log('Usuarios activos:',   stats.active_users)
+}
+```
+<!-- slide -->
+```dart
+final res = await db.stats.get();
+
+if (res.data != null) {
+  print('Registros: ${res.data!['total_records']}');
+  print('Storage:   ${res.data!['storage_used_mb']} MB');
+  print('Requests:  ${res.data!['requests_today']}');
+}
+```
+````
+
+---
+
+## Logs de requests
+
+Útil para debugging, auditoría y tracking de errores en producción.
+
+````carousel
+```ts
+// Últimos 50 logs
+const { data: logs } = await db.logs.list({ limit: 50 })
+
+// Filtrar por código HTTP
+const { data: errors }   = await db.logs.list({ status: 500 })
+const { data: notFound } = await db.logs.list({ status: 404 })
+
+// Filtrar por método HTTP
+const { data: writes }  = await db.logs.list({ method: 'POST' })
+const { data: deletes } = await db.logs.list({ method: 'DELETE' })
+
+// Filtrar por path
+const { data: authLogs } = await db.logs.list({ path: '/auth' })
+
+// Cada log tiene:
+// log.method, log.path, log.status, log.duration_ms,
+// log.ip, log.user_id, log.created_at
+```
+<!-- slide -->
+```dart
+// Últimos 50 logs
+final res = await db.logs.list(limit: 50);
+
+// Filtrar
+final errors   = await db.logs.list(status: 500);
+final posts    = await db.logs.list(method: 'POST');
+final authLogs = await db.logs.list(path: '/auth');
+
+// Cada log:
+// log['method'], log['path'], log['status'],
+// log['duration_ms'], log['user_id'], log['created_at']
+```
+````
+
+---
+
+Siguiente: [SMTP y Email](smtp-and-email.md)
+
+---
+
+# SMTP y Email Templates
+
+Enviá emails transaccionales y gestioná tus templates desde el SDK. Requiere `serviceKey`.
+
+---
+
+## Configurar SMTP
+
+````carousel
+```ts
+// Configurar conexión SMTP
+await db.smtp.set({
+  host: 'smtp.gmail.com',
+  port: 587,
+  user: 'noreply@miapp.com',
+  pass: 'app-password',
+  from: 'Mi App <noreply@miapp.com>',
+})
+
+// Actualizar parcialmente
+await db.smtp.update({ port: 465 })
+
+// Enviar email de prueba para verificar la configuración
+const { error } = await db.smtp.test('admin@miapp.com')
+if (!error) console.log('SMTP funciona correctamente')
+```
+<!-- slide -->
+```dart
+// Configurar
+await db.smtp.set(
+  host: 'smtp.gmail.com',
+  port: 587,
+  user: 'noreply@miapp.com',
+  pass: 'app-password',
+  from: 'Mi App <noreply@miapp.com>',
+);
+
+// Actualizar parcialmente
+await db.smtp.update(port: 465);
+
+// Email de prueba
+final err = await db.smtp.test('admin@miapp.com');
+if (err == null) print('SMTP funciona correctamente');
+```
+````
+
+---
+
+## Email Templates
+
+Los templates soportan interpolación de variables con `{{nombre_variable}}`.
+
+````carousel
+```ts
+// Generar templates del sistema por defecto
+// (welcome, reset-password, verify-email, etc.)
+await db.emailTemplates.seed()
+
+// Crear template personalizado
+const { data: tmpl } = await db.emailTemplates.create({
+  name:    'pedido_confirmado',
+  subject: 'Tu pedido {{order_id}} fue confirmado',
+  body:    `
+    <h1>¡Hola {{user_name}}!</h1>
+    <p>Tu pedido <strong>{{order_id}}</strong> está en camino.</p>
+    <p>Total: ${{total}}</p>
+  `,
+})
+
+// Listar todos los templates
+const { data: list } = await db.emailTemplates.list()
+
+// Actualizar template existente
+await db.emailTemplates.update('template-uuid', {
+  subject: 'Asunto actualizado',
+  body:    '<p>Nuevo cuerpo del email</p>',
+})
+
+// Eliminar template
+await db.emailTemplates.delete('template-uuid')
+```
+<!-- slide -->
+```dart
+// Templates del sistema
+await db.emailTemplates.seed();
+
+// Crear template
+final res = await db.emailTemplates.create(
+  name:    'pedido_confirmado',
+  subject: 'Tu pedido {{order_id}} fue confirmado',
+  body:    '''
+    <h1>¡Hola {{user_name}}!</h1>
+    <p>Tu pedido <strong>{{order_id}}</strong> está en camino.</p>
+  ''',
+);
+
+// Listar
+final list = await db.emailTemplates.list();
+
+// Actualizar
+await db.emailTemplates.update('template-uuid', {
+  'subject': 'Asunto actualizado',
+});
+
+// Eliminar
+await db.emailTemplates.delete('template-uuid');
+```
+````
+
+---
+
+Siguiente: [Webhooks](webhooks.md)
+
+---
+
+# Webhooks
+
+Configurá URLs externas que reciben un `POST` cuando ocurre un evento en tu proyecto. Requiere `serviceKey`.
+
+---
+
+## Operaciones
+
+````carousel
+```ts
+// Crear webhook
+const { data: hook } = await db.webhooks.create({
+  url:    'https://miapp.com/hooks/matecito',
+  events: ['record.created', 'record.deleted'],
+  secret: 'mi-secreto-de-firma',  // para verificar la firma HMAC
+})
+
+// Listar webhooks configurados
+const { data: hooks } = await db.webhooks.list()
+
+// Actualizar (ej. deshabilitar temporalmente)
+await db.webhooks.update('hook-uuid', { enabled: false })
+
+// Volver a habilitar
+await db.webhooks.update('hook-uuid', {
+  enabled: true,
+  events:  ['record.created', 'record.updated', 'record.deleted'],
+})
+
+// Eliminar
+await db.webhooks.delete('hook-uuid')
+```
+<!-- slide -->
+```dart
+// Crear
+final res = await db.webhooks.create(
+  url:    'https://miapp.com/hooks/matecito',
+  events: ['record.created', 'record.deleted'],
+  secret: 'mi-secreto-de-firma',
+);
+
+// Listar
+final hooks = await db.webhooks.list();
+
+// Actualizar
+await db.webhooks.update('hook-uuid', enabled: false);
+
+// Eliminar
+await db.webhooks.delete('hook-uuid');
+```
+````
+
+---
+
+## Eventos disponibles
+
+| Evento | Cuándo se dispara |
+|--------|------------------|
+| `record.created` | Se inserta un nuevo registro |
+| `record.updated` | Se actualiza un registro |
+| `record.deleted` | Se elimina un registro (soft o hard) |
+| `auth.signup` | Un usuario se registra |
+| `auth.login` | Un usuario inicia sesión |
+| `storage.upload` | Se sube un archivo |
+
+---
+
+## Verificar la firma (servidor receptor)
+
+El cuerpo del POST incluye un header `X-Matecito-Signature`. Podés verificarlo con el secreto:
+
+```ts
+import crypto from 'crypto'
+
+function verifySignature(body: string, signature: string, secret: string): boolean {
+  const expected = crypto
+    .createHmac('sha256', secret)
+    .update(body)
+    .digest('hex')
+  return `sha256=${expected}` === signature
+}
+```
+
+---
+
+## Estructura del payload
+
+```json
+{
+  "event":      "record.created",
+  "collection": "orders",
+  "record": {
+    "id":         "abc-123",
+    "created_at": "2025-06-01T12:00:00Z",
+    "total":      1500
+  },
+  "timestamp": "2025-06-01T12:00:01Z"
+}
+```
+
+---
+
+Siguiente: [Manejo de errores](error-handling.md)
+
+---
+
+# CLI
+
+MatecitoDB incluye una CLI para inicializar proyectos y generar código automáticamente.
+
+```bash
+npx matecitodb <comando>
+```
+
+---
+
+## Comandos disponibles
+
+### `init` — Inicializar proyecto
+
+Conecta tu entorno local con un proyecto de matecito.dev y genera el archivo `.env.local` con tus credenciales.
+
+```bash
+npx matecitodb init
+```
+
+Genera:
+```env
+# .env.local
+NEXT_PUBLIC_MATECITODB_API_KEY=mk_anon_...
+MATECITODB_API_KEY=mk_service_...
+MATECITODB_URL=https://tu-proyecto.matecito.dev
+```
+
+---
+
+### `generate types` — Tipos TypeScript
+
+Genera interfaces TypeScript basadas en el schema actual de tu proyecto.
+
+```bash
+npx matecitodb generate types
+```
+
+Genera `matecito.types.ts`:
+
+```ts
+// matecito.types.ts (generado automáticamente — no editar)
+export interface Database {
+  posts: {
+    id:         string
+    title:      string
+    content:    string
+    status:     'borrador' | 'publicado'
+    views:      number
+    created_at: string
+    updated_at: string
+  }
+  users: {
+    id:       string
+    email:    string
+    name:     string
+    role:     string
+    created_at: string
+  }
+}
+```
+
+Una vez generado, pasalo al cliente para obtener autocompletado completo:
+
+```ts
+import { createClient } from 'matecitodb'
+import type { Database } from './matecito.types'
+
+const db = createClient<Database>({
+  url:    process.env.MATECITODB_URL!,
+  apiKey: process.env.NEXT_PUBLIC_MATECITODB_API_KEY!,
+})
+
+// db.from('posts') → completamente tipado
+const { data } = await db.from('posts').eq('status', 'publicado').find()
+// data es Database['posts'][]
+```
+
+---
+
+### `generate auth` — Scaffold de autenticación (Next.js)
+
+Genera los archivos necesarios para autenticación completa en Next.js: contexto, hooks, páginas de login y registro.
+
+```bash
+npx matecitodb generate auth
+```
+
+Archivos generados:
+- `src/lib/matecito.ts` — cliente singleton
+- `src/context/AuthContext.tsx` — proveedor de sesión
+- `src/hooks/useAuth.ts` — hook `useAuth()`
+- `src/app/login/page.tsx` — página de login
+- `src/app/register/page.tsx` — página de registro
+
+---
+
+### `generate hook <coleccion>` — React hook para una colección
+
+Genera un hook tipado con CRUD completo para una colección específica.
+
+```bash
+npx matecitodb generate hook posts
+```
+
+Genera `src/hooks/usePosts.ts`:
+
+```ts
+import { usePosts } from '@/hooks/usePosts'
+
+function PostList() {
+  const { data: posts, loading, error, create, update, remove } = usePosts({
+    filters: { status: 'publicado' },
+    order:   'latest',
+  })
+
+  if (loading) return <p>Cargando...</p>
+  if (error)   return <p>Error: {error.message}</p>
+
+  return (
+    <ul>
+      {posts.map(post => <li key={post.id}>{post.title}</li>)}
+    </ul>
+  )
+}
+```
+
+---
+
+## Opciones globales
+
+| Flag | Descripción |
+|------|-------------|
+| `--url <url>` | URL del proyecto (sobreescribe `.env`) |
+| `--key <key>` | Service key (sobreescribe `.env`) |
+| `--out <dir>` | Directorio de salida (default: `./`) |
+| `--yes` | Confirmar todos los prompts automáticamente |
+
+---
+
+Volver a [Inicio rápido](getting-started.md)
+
+---
+
+# Manejo de errores
+
+MatecitoDB usa un patrón consistente: todos los métodos devuelven `{ data, error }`. Nunca tiran excepciones salvo `find()`, `findOne()` y `count()` (que lanzan `Error` si hay un fallo).
+
+---
+
+## El objeto `MatecitoError`
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `status` | `number` | Código HTTP (0 = error de red / timeout) |
+| `message` | `string` | Mensaje legible para el desarrollador |
+| `raw` | `any?` | Respuesta raw del servidor |
+
+---
+
+## Patrón básico
+
+````carousel
+```ts
+const { data, error } = await db.from('posts').insert({ title: 'Test' })
+
+if (error) {
+  switch (error.status) {
+    case 0:   console.error('Error de red o timeout'); break
+    case 400: console.error('Datos inválidos:', error.message); break
+    case 401: console.error('No autenticado'); break
+    case 403: console.error('Sin permisos'); break
+    case 404: console.error('Recurso no encontrado'); break
+    case 429: console.error('Rate limit excedido'); break
+    case 500: console.error('Error del servidor'); break
+    default:  console.error('Error:', error.message)
+  }
+} else {
+  console.log('Creado:', data)
+}
+```
+<!-- slide -->
+```dart
+final res = await db.from('posts').insert({'title': 'Test'});
+
+if (res.error != null) {
+  final err = res.error!;
+  switch (err.status) {
+    case 0:   print('Error de red o timeout'); break;
+    case 400: print('Datos inválidos: ${err.message}'); break;
+    case 401: print('No autenticado'); break;
+    case 403: print('Sin permisos'); break;
+    case 404: print('Recurso no encontrado'); break;
+    case 429: print('Rate limit excedido'); break;
+    case 500: print('Error del servidor'); break;
+    default:  print('Error: ${err.message}');
+  }
+} else {
+  print('Creado: ${res.data}');
+}
+```
+````
+
+---
+
+## Auto-retry y auto-refresh
+
+El SDK maneja automáticamente dos situaciones comunes:
+
+### Auto-retry (errores de red)
+Si una request falla por un error de red (no de aplicación), el SDK la reintenta automáticamente con backoff exponencial.
+
+### Auto-refresh (token vencido)
+Si el servidor devuelve `401`, el SDK intenta refrescar el JWT con el `refreshToken` y reintenta la request original una vez. Si el refresh también falla, cierra la sesión automáticamente.
+
+### Configuración
+
+````carousel
+```ts
+const db = createClient({
+  url,
+  apiKey,
+  autoRefresh: true,
+  retry: {
+    attempts:  3,      // máximo de reintentos
+    baseDelay: 500,    // delay inicial en ms (se duplica en cada intento)
+  },
+  timeout: 30_000,     // timeout por request en ms (0 = sin timeout)
+})
+```
+<!-- slide -->
+```dart
+final db = MatecitoDB.createClient(
+  url,
+  config: const ClientConfig(
+    apiKey:      'mk_anon_...',
+    autoRefresh: true,
+    retry: RetryConfig(
+      attempts:    3,
+      baseDelayMs: 500,
+    ),
+    timeoutMs: 30000,
+  ),
+);
+```
+````
+
+---
+
+## Debug mode
+
+En desarrollo podés habilitar logs de todas las requests. Los headers sensibles (`Authorization`, `x-matecito-key`) se redactan automáticamente.
+
+````carousel
+```ts
+const db = createClient({ url, apiKey, debug: true })
+// [matecitodb] GET https://tu-proyecto.matecito.dev/records?...
+// [matecitodb] 200 { records: [...] }
+```
+<!-- slide -->
+```dart
+final db = MatecitoDB.createClient(
+  url,
+  config: const ClientConfig(apiKey: 'mk_anon_...', debug: true),
+);
+// [MatecitoDB] GET https://tu-proyecto.matecito.dev/records?...
+// [MatecitoDB] 200 response
+```
+````
+
+---
+
+Volver a [Inicio rápido](getting-started.md)
