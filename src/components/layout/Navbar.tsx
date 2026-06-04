@@ -31,9 +31,8 @@ export function Navbar() {
     if (isDashboard) return null;
 
     const navLinks = [
-        { href: "/matecitodb", label: "matecitodb", tag: "beta" },
-        { href: "/apps",       label: "Apps",        tag: null  },
-        { href: "/web",        label: "Webs",         tag: null  },
+        { href: "/estudio", label: "Proyectos", tag: null },
+        { href: "/labs",    label: "Labs",      tag: null },
     ];
 
     const isActive = (href: string) =>

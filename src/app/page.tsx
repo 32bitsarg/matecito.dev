@@ -1,29 +1,28 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { ArrowRight, ArrowUpRight, Database, Globe, Layers } from "lucide-react"
-import { TerminalAnimation } from "@/components/ascii/TerminalAnimation"
+import { ArrowRight, ArrowUpRight } from "lucide-react"
 
 export const metadata: Metadata = {
-    title: "matecito.dev — desarrollo de software desde Argentina",
-    description: "Construimos software desde Pergamino, Argentina: matecitodb (BaaS para developers), apps web, juegos y páginas web para pymes y emprendimientos.",
+    title: "Matecito.dev — Construyendo comunidades, videojuegos y productos digitales",
+    description: "Matecito.dev es un ecosistema de proyectos digitales: Recién Llegué, ZeroLagARG, Conquest of Etheria y Labs. Construimos en público desde Argentina.",
     keywords: [
-        "desarrollo software Argentina", "BaaS Argentina", "matecitodb",
-        "apps web Argentina", "páginas web pymes Pergamino",
-        "landing page Argentina", "software Pergamino Buenos Aires",
+        "ecosistema digital Argentina", "videojuegos Argentina", "comunidad gaming Argentina",
+        "Recién Llegué", "ZeroLagARG", "Conquest of Etheria", "Labs matecito",
+        "build in public Argentina", "software Pergamino Buenos Aires",
     ],
     openGraph: {
-        title: "matecito.dev — desarrollo de software desde Argentina",
-        description: "BaaS para developers, apps web, juegos y páginas web para pymes. Desde Pergamino, Argentina.",
+        title: "Matecito.dev — Construyendo comunidades, videojuegos y productos digitales",
+        description: "Ecosistema de proyectos digitales construidos en público desde Argentina.",
         url: "https://matecito.dev",
         siteName: "matecito.dev",
         locale: "es_AR",
         type: "website",
-        images: [{ url: "https://matecito.dev/og/home.png", width: 1200, height: 630, alt: "matecito.dev — software desde Argentina" }],
+        images: [{ url: "https://matecito.dev/og/home.png", width: 1200, height: 630, alt: "matecito.dev" }],
     },
     twitter: {
         card: "summary_large_image",
-        title: "matecito.dev — software desde Argentina",
-        description: "BaaS, apps, juegos y webs. Desde Pergamino, Argentina.",
+        title: "Matecito.dev — Ecosistema digital desde Argentina",
+        description: "Comunidades, videojuegos y productos digitales. Construimos en público.",
     },
     alternates: { canonical: "https://matecito.dev" },
 }
@@ -34,51 +33,59 @@ const jsonLd = {
     name: "matecito.dev",
     url: "https://matecito.dev",
     logo: "https://matecito.dev/logos/matecitologo.png",
-    description: "Estudio de desarrollo de software en Pergamino, Argentina. Creamos BaaS, apps web, juegos y páginas web para pymes.",
+    description: "Ecosistema de comunidades, videojuegos y productos digitales construidos en público desde Pergamino, Argentina.",
     address: { "@type": "PostalAddress", addressLocality: "Pergamino", addressRegion: "Buenos Aires", addressCountry: "AR" },
     sameAs: [],
     hasOfferCatalog: {
         "@type": "OfferCatalog",
-        name: "Productos y servicios",
+        name: "Proyectos del ecosistema",
         itemListElement: [
-            { "@type": "Offer", itemOffered: { "@type": "SoftwareApplication", name: "matecitodb", url: "https://matecito.dev/matecitodb" } },
-            { "@type": "Offer", itemOffered: { "@type": "Service", name: "Páginas web para pymes", url: "https://matecito.dev/web" } },
-            { "@type": "Offer", itemOffered: { "@type": "Service", name: "Apps y proyectos web", url: "https://matecito.dev/apps" } },
+            { "@type": "Offer", itemOffered: { "@type": "WebApplication", name: "Recién Llegué", url: "https://recienllegue.com.ar" } },
+            { "@type": "Offer", itemOffered: { "@type": "VideoGame", name: "Conquest of Etheria" } },
+            { "@type": "Offer", itemOffered: { "@type": "WebApplication", name: "Labs", url: "https://matecito.dev/labs" } },
         ],
     },
 }
 
-const PRODUCTS = [
+const ECOSYSTEM = [
     {
-        href: "/matecitodb",
-        icon: Database,
-        tag: "beta",
-        eyebrow: "Para developers",
-        title: "matecitodb",
-        desc: "Backend-as-a-Service argentino. Auth, base de datos, storage y API REST listos en minutos. Sin configurar servidores.",
-        cta: "Ver matecitodb",
-        external: false,
+        emoji: "🌎",
+        title: "Recién Llegué",
+        desc: "Ayudando a las personas a adaptarse a nuevas ciudades.",
+        href: "https://recienllegue.com.ar",
+        external: true,
+        status: "live" as const,
     },
     {
-        href: "/apps",
-        icon: Layers,
-        tag: null,
-        eyebrow: "Proyectos",
-        title: "Apps & Juegos",
-        desc: "Apps web, juegos y herramientas que construimos. Desde reproductores de música hasta experimentos con IA y más.",
-        cta: "Ver proyectos",
+        emoji: "🎮",
+        title: "ZeroLagARG",
+        desc: "Comunidad gaming y servidores.",
+        href: null as string | null,
         external: false,
+        status: "wip" as const,
     },
     {
-        href: "/web",
-        icon: Globe,
-        tag: null,
-        eyebrow: "Servicios",
-        title: "Webs & Landings",
-        desc: "Diseñamos y desarrollamos sitios web y landing pages para emprendimientos y pymes. Rápido, SEO, a medida.",
-        cta: "Ver servicios",
+        emoji: "⚔️",
+        title: "Conquest of Etheria",
+        desc: "Juego de estrategia en desarrollo.",
+        href: null as string | null,
         external: false,
+        status: "wip" as const,
     },
+    {
+        emoji: "🧪",
+        title: "Labs",
+        desc: "Experimentos y herramientas.",
+        href: "/labs",
+        external: false,
+        status: "wip" as const,
+    },
+]
+
+const PROGRESS = [
+    { label: "Recién Llegué", pct: 70 },
+    { label: "ZeroLagARG", pct: 80 },
+    { label: "Conquest of Etheria", pct: 30 },
 ]
 
 export default function Home() {
@@ -89,133 +96,143 @@ export default function Home() {
 
             {/* Hero */}
             <section className="relative px-6 pt-28 pb-24 overflow-hidden">
-                {/* subtle dot grid */}
                 <div className="absolute inset-0 opacity-[0.04]"
                     style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
-                {/* crimson glow top-center */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[200px] rounded-full blur-[100px] opacity-20"
                     style={{ backgroundColor: '#6d001a' }} />
 
-                <div className="relative max-w-5xl mx-auto flex flex-col lg:flex-row items-center gap-16">
-                    {/* left — copy */}
-                    <div className="flex-1 text-center lg:text-left">
+                <div className="relative max-w-4xl mx-auto text-center">
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-mono mb-10 border"
                         style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(240,240,240,0.45)', backgroundColor: 'rgba(255,255,255,0.03)' }}>
                         <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#6d001a' }} />
                         Pergamino, Buenos Aires · Argentina
                     </div>
 
-                    <h1 className="text-5xl sm:text-7xl font-extrabold tracking-tight leading-[1.0] mb-6">
-                        Software<br />
-                        <span style={{ color: '#6d001a' }}>desde Argentina</span>
+                    <h1 className="text-5xl sm:text-7xl font-extrabold tracking-tight leading-[1.05] mb-6">
+                        Matecito<span style={{ color: '#6d001a' }}>.dev</span>
                     </h1>
 
-                    <p className="text-lg sm:text-xl max-w-xl mx-auto leading-relaxed mb-12"
+                    <p className="text-lg sm:text-2xl max-w-2xl mx-auto leading-relaxed mb-12"
                         style={{ color: 'rgba(240,240,240,0.50)' }}>
-                        Construimos herramientas para developers, apps para usuarios
-                        y webs para negocios.
+                        Construyendo comunidades, videojuegos y productos digitales.
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                        <Link href="/apps"
+                        <Link href="/estudio"
                             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-opacity hover:opacity-85"
                             style={{ backgroundColor: '#6d001a' }}>
                             Ver proyectos
                             <ArrowRight className="w-4 h-4" />
                         </Link>
-                        <Link href="/matecitodb"
+                        <Link href="/labs"
                             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-colors border hover:bg-white/5"
                             style={{ borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(240,240,240,0.70)' }}>
-                            Conocer matecitodb
+                            Seguir el desarrollo
                         </Link>
-                    </div>
-                    </div>
-
-                    {/* right — terminal */}
-                    <div className="shrink-0 w-full lg:w-auto">
-                        <TerminalAnimation />
                     </div>
                 </div>
             </section>
 
-            {/* Products */}
+            {/* Ecosistema */}
             <section className="px-6 pb-24 border-t" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
                 <div className="max-w-4xl mx-auto">
                     <p className="text-xs font-mono pt-16 pb-10 uppercase tracking-[0.2em]"
                         style={{ color: 'rgba(240,240,240,0.30)' }}>
-                        Lo que hacemos
+                        El ecosistema
                     </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {ECOSYSTEM.map(p => {
+                            const isLink = !!p.href
+                            const linkProps = isLink
+                                ? { href: p.href!, ...(p.external ? { target: '_blank', rel: 'noopener noreferrer' } : {}) }
+                                : {}
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        {PRODUCTS.map(p => {
-                            const Icon = p.icon
-                            return (
-                                <Link key={p.href} href={p.href}
-                                    className="group flex flex-col gap-5 p-6 rounded-2xl border transition-all hover:border-[rgba(255,255,255,0.20)] hover:-translate-y-px"
-                                    style={{ backgroundColor: '#0d0d0d', borderColor: 'rgba(255,255,255,0.09)' }}>
+                            const cardClasses = `group flex flex-col gap-5 p-6 rounded-2xl border transition-all ${isLink ? 'hover:border-[rgba(255,255,255,0.20)] hover:-translate-y-px cursor-pointer' : 'cursor-default'}`
+                            const cardStyle = { backgroundColor: '#0d0d0d', borderColor: 'rgba(255,255,255,0.09)' }
 
-                                    {/* Icon row */}
-                                    <div className="flex items-start justify-between">
-                                        <div className="w-11 h-11 rounded-xl flex items-center justify-center border"
-                                            style={{ backgroundColor: '#161616', borderColor: 'rgba(255,255,255,0.08)' }}>
-                                            <Icon className="w-5 h-5" style={{ color: 'rgba(240,240,240,0.60)' }} />
-                                        </div>
-                                        {p.tag ? (
-                                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
-                                                style={{ backgroundColor: 'rgba(109,0,26,0.25)', color: '#e0a0a0', border: '1px solid rgba(109,0,26,0.45)' }}>
-                                                {p.tag}
+                            const inner = (
+                                <>
+                                    <span className="text-3xl leading-none">{p.emoji}</span>
+                                    <div className="flex-1">
+                                        <h2 className="text-base font-bold mb-2" style={{ color: '#f0f0f0' }}>{p.title}</h2>
+                                        <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,240,240,0.45)' }}>{p.desc}</p>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        {p.status === 'wip' ? (
+                                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                                                style={{ backgroundColor: 'rgba(245,158,11,0.15)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.30)' }}>
+                                                En desarrollo
                                             </span>
                                         ) : (
-                                            <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-40 transition-opacity"
+                                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                                                style={{ backgroundColor: 'rgba(5,150,105,0.15)', color: '#34d399', border: '1px solid rgba(5,150,105,0.35)' }}>
+                                                Live
+                                            </span>
+                                        )}
+                                        {isLink && (
+                                            <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-50 transition-opacity"
                                                 style={{ color: '#f0f0f0' }} />
                                         )}
                                     </div>
+                                </>
+                            )
 
-                                    {/* Text */}
-                                    <div className="flex-1">
-                                        <p className="text-[11px] font-mono mb-1.5 uppercase tracking-wider"
-                                            style={{ color: 'rgba(240,240,240,0.30)' }}>
-                                            {p.eyebrow}
-                                        </p>
-                                        <h2 className="text-base font-bold mb-2" style={{ color: '#f0f0f0' }}>
-                                            {p.title}
-                                        </h2>
-                                        <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,240,240,0.45)' }}>
-                                            {p.desc}
-                                        </p>
-                                    </div>
-
-                                    {/* CTA */}
-                                    <div className="flex items-center gap-1.5 text-xs font-semibold transition-all opacity-0 group-hover:opacity-100 -translate-y-1 group-hover:translate-y-0"
-                                        style={{ color: 'rgba(240,240,240,0.70)' }}>
-                                        {p.cta}
-                                        <ArrowRight className="w-3.5 h-3.5" />
-                                    </div>
+                            return isLink ? (
+                                <Link key={p.title} {...(linkProps as any)} className={cardClasses} style={cardStyle}>
+                                    {inner}
                                 </Link>
+                            ) : (
+                                <div key={p.title} className={cardClasses} style={cardStyle}>
+                                    {inner}
+                                </div>
                             )
                         })}
                     </div>
                 </div>
             </section>
 
-            {/* Strip — matecitodb highlight */}
+            {/* Ahora mismo */}
             <section className="px-6 py-16 border-t border-b" style={{ borderColor: 'rgba(255,255,255,0.07)', backgroundColor: '#0a0a0a' }}>
+                <div className="max-w-4xl mx-auto">
+                    <p className="text-xs font-mono uppercase tracking-[0.2em] mb-10"
+                        style={{ color: 'rgba(240,240,240,0.30)' }}>
+                        Ahora mismo
+                    </p>
+                    <div className="flex flex-col gap-7">
+                        {PROGRESS.map(item => (
+                            <div key={item.label}>
+                                <div className="flex justify-between items-center mb-2.5">
+                                    <span className="text-sm font-semibold" style={{ color: '#f0f0f0' }}>{item.label}</span>
+                                    <span className="text-xs font-mono" style={{ color: 'rgba(240,240,240,0.35)' }}>{item.pct}%</span>
+                                </div>
+                                <div className="h-1.5 w-full rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.07)' }}>
+                                    <div className="h-full rounded-full" style={{ width: `${item.pct}%`, backgroundColor: '#6d001a' }} />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Build in Public */}
+            <section className="px-6 py-24 border-t" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
                 <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                     <div>
-                        <p className="text-xs font-mono uppercase tracking-widest mb-2" style={{ color: 'rgba(109,0,26,0.9)' }}>
-                            En construcción
+                        <p className="text-xs font-mono uppercase tracking-widest mb-2"
+                            style={{ color: 'rgba(109,0,26,0.9)' }}>
+                            Build in Public
                         </p>
                         <h3 className="text-xl font-bold mb-1" style={{ color: '#f0f0f0' }}>
-                            matecitodb — BaaS para developers argentinos
+                            Construimos en público
                         </h3>
-                        <p className="text-sm" style={{ color: 'rgba(240,240,240,0.45)' }}>
-                            Auth, base de datos, storage, realtime y funciones serverless. Un SDK. Listo para producción.
+                        <p className="text-sm max-w-md" style={{ color: 'rgba(240,240,240,0.45)' }}>
+                            Devlogs, decisiones, aprendizajes y el proceso detrás de cada proyecto. Próximamente.
                         </p>
                     </div>
-                    <Link href="/matecitodb"
+                    <Link href="/labs"
                         className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold border transition-colors hover:bg-white/5 whitespace-nowrap"
                         style={{ borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(240,240,240,0.70)' }}>
-                        Saber más
+                        Ver devlogs
                         <ArrowRight className="w-4 h-4" />
                     </Link>
                 </div>
