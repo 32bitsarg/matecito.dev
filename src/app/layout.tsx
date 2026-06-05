@@ -27,21 +27,24 @@ const commitMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Matecito.Dev — Páginas Web y Landings para Emprendimientos y Pymes",
-  description: "Creamos páginas web y landings de alta conversión para emprendimientos y pymes en Argentina. Diseño profesional, SEO optimizado y resultados medibles.",
-  keywords: ["páginas web pymes Argentina", "landing page emprendimiento", "diseño web Pergamino", "desarrollo web Argentina", "SEO local Argentina"],
+  title: {
+    default: "Matecito.dev — Construyendo comunidades, videojuegos y productos digitales",
+    template: "%s — matecito.dev",
+  },
+  description: "Matecito.dev es un ecosistema de proyectos digitales: Recién Llegué, ZeroLagARG, Conquest of Etheria y Labs. Construimos en público desde Pergamino, Argentina.",
+  keywords: ["ecosistema digital Argentina", "videojuegos Argentina", "comunidad gaming Argentina", "build in public", "software Pergamino Buenos Aires"],
   openGraph: {
-    title: "Matecito.Dev — Páginas Web para Emprendimientos y Pymes",
-    description: "Potenciá tu emprendimiento con una página web profesional. Diseño + SEO + conversión.",
+    title: "Matecito.dev — Ecosistema digital desde Argentina",
+    description: "Comunidades, videojuegos y productos digitales construidos en público desde Pergamino, Argentina.",
     url: "https://matecito.dev",
-    siteName: "Matecito.Dev",
+    siteName: "Matecito.dev",
     locale: "es_AR",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Matecito.Dev — Páginas Web para Emprendimientos y Pymes",
-    description: "Potenciá tu emprendimiento con una página web profesional. Diseño + SEO + conversión.",
+    title: "Matecito.dev — Ecosistema digital desde Argentina",
+    description: "Comunidades, videojuegos y productos digitales. Construimos en público.",
   },
   icons: {
     icon: "/logos/matecitologo.png",

@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { ArrowUpRight, Globe, Gamepad2, Database } from "lucide-react"
+import { ArrowUpRight, Globe, Gamepad2 } from "lucide-react"
 import { IloveMP3Card } from "@/components/apps/IloveMP3Card"
 
 export const metadata: Metadata = {
@@ -42,15 +42,6 @@ const STATUS_STYLE: Record<ProjectStatus, { bg: string; color: string; border: s
 
 const PROJECTS: Project[] = [
     {
-        title: "matecitodb",
-        desc: "Backend-as-a-Service para developers argentinos. Auth, base de datos, storage, realtime y API REST. Self-hosted o cloud.",
-        icon: Database,
-        tags: ["BaaS", "SDK", "PostgreSQL", "Auth"],
-        status: "beta",
-        href: "/matecitodb",
-        internal: true,
-    },
-    {
         title: "Webs para pymes",
         desc: "Sitios web y landing pages para emprendimientos y negocios. Diseño a medida, SEO y alta performance.",
         icon: Globe,
@@ -60,10 +51,17 @@ const PROJECTS: Project[] = [
         internal: true,
     },
     {
-        title: "Juego — próximamente",
-        desc: "Algo estamos cocinando. Un juego web para el navegador. Pronto.",
+        title: "Conquest of Etheria",
+        desc: "Juego de estrategia por turnos en desarrollo. Construido en público desde cero.",
         icon: Gamepad2,
-        tags: ["Canvas", "TypeScript"],
+        tags: ["Strategy", "TypeScript", "Canvas"],
+        status: "wip",
+    },
+    {
+        title: "ZeroLagARG",
+        desc: "Comunidad gaming argentina. Servidores de Minecraft, MU Online, foros y eventos.",
+        icon: Globe,
+        tags: ["Gaming", "Comunidad", "Minecraft"],
         status: "wip",
     },
 ]

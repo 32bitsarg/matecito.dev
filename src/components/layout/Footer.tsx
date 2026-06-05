@@ -14,7 +14,7 @@ export function Footer() {
                             </span>
                         </div>
                         <p className="text-sm max-w-[200px] leading-relaxed" style={{ color: 'rgba(240,240,240,0.35)' }}>
-                            Software desde Pergamino,<br />Buenos Aires, Argentina.
+                            Comunidades, videojuegos<br />y productos digitales.
                         </p>
                     </div>
 
@@ -23,14 +23,15 @@ export function Footer() {
                         <div className="flex flex-col gap-2.5">
                             <p className="text-[11px] font-bold uppercase tracking-widest mb-0.5"
                                 style={{ color: 'rgba(240,240,240,0.25)' }}>
-                                Productos
+                                Ecosistema
                             </p>
-                            <Link href="/matecitodb" className="transition-colors hover:text-white"
-                                style={{ color: 'rgba(240,240,240,0.50)' }}>matecitodb</Link>
-                            <Link href="/apps" className="transition-colors hover:text-white"
-                                style={{ color: 'rgba(240,240,240,0.50)' }}>Apps & Juegos</Link>
-                            <Link href="/web" className="transition-colors hover:text-white"
-                                style={{ color: 'rgba(240,240,240,0.50)' }}>Webs & Landings</Link>
+                            <Link href="https://recienllegue.com.ar" target="_blank" rel="noopener noreferrer"
+                                className="transition-colors hover:text-white"
+                                style={{ color: 'rgba(240,240,240,0.50)' }}>Recién Llegué</Link>
+                            <span style={{ color: 'rgba(240,240,240,0.25)' }}>ZeroLagARG</span>
+                            <span style={{ color: 'rgba(240,240,240,0.25)' }}>Conquest of Etheria</span>
+                            <Link href="/labs" className="transition-colors hover:text-white"
+                                style={{ color: 'rgba(240,240,240,0.50)' }}>Labs</Link>
                         </div>
                         <div className="flex flex-col gap-2.5">
                             <p className="text-[11px] font-bold uppercase tracking-widest mb-0.5"
