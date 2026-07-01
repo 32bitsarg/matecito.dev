@@ -1,65 +1,65 @@
-import Link from "next/link"
+import Link from "next/link";
+import { WHATSAPP_URL } from "@/lib/content";
 
 export function Footer() {
-    return (
-        <footer className="px-6 py-12 border-t" style={{ backgroundColor: '#000', borderColor: 'rgba(255,255,255,0.07)' }}>
-            <div className="max-w-4xl mx-auto">
-                <div className="flex flex-col sm:flex-row items-start justify-between gap-10 mb-10">
-                    {/* Brand */}
-                    <div className="shrink-0">
-                        <div className="flex items-center gap-2 mb-3">
-                            <img src="/logos/matecitonobg.png" alt="matecito.dev" className="w-6 h-6 object-contain" />
-                            <span className="font-bold text-base tracking-tight" style={{ color: '#f0f0f0' }}>
-                                matecito<span style={{ color: '#6d001a' }}>.dev</span>
-                            </span>
-                        </div>
-                        <p className="text-sm max-w-[200px] leading-relaxed" style={{ color: 'rgba(240,240,240,0.35)' }}>
-                            Comunidades, videojuegos<br />y productos digitales.
-                        </p>
-                    </div>
+  return (
+    <footer className="mt-auto border-t-2 border-ink bg-surface">
+      <div className="page-wrap py-12">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
+          <div className="lg:col-span-1">
+            <p className="text-3xl font-bold tracking-tight text-ink">
+              matecito<span className="text-accent">.dev</span>
+            </p>
+            <p className="mt-4 max-w-sm text-sm leading-relaxed text-ink-muted">
+              Studio digital desde Pergamino, Argentina. Comunidades, juegos y productos
+              construidos en público.
+            </p>
+          </div>
 
-                    {/* Links */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-12 gap-y-6 text-sm">
-                        <div className="flex flex-col gap-2.5">
-                            <p className="text-[11px] font-bold uppercase tracking-widest mb-0.5"
-                                style={{ color: 'rgba(240,240,240,0.25)' }}>
-                                Ecosistema
-                            </p>
-                            <Link href="https://recienllegue.com.ar" target="_blank" rel="noopener noreferrer"
-                                className="transition-colors hover:text-white"
-                                style={{ color: 'rgba(240,240,240,0.50)' }}>Recién Llegué</Link>
-                            <span style={{ color: 'rgba(240,240,240,0.25)' }}>ZeroLagARG</span>
-                            <span style={{ color: 'rgba(240,240,240,0.25)' }}>Conquest of Etheria</span>
-                            <Link href="/labs" className="transition-colors hover:text-white"
-                                style={{ color: 'rgba(240,240,240,0.50)' }}>Labs</Link>
-                        </div>
-                        <div className="flex flex-col gap-2.5">
-                            <p className="text-[11px] font-bold uppercase tracking-widest mb-0.5"
-                                style={{ color: 'rgba(240,240,240,0.25)' }}>
-                                Cuenta
-                            </p>
-                            <Link href="/dashboard" className="transition-colors hover:text-white"
-                                style={{ color: 'rgba(240,240,240,0.50)' }}>Dashboard</Link>
-                            <Link href="/login" className="transition-colors hover:text-white"
-                                style={{ color: 'rgba(240,240,240,0.50)' }}>Iniciar sesión</Link>
-                        </div>
-                        <div className="flex flex-col gap-2.5">
-                            <p className="text-[11px] font-bold uppercase tracking-widest mb-0.5"
-                                style={{ color: 'rgba(240,240,240,0.25)' }}>
-                                Legal
-                            </p>
-                            <Link href="/privacidad" className="transition-colors hover:text-white"
-                                style={{ color: 'rgba(240,240,240,0.50)' }}>Privacidad</Link>
-                        </div>
-                    </div>
-                </div>
+          <div>
+            <p className="section-label mb-4">Navegar</p>
+            <ul className="space-y-2 text-sm font-semibold text-ink-muted">
+              <li><Link href="/proyectos" className="hover:text-accent">Proyectos</Link></li>
+              <li><Link href="/labs" className="hover:text-accent">Labs</Link></li>
+              <li><Link href="/privacidad" className="hover:text-accent">Privacidad</Link></li>
+            </ul>
+          </div>
 
-                <div className="pt-6 border-t flex flex-col sm:flex-row items-center justify-between gap-2 text-xs"
-                    style={{ borderColor: 'rgba(255,255,255,0.07)', color: 'rgba(240,240,240,0.25)' }}>
-                    <span>© {new Date().getFullYear()} matecito.dev</span>
-                    <span>Hecho con mate 🧉 en Pergamino</span>
-                </div>
-            </div>
-        </footer>
-    )
+          <div>
+            <p className="section-label mb-4">Ecosistema</p>
+            <ul className="space-y-2 text-sm font-semibold text-ink-muted">
+              <li>
+                <a href="https://recienllegue.com" target="_blank" rel="noopener noreferrer" className="hover:text-accent">
+                  Recién Llegué
+                </a>
+              </li>
+              <li className="text-ink-faint">ZeroLagARG</li>
+              <li className="text-ink-faint">Conquest of Etheria</li>
+            </ul>
+          </div>
+
+          <div>
+            <p className="section-label mb-4">Contacto</p>
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-semibold text-ink-muted hover:text-accent"
+            >
+              WhatsApp
+              <br />
+              <span className="font-mono text-xs font-normal text-ink-faint">+54 2477 699586</span>
+            </a>
+          </div>
+        </div>
+
+        <hr className="rule my-8" />
+
+        <div className="flex flex-col gap-2 text-xs text-ink-faint sm:flex-row sm:items-center sm:justify-between">
+          <span>© {new Date().getFullYear()} matecito.dev</span>
+          <span className="font-mono">Hecho con mate 🧉 · build in public</span>
+        </div>
+      </div>
+    </footer>
+  );
 }

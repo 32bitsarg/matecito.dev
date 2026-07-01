@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
-import { ConditionalFooter } from "@/components/layout/ConditionalFooter";
+import { Footer } from "@/components/layout/Footer";
+import { ContactCta } from "@/components/ContactCta";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { DEFAULT_DESCRIPTION, OG_IMAGE, SITE_NAME, SITE_URL } from "@/lib/seo";
 import Script from "next/script";
-import { Toaster } from "sonner";
 
 const clashDisplay = localFont({
   src: [
@@ -27,24 +29,42 @@ const commitMono = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Matecito.dev — Construyendo comunidades, videojuegos y productos digitales",
-    template: "%s — matecito.dev",
+    default: `${SITE_NAME} — Studio digital desde Argentina`,
+    template: `%s — ${SITE_NAME}`,
   },
-  description: "Matecito.dev es un ecosistema de proyectos digitales: Recién Llegué, ZeroLagARG, Conquest of Etheria y Labs. Construimos en público desde Pergamino, Argentina.",
-  keywords: ["ecosistema digital Argentina", "videojuegos Argentina", "comunidad gaming Argentina", "build in public", "software Pergamino Buenos Aires"],
+  description: DEFAULT_DESCRIPTION,
+  keywords: [
+    "studio digital Argentina",
+    "ecosistema digital Argentina",
+    "videojuegos Argentina",
+    "build in public",
+    "software Pergamino",
+    "desarrollo web Argentina",
+  ],
+  authors: [{ name: SITE_NAME, url: SITE_URL }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
   openGraph: {
-    title: "Matecito.dev — Ecosistema digital desde Argentina",
-    description: "Comunidades, videojuegos y productos digitales construidos en público desde Pergamino, Argentina.",
-    url: "https://matecito.dev",
-    siteName: "Matecito.dev",
+    title: `${SITE_NAME} — Studio digital desde Argentina`,
+    description: DEFAULT_DESCRIPTION,
+    url: SITE_URL,
+    siteName: SITE_NAME,
     locale: "es_AR",
     type: "website",
+    images: [OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Matecito.dev — Ecosistema digital desde Argentina",
-    description: "Comunidades, videojuegos y productos digitales. Construimos en público.",
+    title: `${SITE_NAME} — Studio digital desde Argentina`,
+    description: DEFAULT_DESCRIPTION,
+    images: [OG_IMAGE.url],
   },
   icons: {
     icon: "/logos/matecitologo.png",
@@ -53,18 +73,14 @@ export const metadata: Metadata = {
   },
 };
 
-import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
-import { ThemeProvider } from "@/contexts/ThemeContext";
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className="dark">
+    <html lang="es">
       <head>
-        {/* Google Analytics (gtag.js) */}
         <Script
           async
           src="https://www.googletagmanager.com/gtag/js?id=G-0Z1TBB6SX2"
@@ -75,23 +91,18 @@ export default function RootLayout({
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-
             gtag('config', 'G-0Z1TBB6SX2');
           `}
         </Script>
-        {/* End Google Analytics */}
       </head>
       <body
-        className={`${clashDisplay.variable} ${commitMono.variable} flex min-h-screen flex-col font-sans antialiased`}
+        className={`${clashDisplay.variable} ${commitMono.variable} flex min-h-screen flex-col font-sans antialiased bg-paper text-ink`}
       >
-        <ThemeProvider>
-          <WorkspaceProvider>
-            <Navbar />
-            <main className="flex-1">{children}</main>
-            <ConditionalFooter />
-            <Toaster position="top-right" richColors />
-          </WorkspaceProvider>
-        </ThemeProvider>
+        <JsonLd />
+        <Navbar />
+        <main className="flex-1">{children}</main>
+        <ContactCta />
+        <Footer />
       </body>
     </html>
   );

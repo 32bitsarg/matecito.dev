@@ -1,10 +1,13 @@
-import Link from "next/link"
-import { Metadata } from "next"
+import Link from "next/link";
+import { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Política de Privacidad · Matecito.Dev",
-  description: "Política de privacidad de las aplicaciones desarrolladas por Matecito.Dev.",
-}
+export const metadata: Metadata = pageMetadata({
+  title: "Privacidad",
+  description:
+    "Política de privacidad de las aplicaciones del ecosistema Matecito.dev.",
+  path: "/privacidad",
+});
 
 const apps = [
   {
@@ -15,132 +18,107 @@ const apps = [
         title: "Datos que recopilamos",
         content: `ILoveMP3 puede recopilar los siguientes datos según las funcionalidades que uses:
 • **Cuenta de usuario**: si te registrás, guardamos tu email y nombre de usuario.
-• **Token de notificaciones (FCM)**: para enviarte notificaciones push sobre actividad en la radio social. Este token se asocia a tu cuenta y se elimina si cerrás sesión.
-• **Contenido social**: las canciones que recomendás en el muro y tus interacciones (me gusta, votos) se almacenan en nuestros servidores.
-• **Canciones locales**: el reproductor accede a los archivos de música de tu dispositivo únicamente para reproducirlos. Estos archivos no se suben a ningún servidor.`,
-      },
-      {
-        title: "Permisos que solicitamos",
-        content: `• **Almacenamiento**: para leer y guardar archivos de música en tu dispositivo.
-• **Notificaciones**: para enviarte alertas de actividad en la radio social (podés desactivarlas en cualquier momento desde la configuración de tu dispositivo).`,
+• **Token de notificaciones (FCM)**: para enviarte notificaciones push sobre actividad en la radio social.
+• **Contenido social**: recomendaciones, me gusta y votos en el muro.
+• **Canciones locales**: solo se leen en el dispositivo para reproducir. No se suben a servidores.`,
       },
       {
         title: "Cómo usamos los datos",
-        content: `• Para mostrarte el muro social con recomendaciones de otros usuarios.
-• Para enviarte notificaciones push (solo si las habilitaste).
+        content: `• Para mostrar el muro social y enviarte notificaciones (si las habilitaste).
 • No vendemos ni compartimos tus datos con terceros con fines publicitarios.`,
       },
       {
-        title: "Retención y eliminación",
-        content: `Podés eliminar tu cuenta en cualquier momento desde la configuración de la app. Al hacerlo, borramos tus datos personales y tu token de notificaciones de nuestros servidores. Los archivos de música en tu dispositivo no se ven afectados.`,
-      },
-      {
         title: "Servicios de terceros",
-        content: `• **Firebase (Google)**: usamos Firebase Cloud Messaging para notificaciones push. Firebase puede recopilar datos de uso según su propia política de privacidad: https://firebase.google.com/support/privacy
-• **YouTube / Cobalt**: las descargas de audio usan la API pública de YouTube y un servidor intermediario (Cobalt). No almacenamos el contenido descargado en nuestros servidores.`,
+        content: `• **Firebase (Google)**: notificaciones push.
+• **YouTube / Cobalt**: descargas de audio vía API pública. No almacenamos el contenido descargado.`,
       },
     ],
   },
-]
+];
+
+function renderContent(content: string) {
+  return content.split("\n").map((line, i) => {
+    if (!line.trim()) return null;
+    const parts = line.split(/\*\*(.*?)\*\*/g);
+    return (
+      <p key={i} className="mt-2 text-sm leading-relaxed text-ink-muted first:mt-0">
+        {parts.map((part, j) =>
+          j % 2 === 1 ? (
+            <strong key={j} className="font-semibold text-ink">
+              {part}
+            </strong>
+          ) : (
+            part
+          )
+        )}
+      </p>
+    );
+  });
+}
 
 export default function PrivacidadPage() {
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-300">
-      {/* Header */}
-      <div className="border-b border-slate-800 bg-slate-900">
-        <div className="max-w-3xl mx-auto px-6 py-8">
-          <Link href="/" className="text-xs text-violet-400 hover:text-violet-300 transition-colors mb-4 inline-block">
-            ← matecito.dev
+    <>
+      <section className="border-b border-line bg-surface">
+        <div className="page-wrap py-16 md:py-20">
+          <Link href="/" className="mb-6 inline-block font-mono text-xs font-bold uppercase tracking-widest text-accent">
+            ← Inicio
           </Link>
-          <h1 className="text-3xl font-black text-white tracking-tight">Política de Privacidad</h1>
-          <p className="mt-2 text-sm text-slate-500">
-            Última actualización: {new Date().toLocaleDateString("es-AR", { year: "numeric", month: "long", day: "numeric" })}
-          </p>
-          <p className="mt-4 text-sm leading-relaxed">
-            En <span className="text-violet-400 font-semibold">Matecito.Dev</span> nos tomamos en serio tu privacidad.
-            Esta página describe qué datos recopila cada una de nuestras aplicaciones, cómo los usamos y cuáles son tus derechos.
+          <h1 className="text-4xl font-bold tracking-tight text-ink md:text-5xl">Privacidad</h1>
+          <p className="mt-4 max-w-2xl text-sm text-ink-muted">
+            Última actualización:{" "}
+            {new Date().toLocaleDateString("es-AR", { year: "numeric", month: "long", day: "numeric" })}
           </p>
         </div>
-      </div>
+      </section>
 
-      {/* Apps */}
-      <div className="max-w-3xl mx-auto px-6 py-12 space-y-16">
-        {apps.map((app) => (
-          <section key={app.name}>
-            {/* App header */}
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center shadow-lg shadow-violet-900/40">
-                <span className="text-white font-black text-sm">{app.name[0]}</span>
-              </div>
-              <div>
-                <h2 className="text-xl font-black text-white">{app.name}</h2>
-                <p className="text-xs text-slate-500 mt-0.5">{app.description}</p>
+      <section className="page-wrap py-16">
+        <div className="max-w-3xl space-y-16">
+          {apps.map((app) => (
+            <div key={app.name}>
+              <h2 className="text-2xl font-bold text-ink">{app.name}</h2>
+              <p className="mt-2 text-sm text-ink-muted">{app.description}</p>
+              <div className="mt-8 space-y-8">
+                {app.sections.map((section) => (
+                  <div key={section.title}>
+                    <h3 className="section-label mb-3">{section.title}</h3>
+                    <div className="rounded-2xl border-2 border-line bg-paper-warm p-6">
+                      {renderContent(section.content)}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
+          ))}
 
-            <div className="space-y-8">
-              {app.sections.map((section) => (
-                <div key={section.title}>
-                  <h3 className="text-sm font-bold text-violet-400 uppercase tracking-wider mb-3">
-                    {section.title}
-                  </h3>
-                  <div className="bg-slate-900 rounded-xl border border-slate-800 p-5">
-                    {section.content.split("\n").map((line, i) => {
-                      if (!line.trim()) return null
-                      // Bold: **text**
-                      const parts = line.split(/\*\*(.*?)\*\*/g)
-                      return (
-                        <p key={i} className="text-sm leading-relaxed text-slate-400 mt-1 first:mt-0">
-                          {parts.map((part, j) =>
-                            j % 2 === 1
-                              ? <strong key={j} className="text-slate-200 font-semibold">{part}</strong>
-                              : part
-                          )}
-                        </p>
-                      )
-                    })}
+          <div>
+            <h2 className="text-2xl font-bold text-ink">Disposiciones generales</h2>
+            <div className="mt-8 space-y-6">
+              {[
+                {
+                  title: "Contacto",
+                  content: "Consultas sobre esta política: a través del sitio matecito.dev.",
+                },
+                {
+                  title: "Menores",
+                  content: "Nuestras apps no están dirigidas a menores de 13 años.",
+                },
+                {
+                  title: "Cambios",
+                  content: "Podemos actualizar esta política. Los cambios relevantes se comunicarán por la app o el sitio.",
+                },
+              ].map((item) => (
+                <div key={item.title}>
+                  <h3 className="section-label mb-3">{item.title}</h3>
+                  <div className="rounded-2xl border-2 border-line bg-paper-warm p-6">
+                    <p className="text-sm leading-relaxed text-ink-muted">{item.content}</p>
                   </div>
                 </div>
               ))}
             </div>
-          </section>
-        ))}
-
-        {/* General */}
-        <section>
-          <h2 className="text-xl font-black text-white mb-6">Disposiciones generales</h2>
-          <div className="space-y-6">
-            {[
-              {
-                title: "Contacto",
-                content: "Si tenés preguntas sobre esta política o querés ejercer tus derechos, escribinos a través del sitio matecito.dev o por WhatsApp.",
-              },
-              {
-                title: "Menores de edad",
-                content: "Nuestras aplicaciones no están dirigidas a menores de 13 años. No recopilamos intencionalmente datos de menores.",
-              },
-              {
-                title: "Cambios a esta política",
-                content: "Podemos actualizar esta política en cualquier momento. Te notificaremos sobre cambios significativos a través de la app o del sitio.",
-              },
-            ].map((item) => (
-              <div key={item.title}>
-                <h3 className="text-sm font-bold text-violet-400 uppercase tracking-wider mb-3">{item.title}</h3>
-                <div className="bg-slate-900 rounded-xl border border-slate-800 p-5">
-                  <p className="text-sm leading-relaxed text-slate-400">{item.content}</p>
-                </div>
-              </div>
-            ))}
           </div>
-        </section>
-      </div>
-
-      {/* Footer minimal */}
-      <div className="border-t border-slate-800 mt-8">
-        <div className="max-w-3xl mx-auto px-6 py-6 text-xs text-slate-600 text-center">
-          © {new Date().getFullYear()} Matecito.Dev · <Link href="/" className="hover:text-violet-400 transition-colors">Inicio</Link>
         </div>
-      </div>
-    </main>
-  )
+      </section>
+    </>
+  );
 }

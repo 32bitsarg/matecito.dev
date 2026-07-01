@@ -1,12 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /dashboard/
-Disallow: /login
-Disallow: /api/
 
-# Sitemap
 Sitemap: https://matecito.dev/sitemap.xml
-
-# LLMs / AI Agents — documentación para asistentes de IA (estándar llms.txt)
-# https://matecito.dev/llms.txt
-# https://matecito.dev/llms-full.txt

@@ -1,131 +1,75 @@
-import type { Metadata } from "next"
-import Link from "next/link"
-import { ArrowRight, Bot, Container, Wrench, FlaskConical } from "lucide-react"
+import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { LAB_NOTES } from "@/lib/content";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-    title: "Labs — matecito.dev",
-    description: "Experimentos, herramientas, automatizaciones y proyectos de IA de Matecito.dev. Construimos en público.",
-    openGraph: {
-        title: "Matecito Labs — experimentos y herramientas",
-        description: "Experimentos, herramientas y automatizaciones construidos en público desde Argentina.",
-        url: "https://matecito.dev/labs",
-        siteName: "matecito.dev",
-        locale: "es_AR",
-        type: "website",
-    },
-}
-
-const LAB_ITEMS = [
-    {
-        icon: Bot,
-        title: "IA & Agentes",
-        desc: "Experimentos con modelos de lenguaje, agentes autónomos y automatizaciones inteligentes.",
-    },
-    {
-        icon: Container,
-        title: "Docker & DevOps",
-        desc: "Herramientas y configuraciones para infraestructura reproducible.",
-    },
-    {
-        icon: Wrench,
-        title: "Herramientas",
-        desc: "Scripts, utilidades y pequeñas herramientas construidas en público.",
-    },
-    {
-        icon: FlaskConical,
-        title: "Experimentos",
-        desc: "Ideas en etapa exploratoria. Algunas crecen, otras no.",
-    },
-]
+export const metadata: Metadata = pageMetadata({
+  title: "Labs",
+  description:
+    "Bitácora de experimentos del studio Matecito: infraestructura, juegos, IA y procesos de desarrollo en público.",
+  path: "/labs",
+});
 
 export default function LabsPage() {
-    return (
-        <main className="min-h-screen bg-black text-white">
+  return (
+    <>
+      <section className="border-b border-line bg-ink text-surface">
+        <div className="page-wrap py-16 md:py-24">
+          <p className="mb-4 font-mono text-xs font-bold uppercase tracking-[0.25em] text-ink-faint">
+            Taller · bitácora
+          </p>
+          <h1 className="max-w-2xl text-[clamp(2.5rem,7vw,4.5rem)] font-bold leading-[0.95] tracking-tight">
+            Labs
+          </h1>
+          <p className="mt-6 max-w-lg text-base leading-relaxed text-white/70">
+            Un cuaderno abierto de lo que probamos antes de productizar: infra, juegos,
+            IA y procesos del studio.
+          </p>
+        </div>
+      </section>
 
-            {/* Hero */}
-            <section className="relative px-6 pt-28 pb-16 overflow-hidden">
-                <div className="absolute inset-0 opacity-[0.04]"
-                    style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[160px] rounded-full blur-[100px] opacity-15"
-                    style={{ backgroundColor: '#6d001a' }} />
-
-                <div className="relative max-w-4xl mx-auto">
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-mono mb-10 border"
-                        style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(240,240,240,0.45)', backgroundColor: 'rgba(255,255,255,0.03)' }}>
-                        <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#6d001a' }} />
-                        En construcción permanente
-                    </div>
-
-                    <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight leading-[1.05] mb-6">
-                        🧪 Labs
-                    </h1>
-
-                    <p className="text-xl max-w-2xl leading-relaxed mb-4" style={{ color: 'rgba(240,240,240,0.50)' }}>
-                        Experimentos, herramientas y automatizaciones construidos en público.
-                    </p>
-                    <p className="text-sm" style={{ color: 'rgba(240,240,240,0.30)' }}>
-                        Algunas ideas crecen y se convierten en proyectos. Otras son simplemente exploración.
-                    </p>
+      <section className="py-16 md:py-24">
+        <div className="page-wrap max-w-3xl">
+          <p className="section-label mb-10">Entradas recientes</p>
+          <ol className="relative border-l-2 border-ink pl-8">
+            {LAB_NOTES.map((note, i) => (
+              <li key={note.title} className={`relative pb-12 ${i === LAB_NOTES.length - 1 ? "pb-0" : ""}`}>
+                <span className="absolute -left-[1.6rem] top-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-ink bg-paper">
+                  <span className="h-2 w-2 rounded-full bg-accent" />
+                </span>
+                <p className="font-mono text-xs font-bold uppercase tracking-widest text-ink-faint">
+                  {note.date}
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-3">
+                  <h2 className="text-xl font-bold text-ink md:text-2xl">{note.title}</h2>
+                  <span className="rounded-full border border-line bg-surface px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-ink-muted">
+                    {note.tag}
+                  </span>
                 </div>
-            </section>
+                <p className="mt-3 text-sm leading-relaxed text-ink-muted">{note.body}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
 
-            {/* Lab items */}
-            <section className="px-6 pb-24 border-t" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
-                <div className="max-w-4xl mx-auto">
-                    <p className="text-xs font-mono pt-16 pb-10 uppercase tracking-[0.2em]"
-                        style={{ color: 'rgba(240,240,240,0.30)' }}>
-                        Áreas de exploración
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {LAB_ITEMS.map(item => {
-                            const Icon = item.icon
-                            return (
-                                <div key={item.title}
-                                    className="flex flex-col gap-4 p-6 rounded-2xl border"
-                                    style={{ backgroundColor: '#0d0d0d', borderColor: 'rgba(255,255,255,0.09)' }}>
-                                    <div className="w-11 h-11 rounded-xl flex items-center justify-center border"
-                                        style={{ backgroundColor: '#161616', borderColor: 'rgba(255,255,255,0.08)' }}>
-                                        <Icon className="w-5 h-5" style={{ color: 'rgba(240,240,240,0.60)' }} />
-                                    </div>
-                                    <div>
-                                        <h2 className="text-base font-bold mb-2" style={{ color: '#f0f0f0' }}>{item.title}</h2>
-                                        <p className="text-sm leading-relaxed" style={{ color: 'rgba(240,240,240,0.45)' }}>{item.desc}</p>
-                                    </div>
-                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full self-start"
-                                        style={{ backgroundColor: 'rgba(245,158,11,0.15)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.30)' }}>
-                                        En construcción
-                                    </span>
-                                </div>
-                            )
-                        })}
-                    </div>
-                </div>
-            </section>
-
-            {/* Build in public CTA */}
-            <section className="px-6 pb-24 border-t" style={{ borderColor: 'rgba(255,255,255,0.07)', backgroundColor: '#0a0a0a' }}>
-                <div className="max-w-4xl mx-auto py-16 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-                    <div>
-                        <p className="text-xs font-mono uppercase tracking-widest mb-2"
-                            style={{ color: 'rgba(109,0,26,0.9)' }}>
-                            Build in Public
-                        </p>
-                        <h3 className="text-xl font-bold mb-1" style={{ color: '#f0f0f0' }}>
-                            Todo construido en público
-                        </h3>
-                        <p className="text-sm" style={{ color: 'rgba(240,240,240,0.45)' }}>
-                            Seguí el proceso, los errores y los aprendizajes en tiempo real.
-                        </p>
-                    </div>
-                    <Link href="/estudio"
-                        className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold border transition-colors hover:bg-white/5 whitespace-nowrap"
-                        style={{ borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(240,240,240,0.70)' }}>
-                        Ver proyectos
-                        <ArrowRight className="w-4 h-4" />
-                    </Link>
-                </div>
-            </section>
-
-        </main>
-    )
+      <section className="border-t border-line bg-paper-warm py-16">
+        <div className="page-wrap">
+          <div className="rounded-[2rem] border-2 border-dashed border-line-strong bg-surface p-10 text-center md:p-14">
+            <p className="section-label mb-4">Próximamente</p>
+            <h2 className="text-2xl font-bold text-ink md:text-3xl">Devlogs semanales</h2>
+            <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-ink-muted">
+              Publicaremos avances cortos: qué se rompió, qué se aprendió y qué sigue.
+              Mientras tanto, el detalle de cada producto vive en Proyectos.
+            </p>
+            <Link href="/proyectos" className="btn-primary mt-8">
+              Ver proyectos
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+    </>
+  );
 }
