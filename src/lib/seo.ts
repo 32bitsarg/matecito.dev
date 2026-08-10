@@ -4,7 +4,7 @@ export const SITE_URL = "https://matecito.dev";
 export const SITE_NAME = "Matecito.dev";
 
 export const DEFAULT_DESCRIPTION =
-  "Studio digital desde Pergamino, Argentina. Comunidades, videojuegos y productos construidos en público: Recién Llegué, ZeroLagARG, Conquest of Etheria y Labs.";
+  "Studio digital desde Pergamino, Argentina. Comunidades, videojuegos, productos digitales y landing pages construidos con proceso visible.";
 
 export const OG_IMAGE = {
   url: "/banner/bannerfb.png",
@@ -18,14 +18,15 @@ export function pageMetadata({
   description = DEFAULT_DESCRIPTION,
   path,
   absoluteTitle,
+  ogImage = OG_IMAGE,
 }: {
   title?: string;
   description?: string;
   path: string;
   absoluteTitle?: string;
+  ogImage?: typeof OG_IMAGE;
 }): Metadata {
   const url = `${SITE_URL}${path}`;
-  const resolvedTitle = absoluteTitle ?? title ?? SITE_NAME;
   const ogTitle = absoluteTitle ?? (title ? `${title} — matecito.dev` : SITE_NAME);
 
   return {
@@ -39,13 +40,13 @@ export function pageMetadata({
       siteName: SITE_NAME,
       locale: "es_AR",
       type: "website",
-      images: [OG_IMAGE],
+      images: [ogImage],
     },
     twitter: {
       card: "summary_large_image",
       title: ogTitle,
       description,
-      images: [OG_IMAGE.url],
+      images: [ogImage.url],
     },
   };
 }

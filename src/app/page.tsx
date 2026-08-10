@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { ProjectBento } from "@/components/ProjectBento";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
   absoluteTitle: "Matecito.dev — Studio digital desde Argentina",
   description:
-    "Comunidades, videojuegos y productos digitales construidos en público desde Pergamino, Argentina.",
+    "Comunidades, videojuegos, productos digitales y landing pages construidos desde Pergamino, Argentina.",
   path: "/",
 });
 
@@ -88,6 +88,41 @@ export default function Home() {
               <span className="text-accent">✦</span>
             </span>
           ))}
+        </div>
+      </section>
+
+      <section className="border-b border-line bg-surface py-16 md:py-20">
+        <div className="page-wrap">
+          <div className="grid gap-8 rounded-[2rem] border-2 border-ink bg-paper p-7 shadow-[7px_7px_0_0_var(--accent)] md:grid-cols-[1fr_0.72fr] md:items-center md:p-10">
+            <div>
+              <p className="section-label mb-4 text-accent">Servicio destacado</p>
+              <h2 className="text-3xl font-bold leading-tight tracking-tight text-ink md:text-5xl">
+                Landing pages para convertir visitas en consultas.
+              </h2>
+              <p className="mt-5 max-w-2xl text-base leading-relaxed text-ink-muted">
+                Diseñamos y desarrollamos páginas rápidas, responsive y con SEO base para
+                profesionales, comercios y emprendimientos.
+              </p>
+            </div>
+            <div className="rounded-[1.5rem] bg-ink p-6 text-surface md:p-7">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-white/50">
+                Precio lanzamiento
+              </p>
+              <p className="mt-2 text-4xl font-bold">$50.000 <span className="font-mono text-xs text-white/50">ARS</span></p>
+              <ul className="mt-5 space-y-2 text-sm text-white/70">
+                {["Diseño personalizado", "WhatsApp integrado", "Publicación incluida"].map((item) => (
+                  <li key={item} className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-accent" strokeWidth={3} />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/landing-pages" className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-bold text-white transition-transform hover:-translate-y-0.5">
+                Conocer el servicio
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 

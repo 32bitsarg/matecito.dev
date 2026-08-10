@@ -46,6 +46,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
@@ -192,4 +193,28 @@ body {
 
 .ticker-track:hover {
   animation-play-state: paused;
+}
+
+.hero-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--line) 65%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--line) 65%, transparent) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: linear-gradient(to bottom right, black, transparent 72%);
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .page-wrap {
+    width: min(100% - 2rem, var(--page-max));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal { animation: none; }
+  .ticker-track { animation: none; }
 }

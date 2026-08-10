@@ -1,10 +1,12 @@
 # Matecito.dev — Contexto completo
 
-> Studio digital desde Pergamino, Buenos Aires, Argentina. Ecosistema de proyectos construidos en público.
+> Landing pages profesionales y soluciones digitales desde Pergamino, Buenos Aires, Argentina.
 
 ## Sobre el studio
 
-Matecito.dev es el sitio central del studio Matecito. El enfoque es **build in public**: documentar proceso, decisiones técnicas y avances de cada proyecto sin vender promesas vacías.
+Matecito.dev es un studio digital que diseña y desarrolla landing pages para profesionales, comercios y emprendimientos. La oferta principal comienza en **$50.000 ARS** e incluye una página responsive, estructura orientada a conversión, SEO base, integración con WhatsApp y publicación en Vercel.
+
+También ofrece, con cotización según alcance, marketing digital, campañas publicitarias, SEO y contenidos, y automatizaciones. El studio mantiene proyectos propios y documenta parte de su proceso bajo el enfoque **build in public**.
 
 **Ubicación:** Pergamino, Buenos Aires, Argentina  
 **Contacto:** WhatsApp +54 2477 699586  
@@ -14,7 +16,8 @@ Matecito.dev es el sitio central del studio Matecito. El enfoque es **build in p
 
 | Ruta | Descripción |
 |------|-------------|
-| `/` | Landing del studio con hero, progreso de proyectos y grid bento |
+| `/` | Home del studio, sus proyectos y servicios destacados |
+| `/landing-pages` | Oferta comercial con precio, alcance, proceso, portfolio y preguntas frecuentes |
 | `/proyectos` | Portfolio detallado de cada frente del ecosistema |
 | `/labs` | Bitácora de experimentos: infra, juegos, IA y procesos |
 | `/privacidad` | Políticas de privacidad de las aplicaciones |

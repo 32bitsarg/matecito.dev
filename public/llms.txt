@@ -1,22 +1,23 @@
 # Matecito.dev
 
-> Studio digital desde Pergamino, Argentina. Construimos comunidades, videojuegos y productos digitales en público (build in public).
+> Diseño y desarrollo de landing pages profesionales desde Pergamino, Argentina.
 
-Matecito.dev es el hub del ecosistema Matecito: un studio que documenta decisiones, errores y avances mientras desarrolla plataformas locales, comunidades gaming y juegos propios.
+Matecito.dev crea landing pages rápidas, responsive y orientadas a generar consultas. La oferta principal comienza en $50.000 ARS e incluye diseño personalizado, estructura de contenido, SEO base, integración con WhatsApp y publicación en Vercel.
 
 ## Páginas principales
 
-- [Inicio](https://matecito.dev/): Presentación del studio y proyectos activos
+- [Inicio](https://matecito.dev/): Presentación del studio y sus proyectos
+- [Landing pages](https://matecito.dev/landing-pages): Oferta, precio, alcance y preguntas frecuentes
 - [Proyectos](https://matecito.dev/proyectos): Portfolio del ecosistema
 - [Labs](https://matecito.dev/labs): Bitácora de experimentos e infraestructura
-- [Privacidad](https://matecito.dev/privacidad): Políticas de privacidad de las apps
+- [Privacidad](https://matecito.dev/privacidad): Políticas de privacidad
 
-## Proyectos del ecosistema
+## Otros servicios
 
-- **Recién Llegué** — Plataforma local para adaptarse a nuevas ciudades ([recienllegue.com](https://recienllegue.com))
-- **ZeroLagARG** — Comunidad gaming argentina (Minecraft, MU Online, foro)
-- **Conquest of Etheria** — Juego de estrategia medieval en desarrollo
-- **Labs** — Experimentos con IA, DevOps y prototipos
+- Marketing digital
+- Campañas publicitarias
+- SEO y contenidos
+- Automatizaciones
 
 ## Contacto
 
@@ -25,4 +26,4 @@ Matecito.dev es el hub del ecosistema Matecito: un studio que documenta decision
 
 ## Documentación extendida
 
-- [llms-full.txt](https://matecito.dev/llms-full.txt): Contexto ampliado del studio y proyectos
+- [llms-full.txt](https://matecito.dev/llms-full.txt): Contexto ampliado del studio, servicios y proyectos

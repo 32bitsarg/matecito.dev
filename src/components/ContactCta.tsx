@@ -47,8 +47,8 @@ export function ContactCta() {
             <span className="text-accent">o una idea?</span>
           </h2>
           <p className="mt-5 max-w-md text-base leading-relaxed text-white/70">
-            Escribinos por WhatsApp. Respondemos consultas sobre colaboraciones,
-            productos del ecosistema o simplemente para charlar del proceso.
+            Escribinos por WhatsApp. Respondemos consultas sobre landing pages,
+            colaboraciones, productos del ecosistema o ideas digitales.
           </p>
         </div>
         <div className="flex flex-col gap-4 md:items-end">

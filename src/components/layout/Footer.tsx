@@ -11,14 +11,14 @@ export function Footer() {
               matecito<span className="text-accent">.dev</span>
             </p>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-ink-muted">
-              Studio digital desde Pergamino, Argentina. Comunidades, juegos y productos
-              construidos en público.
+              Studio digital desde Pergamino, Argentina. Comunidades, juegos, productos y servicios web.
             </p>
           </div>
 
           <div>
             <p className="section-label mb-4">Navegar</p>
             <ul className="space-y-2 text-sm font-semibold text-ink-muted">
+              <li><Link href="/landing-pages" className="hover:text-accent">Landing pages</Link></li>
               <li><Link href="/proyectos" className="hover:text-accent">Proyectos</Link></li>
               <li><Link href="/labs" className="hover:text-accent">Labs</Link></li>
               <li><Link href="/privacidad" className="hover:text-accent">Privacidad</Link></li>

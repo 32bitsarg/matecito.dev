@@ -20,6 +20,10 @@ export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURICo
   "Hola, quiero contactar con matecito.dev"
 )}`;
 
+export const LANDING_WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+  "Hola, quiero consultar por la landing page de $50.000 ARS"
+)}`;
+
 export const PROJECTS: Project[] = [
   {
     id: "recienllegue",

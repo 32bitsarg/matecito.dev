@@ -8,6 +8,7 @@ import { WHATSAPP_URL } from "@/lib/content";
 
 const LINKS = [
   { href: "/", label: "Inicio" },
+  { href: "/landing-pages", label: "Landing pages" },
   { href: "/proyectos", label: "Proyectos" },
   { href: "/labs", label: "Labs" },
 ];

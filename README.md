@@ -1,6 +1,6 @@
 # matecito.dev
 
-Landing del studio **Matecito.dev** — comunidades, videojuegos y productos digitales construidos en público desde Pergamino, Argentina.
+Sitio comercial de **Matecito.dev** — landing pages profesionales y soluciones digitales desde Pergamino, Argentina.
 
 ## Stack
 
@@ -21,7 +21,8 @@ Abrí [http://localhost:3000](http://localhost:3000).
 
 | Ruta | Descripción |
 |------|-------------|
-| `/` | Home |
+| `/` | Home del studio y sus proyectos |
+| `/landing-pages` | Servicio de landing pages desde $50.000 ARS |
 | `/proyectos` | Portfolio del ecosistema |
 | `/labs` | Bitácora de experimentos |
 | `/privacidad` | Políticas de privacidad |

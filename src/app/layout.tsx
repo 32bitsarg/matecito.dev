@@ -42,6 +42,7 @@ export const metadata: Metadata = {
     "build in public",
     "software Pergamino",
     "desarrollo web Argentina",
+    "landing pages Argentina",
   ],
   authors: [{ name: SITE_NAME, url: SITE_URL }],
   creator: SITE_NAME,
